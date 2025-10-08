@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kelime Sıralama Oyunu</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { -webkit-tap-highlight-color: transparent; }
+    body { overscroll-behavior: none; touch-action: manipulation; }
+    .chip { user-select: none; }
+    .dragging { opacity: .6; transform: scale(.98); }
+    .drop-slot { min-height: 48px; }
+    .drop-active { outline: 2px dashed rgba(99,102,241,.7); outline-offset: 4px; }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-indigo-400 via-violet-400 to-pink-400">
+  <div class="max-w-4xl mx-auto px-4 py-6">
+    <header class="mb-4 flex items-center justify-between gap-3">
+      <h1 class="text-2xl md:text-3xl font-extrabold text-white drop-shadow">🔤 Kelime Sıralama Oyunu</h1>
+      <a href="index.html" class="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-full text-white font-bold bg-black/20 hover:bg-black/30">← Ana Sayfa</a>
+    </header>
+
+    <!-- Kontroller -->
+    <section class="bg-white/95 rounded-2xl shadow-xl p-4 md:p-5 mb-5">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <div class="flex flex-col">
+          <label class="text-sm text-gray-600 mb-1 font-semibold">Seviye</label>
+          <select id="seviye" class="px-4 py-3 rounded-xl border-2 border-violet-300 focus:outline-none focus:ring-2 focus:ring-violet-400">
+            <option value="kolay">Kolay (2 kelime)</option>
+            <option value="orta">Orta (3 kelime)</option>
+            <option value="zor">Zor (4 kelime)</option>
+            <option value="cokzor">Çok Zor (5 kelime)</option>
+          </select>
+        </div>
+
+        <div class="flex flex-col">
+          <label class="text-sm text-gray-600 mb-1 font-semibold">Alt Aşama (Kolay/Orta)</label>
+          <select id="altAsama" class="px-4 py-3 rounded-xl border-2 border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-400">
+            <option value="diffFirst">1) İlk harfler farklı</option>
+            <option value="sameFirstDiffSecond">2) İlk harf aynı, ikinci farklı</option>
+            <option value="sameFirst3">3) İlk üç harf aynı</option>
+          </select>
+          <p class="text-xs text-gray-500 mt-1">Zor / Çok Zor seviyede alt aşama otomatik.</p>
+        </div>
+
+        <div class="flex flex-col">
+          <label class="text-sm text-gray-600 mb-1 font-semibold">Duyarlılık</label>
+          <select id="duyarlilik" class="px-4 py-3 rounded-xl border-2 border-sky-300 focus:outline-none focus:ring-2 focus:ring-sky-400">
+            <option value="base">Harf farkı yok (A=a)</option>
+            <option value="variant">Büyük/Küçük duyarlı</option>
+          </select>
+        </div>
+
+        <div class="flex items-end gap-2">
+          <button id="btnYeni" class="flex-1 px-4 py-3 rounded-xl font-bold bg-violet-600 text-white active:bg-violet-700">Yeni Soru</button>
+          <button id="btnKaristir" class="px-4 py-3 rounded-xl font-bold bg-fuchsia-600 text-white active:bg-fuchsia-700">Kaynağı Karıştır</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Görev Bilgisi -->
+    <section class="bg-white rounded-2xl shadow-2xl p-4 md:p-6 mb-4">
+      <div id="gorev" class="text-gray-700 text-sm md:text-base">
+        <strong>Görev:</strong> Üstte verilen kelimeleri alttaki kutulara <em>soldan sağa</em> doğru <strong>sözlük sırasına</strong> göre yerleştir.
+      </div>
+    </section>
+
+    <!-- Oyun Alanı -->
+    <section class="bg-white rounded-2xl shadow-2xl p-4 md:p-6">
+      <!-- Kaynak kelimeler (üstte) -->
+      <div>
+        <div class="text-slate-600 text-sm mb-2 font-semibold">Verilen kelimeler</div>
+        <div id="kaynak" class="flex flex-wrap gap-2 mb-5"></div>
+      </div>
+
+      <!-- Hedef slotlar (altta) -->
+      <div>
+        <div class="text-slate-600 text-sm mb-2 font-semibold">Sürükleyip bırak: (sol → sağ)</div>
+        <div id="hedef" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3"></div>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
+        <button id="btnKontrol" class="px-4 py-3 rounded-xl font-bold bg-emerald-600 text-white active:bg-emerald-700">Kontrol Et</button>
+        <button id="btnCozum" class="px-4 py-3 rounded-xl font-bold bg-amber-500 text-white active:bg-amber-600">Çözümü Göster</button>
+        <button id="btnTemizle" class="px-4 py-3 rounded-xl font-bold bg-sky-600 text-white active:bg-sky-700">Kutuları Temizle</button>
+        <button id="btnYeni2" class="px-4 py-3 rounded-xl font-bold bg-indigo-600 text-white active:bg-indigo-700">Yeni Soru</button>
+      </div>
+
+      <div id="sonuc" class="mt-4 text-center text-lg font-bold"></div>
+    </section>
+
+    <footer class="text-center text-white/90 mt-6">✨ Sözlük sırası <code>localeCompare('tr')</code> ile kontrol edilir. ✨</footer>
+  </div>
+
+  <script>
+    // --- Kelime Bankası (özet) ---
+    const WORDS = [
+      "araba","armut","arı","arka","arşiv","artı","ağaç","ağır","ağrı","ağız","alış","altın","ayak","ayın","ayna","ayva",
+      "bal","balık","balon","balkon","bambaşka","bambu","bana","banka","başak","başarı","başlık",
+      "biber","bilet","bina","bir","bisiklet","bitki",
+      "cami","cam","cambaz","ceviz","ceza","cezve",
+      "çadır","çakıl","çanta","çarşı","çarpım","çay","çiçek","çilek",
+      "dağ","dahi","dakika","dal","damla","dantel",
+      "değer","denk","deniz","dere","dergi",
+      "el","elbise","elma","elmas","elektrik",
+      "fener","fikir","fidan","fil","fincan","fırın","fıstık",
+      "gemi","geniş","gerçek","gezi","göl","gökyüzü","göz","gözlük",
+      "harf","harita","hava","havuç","hayal","hayat","hızlı","hiç","hikaye","horoz",
+      "ışık","ıspanak","ısı","ızgara","ırmak",
+      "inek","insan","ip","iplik","isim","istanbul","iz","izci",
+      "kalem","kale","kalp","kamyon","kanat","kar","karar","karınca","kargo","kardeş","kare","karpuz","kartal",
+      "kasa","katalog","katı","katman","katkı",
+      "kedi","kek","kelebek","kemik","keman",
+      "kış","kısa","kısım","kısıt","kırmızı","kırlangıç","kırk",
+      "kişi","kil","kilim","kilo","kilit","kim","kimlik","kir","kiraz","kirli",
+      "kitap","kol","kola","koli","kolye","koltuk","konu","konuk","konut","konum",
+      "köy","köpek","köprü","köfte","kör","köşe","kök",
+      "lale","lamba","lavabo","leblebi","leke","limon","lokum",
+      "manav","mantar","martı","masa","masal","matematik","mavi",
+      "merak","merdiven","merkez","meyve","metin","metot",
+      "muz","müze","müzik","mühendis",
+      "nar","narin","nane","nal","namaz","nazar",
+      "okul","okuma","okyanus","ok","okçu",
+      "ördek","örnek","örtü","örümcek","özel","özgür","özlem",
+      "panda","pamuk","papatya","para","parmak","park","pastel","patates",
+      "radar","radyo","raf","raket","rast","ray",
+      "sandık","sanat","sandalye","sar","sarı","sarf",
+      "saat","sahil","sahne","sahip","saksı","sal","salça","salon",
+      "simit","simge","sincap","siyah","sistem","sıcak","sığınak",
+      "şapka","şarkı","şeker","şemsiye","şifre","şirin","şişe","şömine",
+      "tabak","taban","tablet","tablo","tahta","tahıl","tahmin",
+      "tane","tanım","tanık","tank","tavan","tavuk","tavşan",
+      "uçak","uçurtma","uçurum","uğur","uşak",
+      "üzüm","üçgen","ülke","üslup","üst","üstün",
+      "vadi","valiz","vakıf","vapur","varlık",
+      "yağ","yağmur","yaka","yakın","yapı","yaprak","yarın","yazı","yazlık",
+      "zaman","zambak","zarf","zayıf","zeytin","zil","zirve"
+    ];
+
+    function trSort(arr, sensitivity='base'){
+      return [...arr].sort((a,b)=> a.localeCompare(b, 'tr', {sensitivity}));
+    }
+    function byPrefix(words, prefix){ return words.filter(w => w.toLowerCase().startsWith(prefix.toLowerCase())); }
+    function sample(arr, n){ const c=[...arr], o=[]; while(o.length<n && c.length){const i=Math.floor(Math.random()*c.length); o.push(c.splice(i,1)[0]);} return o; }
+    function altAsamaAciklama(asama){
+      if(asama==='diffFirst') return "İpucu: İlk harfler farklı.";
+      if(asama==='sameFirstDiffSecond') return "İpucu: İlk harf aynı, ikinci farklı.";
+      if(asama==='sameFirst3') return "İpucu: İlk üç harf aynı.";
+      return "";
+    }
+
+    function buildWords(level, sub, count){
+      const words = [...WORDS];
+      if(level==='kolay' || level==='orta'){
+        if(sub==='diffFirst'){
+          const shuffled = sample(words, words.length);
+          const chosen = []; const firsts = new Set();
+          for(const w of shuffled){ const f = w[0]; if(!firsts.has(f)){ firsts.add(f); chosen.push(w); } if(chosen.length===count) break; }
+          return chosen.length===count ? chosen : sample(words, count);
+        } else if(sub==='sameFirstDiffSecond'){
+          const groups = {};
+          for(const w of words){
+            if(w.length<2) continue;
+            const k1 = w[0], k2 = w[1];
+            groups[k1] = groups[k1] || {}; groups[k1][k2] = groups[k1][k2] || []; groups[k1][k2].push(w);
+          }
+          const keys = Object.keys(groups);
+          while(keys.length){
+            const key = keys.splice(Math.floor(Math.random()*keys.length),1)[0];
+            const secondGroups = groups[key];
+            const seconds = Object.keys(secondGroups).filter(k=>secondGroups[k].length>0);
+            if(seconds.length >= count){
+              const selectedSeconds = sample(seconds, count);
+              return selectedSeconds.map(s => sample(secondGroups[s],1)[0]);
+            }
+          }
+          return sample(words, count);
+        } else {
+          const prefixes = new Set();
+          for(const w of words){ if(w.length>=3) prefixes.add(w.slice(0,3).toLowerCase()); }
+          const prefArr = [...prefixes];
+          while(prefArr.length){
+            const pref = prefArr.splice(Math.floor(Math.random()*prefArr.length),1)[0];
+            const cands = byPrefix(words, pref);
+            if(cands.length >= count) return sample(cands, count);
+          }
+          return sample(words, count);
+        }
+      } else {
+        // zor & çok zor: ilk harf aynı
+        const firsts = [...new Set(words.map(w=>w[0]))];
+        while(firsts.length){
+          const f = firsts.splice(Math.floor(Math.random()*firsts.length),1)[0];
+          const cands = words.filter(w=>w[0]===f);
+          if(cands.length >= count) return sample(cands, count);
+        }
+        return sample(words, count);
+      }
+    }
+
+    function getConfig(){
+      const seviye = document.getElementById('seviye').value;
+      const alt = document.getElementById('altAsama').value;
+      const sensitivity = document.getElementById('duyarlilik').value;
+      let adet = seviye==='kolay'?2: seviye==='orta'?3: seviye==='zor'?4:5;
+      let sub = (seviye==='kolay'||seviye==='orta') ? alt : 'sameFirstDiffSecond';
+      return { seviye, sub, adet, sensitivity };
+    }
+
+    function renderGorev(){
+      const { seviye, sub } = getConfig();
+      let desc = "Üstteki kelimeleri alttaki kutulara <em>soldan sağa</em> doğru <strong>sözlük sırasına</strong> göre yerleştir.";
+      if(seviye==='kolay' || seviye==='orta'){ desc += " " + altAsamaAciklama(sub); }
+      else if(seviye==='zor'){ desc += " İpucu: Tüm kelimelerin <strong>ilk harfi aynı</strong>."; }
+      else { desc += " İpucu: <strong>5 kelime</strong> ve hepsinin ilk harfi aynı."; }
+      document.getElementById('gorev').innerHTML = `<strong>Görev:</strong> ${desc}`;
+    }
+
+    function makeChip(word){
+      const b = document.createElement('button');
+      b.type = "button";
+      b.className = "chip px-3 py-2 rounded-xl font-bold bg-white border border-slate-300 text-slate-800 shadow hover:shadow-md active:scale-95";
+      b.textContent = word;
+      b.draggable = true;
+      b.dataset.word = word;
+      b.addEventListener('dragstart', (e)=>{
+        e.dataTransfer.setData('text/plain', word);
+        b.classList.add('dragging');
+      });
+      b.addEventListener('dragend', ()=> b.classList.remove('dragging'));
+      return b;
+    }
+
+    function clear(el){ while(el.firstChild) el.removeChild(el.firstChild); }
+
+    let currentWords=[], correctOrder=[];
+    function renderGame(words){
+      const kaynak = document.getElementById('kaynak');
+      const hedef = document.getElementById('hedef');
+      clear(kaynak); clear(hedef);
+
+      // kaynak kelimeler
+      const shuffled = [...words];
+      for(let i=shuffled.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]]; }
+      shuffled.forEach(w => kaynak.appendChild(makeChip(w)));
+
+      // hedef slotlar
+      for(let i=0;i<words.length;i++){
+        const slot = document.createElement('div');
+        slot.className = "drop-slot bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl p-2 flex items-center justify-center min-w-[100px]";
+        slot.dataset.index = i;
+        slot.addEventListener('dragover', (e)=>{ e.preventDefault(); slot.classList.add('drop-active'); });
+        slot.addEventListener('dragleave', ()=> slot.classList.remove('drop-active'));
+        slot.addEventListener('drop', (e)=>{
+          e.preventDefault();
+          slot.classList.remove('drop-active');
+          const word = e.dataTransfer.getData('text/plain');
+          if(!word) return;
+          const existing = slot.querySelector('.chip');
+          if(existing){ document.getElementById('kaynak').appendChild(existing); }
+          const dragged = document.querySelector(`.chip.dragging`) || Array.from(document.querySelectorAll('.chip')).find(c=>c.dataset.word===word);
+          if(dragged && dragged.parentElement !== slot){ slot.appendChild(dragged); }
+        });
+        hedef.appendChild(slot);
+      }
+
+      // kaynak alanına geri bırakma
+      kaynak.addEventListener('dragover', (e)=>{ e.preventDefault(); kaynak.classList.add('drop-active'); });
+      kaynak.addEventListener('dragleave', ()=> kaynak.classList.remove('drop-active'));
+      kaynak.addEventListener('drop', (e)=>{
+        e.preventDefault();
+        kaynak.classList.remove('drop-active');
+        const word = e.dataTransfer.getData('text/plain');
+        const dragged = document.querySelector(`.chip.dragging`) || Array.from(document.querySelectorAll('.chip')).find(c=>c.dataset.word===word);
+        if(dragged){ kaynak.appendChild(dragged); }
+      });
+    }
+
+    function yeniSoru(forceLevel){
+      const cfg = getConfig();
+      const lvl = forceLevel || cfg.seviye;
+      const words = buildWords(lvl, cfg.sub, cfg.adet);
+      currentWords = words;
+      correctOrder = trSort(words, cfg.sensitivity);
+      renderGorev();
+      renderGame(words);
+      document.getElementById('sonuc').textContent = "";
+    }
+
+    function kontrolEt(){
+      const slots = Array.from(document.querySelectorAll('#hedef .drop-slot'));
+      const filled = slots.map(s => s.querySelector('.chip')?.dataset.word || null);
+      if(filled.some(x=>x===null)){
+        showMsg("ℹ️ Tüm kutuları doldurmalısın.", "text-amber-600");
+        return;
+      }
+      const ok = filled.every((w,i)=> w===correctOrder[i]);
+      if(ok) showMsg("✅ Harika! Doğru sözlük sırası.", "text-emerald-600");
+      else showMsg("❌ Henüz olmadı. Yeniden dene ya da 'Çözümü Göster' de.", "text-rose-600");
+    }
+
+    function cozumGoster(){
+      const kaynak = document.getElementById('kaynak');
+      const slots = Array.from(document.querySelectorAll('#hedef .drop-slot'));
+      document.querySelectorAll('.chip').forEach(ch => kaynak.appendChild(ch));
+      correctOrder.forEach((w, i)=>{
+        const slot = slots[i];
+        const chip = Array.from(kaynak.children).find(c => c.dataset.word===w);
+        if(chip) slot.appendChild(chip);
+      });
+      showMsg("📘 Çözüm yerleştirildi. İstersen 'Kaynağı Karıştır' ile tekrar dene.", "text-sky-600");
+    }
+
+    function temizleSlots(){
+      const kaynak = document.getElementById('kaynak');
+      document.querySelectorAll('#hedef .chip').forEach(ch => kaynak.appendChild(ch));
+      showMsg("🧹 Kutular temizlendi.", "text-slate-600");
+    }
+
+    function showMsg(text, cls){
+      const s = document.getElementById('sonuc');
+      s.textContent = text;
+      s.className = "mt-4 text-center text-lg font-bold " + cls;
+    }
+
+    // Events
+    document.getElementById('btnYeni').addEventListener('click', ()=> yeniSoru());
+    document.getElementById('btnYeni2').addEventListener('click', ()=> yeniSoru());
+    document.getElementById('btnKaristir').addEventListener('click', ()=>{
+      const kaynak = document.getElementById('kaynak');
+      const chips = Array.from(kaynak.children);
+      for(let i=chips.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); kaynak.insertBefore(chips[j], chips[i]); [chips[i], chips[j]]=[chips[j], chips[i]]; }
+    });
+    document.getElementById('btnTemizle').addEventListener('click', temizleSlots);
+    document.getElementById('btnKontrol').addEventListener('click', kontrolEt);
+    document.getElementById('btnCozum').addEventListener('click', cozumGoster);
+
+    document.getElementById('seviye').addEventListener('change', ()=>{
+      const v=document.getElementById('seviye').value;
+      document.getElementById('altAsama').disabled = !(v==='kolay'||v==='orta');
+      yeniSoru(v);
+    });
+    document.getElementById('altAsama').addEventListener('change', ()=> yeniSoru());
+    document.getElementById('duyarlilik').addEventListener('change', ()=> yeniSoru());
+
+    yeniSoru();
+  </script>
+</body>
+</html>
