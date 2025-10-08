@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Çarpım Tablosu Ezberle</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { -webkit-tap-highlight-color: transparent; }
+    body { overscroll-behavior: none; touch-action: manipulation; }
+    .flip {
+      perspective: 1000px;
+    }
+    .flip-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+    }
+    .flipped .flip-inner { transform: rotateY(180deg); }
+    .flip-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: 1rem;
+    }
+    .flip-back { transform: rotateY(180deg); }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-indigo-400 via-fuchsia-400 to-pink-400">
+  <div class="max-w-3xl mx-auto px-4 py-6">
+    <header class="mb-4 flex items-center justify-between">
+      <a href="carpma-oyunlar.html" class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-white font-bold bg-indigo-600 active:bg-indigo-700 shadow">
+        ← Çarpma Oyunları
+      </a>
+      <h1 class="text-white text-2xl md:text-3xl font-extrabold drop-shadow">🧮 Çarpım Tablosu Ezberle</h1>
+    </header>
+
+    <!-- Kontroller -->
+    <section class="bg-white/90 rounded-2xl shadow-xl p-4 md:p-5 mb-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div class="flex flex-col">
+          <label class="text-sm text-gray-600 mb-1 font-semibold">Tablo (1–10)</label>
+          <select id="tableSelect" class="px-4 py-3 rounded-xl border-2 border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+            <option value="1">1'ler</option>
+            <option value="2">2'ler</option>
+            <option value="3">3'ler</option>
+            <option value="4">4'ler</option>
+            <option value="5">5'ler</option>
+            <option value="6">6'lar</option>
+            <option value="7">7'ler</option>
+            <option value="8">8'ler</option>
+            <option value="9">9'lar</option>
+            <option value="10">10'lar</option>
+          </select>
+        </div>
+
+        <div class="flex flex-col">
+          <label class="text-sm text-gray-600 mb-1 font-semibold">Mod</label>
+          <div class="grid grid-cols-2 gap-2">
+            <button id="modeFlash" class="px-4 py-3 rounded-xl font-bold bg-indigo-500 text-white active:bg-indigo-600">Ezber</button>
+            <button id="modeQuiz" class="px-4 py-3 rounded-xl font-bold bg-emerald-500 text-white active:bg-emerald-600">Test</button>
+          </div>
+        </div>
+
+        <div class="flex flex-col">
+          <label class="text-sm text-gray-600 mb-1 font-semibold">Seçenekler</label>
+          <div class="grid grid-cols-3 gap-2">
+            <button id="btnShuffle" class="px-3 py-3 rounded-xl font-bold bg-violet-500 text-white active:bg-violet-600">Karıştır</button>
+            <button id="btnReset" class="px-3 py-3 rounded-xl font-bold bg-rose-500 text-white active:bg-rose-600">Sıfırla</button>
+            <button id="btnSound" class="px-3 py-3 rounded-xl font-bold bg-sky-500 text-white active:bg-sky-600">Ses</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EZBER (FLIP) -->
+    <section id="flashSection" class="bg-white rounded-2xl shadow-2xl p-4 md:p-6 mb-4">
+      <div class="flex items-center justify-between mb-3">
+        <div class="text-gray-700 text-sm">Kart: <span id="cardIndex">1</span> / <span id="cardTotal">10</span></div>
+        <div class="text-gray-700 text-sm">Bildiğim: <span id="knownCount">0</span></div>
+      </div>
+
+      <div id="card" class="flip w-full h-56 md:h-64 mx-auto">
+        <div class="flip-inner bg-gradient-to-tr from-amber-100 to-amber-50 border-2 border-amber-300">
+          <div class="flip-face flex items-center justify-center flip-front">
+            <div class="text-center">
+              <div id="frontText" class="text-4xl md:text-5xl font-black text-indigo-700 select-none">2 × 3</div>
+              <div class="mt-2 text-sm text-gray-500">kartı çevirmek için tıkla</div>
+            </div>
+          </div>
+          <div class="flip-face flex items-center justify-center flip-back bg-gradient-to-tr from-emerald-100 to-emerald-50">
+            <div class="text-center">
+              <div id="backText" class="text-5xl md:text-6xl font-black text-emerald-700 select-none">6</div>
+              <div class="mt-2 text-sm text-gray-500">ön yüze dönmek için tıkla</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 mt-4">
+        <button id="btnDontKnow" class="px-4 py-3 rounded-xl font-bold bg-orange-500 text-white active:bg-orange-600">Bilmiyorum</button>
+        <button id="btnKnow" class="px-4 py-3 rounded-xl font-bold bg-green-500 text-white active:bg-green-600">Biliyorum</button>
+      </div>
+    </section>
+
+    <!-- TEST -->
+    <section id="quizSection" class="hidden bg-white rounded-2xl shadow-2xl p-4 md:p-6 mb-4">
+      <div class="flex items-center justify-between mb-3">
+        <div class="text-gray-700 text-sm">Soru: <span id="qIndex">1</span> / <span id="qTotal">10</span></div>
+        <div class="text-gray-700 text-sm">Puan: <span id="score">0</span></div>
+      </div>
+
+      <div class="bg-blue-50 border-2 border-blue-200 rounded-2xl p-4 mb-4">
+        <div id="questionText" class="text-center text-3xl md:text-4xl font-extrabold text-blue-700">7 × 8 = ?</div>
+      </div>
+
+      <div id="choices" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
+      <button id="btnNext" class="mt-4 w-full px-4 py-3 rounded-xl font-bold bg-blue-600 text-white active:bg-blue-700">Sonraki</button>
+    </section>
+
+    <!-- TAMAMLANDI -->
+    <section id="doneSection" class="hidden bg-white rounded-2xl shadow-2xl p-6 text-center">
+      <div class="text-2xl md:text-3xl font-extrabold text-emerald-600 mb-2">Harika! 🎉</div>
+      <p class="text-gray-700 mb-4">Bu tabloyu tamamladın.</p>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <button id="btnRepeat" class="px-4 py-3 rounded-xl font-bold bg-indigo-600 text-white active:bg-indigo-700">Aynı Tabloyu Tekrarla</button>
+        <button id="btnNextTable" class="px-4 py-3 rounded-xl font-bold bg-emerald-600 text-white active:bg-emerald-700">Sonraki Tablo</button>
+        <button id="btnHome" class="px-4 py-3 rounded-xl font-bold bg-violet-600 text-white active:bg-violet-700">Çarpma Oyunlarına Dön</button>
+      </div>
+    </section>
+
+    <footer class="text-center text-white/90 mt-6">✨ Ezberleyerek güçlen, test ederek pekiştir! ✨</footer>
+  </div>
+
+  <script>
+    // --- UTIL ---
+    const $ = (s) => document.querySelector(s);
+    const $$ = (s) => document.querySelectorAll(s);
+    const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+    // --- STATE ---
+    let mode = 'flash'; // 'flash' | 'quiz'
+    let table = 1;
+    let pairs = [];           // [{a,b,ans}]
+    let order = [];           // index order for flash
+    let idx = 0;
+    let known = 0;
+
+    // QUIZ
+    let qOrder = [];
+    let qIdx = 0;
+    let score = 0;
+
+    // SOUND
+    let soundOn = false;
+    function speak(text) {
+      if (!soundOn) return;
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'tr-TR';
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(u);
+    }
+
+    // --- INIT ---
+    function genPairs(t){
+      const arr = [];
+      for(let i=1;i<=10;i++){
+        arr.push({a:t, b:i, ans:t*i});
+      }
+      return arr;
+    }
+
+    function shuffle(a){
+      const arr = [...a];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function setMode(newMode){
+      mode = newMode;
+      if(mode==='flash'){
+        $("#flashSection").classList.remove('hidden');
+        $("#quizSection").classList.add('hidden');
+        $("#doneSection").classList.add('hidden');
+        renderFlash();
+      } else {
+        $("#flashSection").classList.add('hidden');
+        $("#quizSection").classList.remove('hidden');
+        $("#doneSection").classList.add('hidden');
+        startQuiz();
+      }
+    }
+
+    function resetFlash(){
+      pairs = genPairs(table);
+      order = Array.from({length: pairs.length}, (_,i)=>i);
+      idx = 0;
+      known = 0;
+      $("#card").classList.remove('flipped');
+      $("#knownCount").textContent = known;
+      $("#cardTotal").textContent = order.length;
+      $("#cardIndex").textContent = 1;
+      renderFlash();
+    }
+
+    function renderFlash(){
+      if(idx >= order.length){
+        // done
+        showDone();
+        return;
+      }
+      const p = pairs[order[idx]];
+      $("#frontText").textContent = `${p.a} × ${p.b}`;
+      $("#backText").textContent = p.ans;
+      $("#cardIndex").textContent = idx+1;
+      $("#card").onclick = () => {
+        $("#card").classList.toggle('flipped');
+        const isBack = $("#card").classList.contains('flipped');
+        speak(isBack ? `${p.a} çarpı ${p.b} eşittir ${p.ans}` : `${p.a} çarpı ${p.b}`);
+      };
+    }
+
+    function nextFlashMark(knownIt){
+      const pIdx = order[idx];
+      if(knownIt){
+        known++;
+        $("#knownCount").textContent = known;
+      }else{
+        // push back to end for spaced repeat
+        order.push(pIdx);
+      }
+      idx++;
+      $("#card").classList.remove('flipped');
+      setTimeout(renderFlash, 200);
+    }
+
+    function showDone(){
+      $("#flashSection").classList.add('hidden');
+      $("#quizSection").classList.add('hidden');
+      $("#doneSection").classList.remove('hidden');
+    }
+
+    function startQuiz(){
+      const all = genPairs(table);
+      qOrder = shuffle(all);
+      qIdx = 0;
+      score = 0;
+      $("#score").textContent = score;
+      $("#qTotal").textContent = qOrder.length;
+      renderQuiz();
+    }
+
+    function renderQuiz(){
+      if(qIdx >= qOrder.length){
+        // quiz done -> summary
+        $("#questionText").textContent = `Bitti! Puanın: ${score}/${qOrder.length}`;
+        $("#choices").innerHTML = '';
+        $("#btnNext").classList.add('hidden');
+        $("#doneSection").classList.remove('hidden');
+        $("#quizSection").classList.add('hidden');
+        return;
+      }
+      const p = qOrder[qIdx];
+      $("#qIndex").textContent = qIdx+1;
+      $("#questionText").textContent = `${p.a} × ${p.b} = ?`;
+      speak(`${p.a} çarpı ${p.b} kaç eder?`);
+
+      // generate choices (1 correct + 3 distractors)
+      const correct = p.ans;
+      const choices = new Set([correct]);
+      while(choices.size < 4){
+        choices.add(p.a * rand(1,10));
+      }
+      const list = shuffle(Array.from(choices));
+      $("#choices").innerHTML = '';
+      list.forEach(val => {
+        const btn = document.createElement('button');
+        btn.className = "px-4 py-3 rounded-xl font-bold bg-white border-2 border-blue-300 text-blue-700 active:bg-blue-100";
+        btn.textContent = val;
+        btn.onclick = () => {
+          if(btn.dataset.locked) return;
+          btn.dataset.locked = "1";
+          if(val === correct){
+            btn.className = "px-4 py-3 rounded-xl font-bold bg-emerald-500 text-white";
+            score++; $("#score").textContent = score;
+            speak("Doğru!");
+          } else {
+            btn.className = "px-4 py-3 rounded-xl font-bold bg-rose-500 text-white";
+            speak(`Yanlış. Doğru cevap ${correct}`);
+          }
+          // lock others
+          [...$("#choices").children].forEach(b=>b.disabled=true);
+        };
+        $("#choices").appendChild(btn);
+      });
+      $("#btnNext").classList.remove('hidden');
+    }
+
+    // --- EVENTS ---
+    $("#modeFlash").addEventListener('click', ()=> setMode('flash'));
+    $("#modeQuiz").addEventListener('click', ()=> setMode('quiz'));
+    $("#btnShuffle").addEventListener('click', ()=>{
+      order = shuffle(order);
+      idx = 0;
+      renderFlash();
+    });
+    $("#btnReset").addEventListener('click', resetFlash);
+    $("#btnSound").addEventListener('click', ()=>{
+      soundOn = !soundOn;
+      $("#btnSound").textContent = soundOn ? "Ses Açık" : "Ses";
+    });
+    $("#btnKnow").addEventListener('click', ()=> nextFlashMark(true));
+    $("#btnDontKnow").addEventListener('click', ()=> nextFlashMark(false));
+    $("#btnNext").addEventListener('click', ()=>{
+      qIdx++;
+      renderQuiz();
+    });
+    $("#btnRepeat").addEventListener('click', ()=>{
+      setMode('flash');
+      resetFlash();
+    });
+    $("#btnNextTable").addEventListener('click', ()=>{
+      table = Math.min(10, table+1);
+      $("#tableSelect").value = String(table);
+      setMode('flash');
+      resetFlash();
+    });
+    $("#btnHome").addEventListener('click', ()=>{
+      window.location.href = 'carpma-oyunlar.html';
+    });
+    $("#tableSelect").addEventListener('change', (e)=>{
+      table = parseInt(e.target.value,10);
+      if(mode==='flash'){ resetFlash(); } else { startQuiz(); }
+    });
+
+    // --- FIRST LOAD ---
+    table = 2;
+    $("#tableSelect").value = "2";
+    resetFlash();
+  </script>
+</body>
+</html>
