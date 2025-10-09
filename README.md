@@ -4,17 +4,17 @@
 +
 +## Dizin Yapısı
 +
-+- **index.html** ana giriş sayfasıdır; kategori kartları aracılığıyla Matematik, Fen, Türkçe, İngilizce ve Hayat Bilgisi sayfalarına yönlendirir.
-+- Ders sayfaları (`mat.html`, `fen.html`, `trk.html`, `ing.html`, `hayat.html`) ortak `style.css` dosyasını kullanarak aynı görsel dili paylaşır.
-+- `carpma-oyunlar.html` matematik altındaki oyunlara bir geçit işlevi görür.
-+- İnteraktif içerikler `carpim.html` (React tabanlı çarpım oyunu), `carpim-ezber.html` (vanilla JS ile ezber/test modu) ve `kelime-oyunu.html` (sürükle-bırak kelime sıralama) dosyalarında bulunur.
-+- `tkelime-oyunu.html` aynı kelime oyununun eski bir sürümüdür ve yalnızca referans amaçlı tutulmuştur.
++- **index.php** ana giriş sayfasıdır; kategori kartları aracılığıyla Matematik, Fen, Türkçe, İngilizce ve Hayat Bilgisi sayfalarına yönlendirir.
++- Ders sayfaları (`mat.php`, `fen.php`, `trk.php`, `ing.php`, `hayat.php`) ortak `style.css` dosyasını kullanarak aynı görsel dili paylaşır.
++- `carpma-oyunlar.php` matematik altındaki oyunlara bir geçit işlevi görür.
++- İnteraktif içerikler `carpim.php` (React tabanlı çarpım oyunu), `carpim-ezber.php` (vanilla JS ile ezber/test modu) ve `kelime-oyunu.php` (sürükle-bırak kelime sıralama) dosyalarında bulunur.
++- `tkelime-oyunu.php` aynı kelime oyununun eski bir sürümüdür ve yalnızca referans amaçlı tutulmuştur.
 +
 +## Teknoloji Yığını
 +
 +- Sayfalar geleneksel HTML + CSS yapısını kullanır; build süreci veya paket yöneticisi yoktur.
 +- Ortak stil, animasyon ve kart düzenleri `style.css` içinde toplanmıştır.
-+- İnteraktif oyunlar Tailwind CSS CDN'i ile stillenir. `carpim.html` React/ReactDOM UMD paketlerini kullanırken diğer oyunlar vanilla JavaScript ile çalışır.
++- İnteraktif oyunlar Tailwind CSS CDN'i ile stillenir. `carpim.php` React/ReactDOM UMD paketlerini kullanırken diğer oyunlar vanilla JavaScript ile çalışır.
 +- Tarayıcı API'leri (ör. `SpeechSynthesis` ve `localeCompare('tr')`) kullanıcı deneyimini güçlendirmek için doğrudan kullanılır.
 +
 +## Geliştirme İpuçları

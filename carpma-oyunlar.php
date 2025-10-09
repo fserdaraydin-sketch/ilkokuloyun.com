@@ -19,7 +19,7 @@
 
     <div class="container">
         <header>
-            <a href="mat.html" class="home-btn">← Matematik Oyunları</a>
+            <a href="mat.php" class="home-btn">← Matematik Oyunları</a>
             <h1>✖️ Çarpma Oyunları ✖️</h1>
             <p class="subtitle">Çarpım tablosunu eğlenceli oyunlarla keşfet!</p>
         </header>
@@ -27,14 +27,14 @@
         <div class="games-grid">
 
             <!-- Bilinmeyen Değeri Bul -->
-            <div class="game-card" onclick="window.open('carpim.html', '_blank')">
+            <div class="game-card" onclick="window.open('carpim.php', '_blank')">
                 <div class="game-icon">❓</div>
                 <h3>Bilinmeyen Değeri Bul</h3>
                 <p>Eksik sayıyı bul, puan kazan!</p>
             </div>
 
             <!-- Çarpım Tablosu Ezberle -->
-           <div class="game-card" onclick="window.open('carpim-ezber.html', '_blank')">
+           <div class="game-card" onclick="window.open('carpim-ezber.php', '_blank')">
   <div class="game-icon">🧮</div>
   <h3>Çarpım Tablosu Ezberle</h3>
   <p>Çarpım tablosunu adım adım öğren!</p>

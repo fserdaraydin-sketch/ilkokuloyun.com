@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="İlkokul İngilizce oyunları - Kelimeler, renkler, sayılar ve daha fazlası!">
-    <title>İngilizce Oyunları - İlkokulOyun.com</title>
+    <meta name="description" content="İlkokul fen bilimleri oyunları - Hayvanlar, bitkiler, uzay ve deney oyunları!">
+    <title>Fen Bilimleri Oyunları - İlkokulOyun.com</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -26,51 +26,51 @@
 
     <div class="container">
         <header>
-            <a href="index.html" class="home-btn">← Ana Sayfa</a>
-            <h1>🌍 İngilizce Oyunları 🌍</h1>
-            <p class="subtitle">İngilizce öğrenmeye hazır mısın?</p>
+            <a href="index.php" class="home-btn">← Ana Sayfa</a>
+            <h1>🔬 Fen Bilimleri Oyunları 🔬</h1>
+            <p class="subtitle">Doğayı keşfetmeye hazır mısın?</p>
         </header>
 
         <div class="games-grid">
             <div class="game-card" onclick="alert('Oyun yakında eklenecek!')">
-                <div class="game-icon">🔤</div>
-                <h3>ABC Öğren</h3>
-                <p>İngilizce alfabeyi öğren ve pratik yap!</p>
+                <div class="game-icon">🐾</div>
+                <h3>Hayvanları Tanı</h3>
+                <p>Farklı hayvanları tanı ve özelliklerini öğren!</p>
             </div>
 
             <div class="game-card" onclick="alert('Oyun yakında eklenecek!')">
-                <div class="game-icon">🎨</div>
-                <h3>Renkler (Colors)</h3>
-                <p>İngilizce renk isimlerini öğren ve eşleştir!</p>
+                <div class="game-icon">🌱</div>
+                <h3>Bitkiler Dünyası</h3>
+                <p>Bitkileri öğren ve nasıl büyüdüklerini keşfet!</p>
             </div>
 
             <div class="game-card" onclick="alert('Oyun yakında eklenecek!')">
-                <div class="game-icon">🔢</div>
-                <h3>Sayılar (Numbers)</h3>
-                <p>1'den 20'ye kadar İngilizce sayıları öğren!</p>
+                <div class="game-icon">🌍</div>
+                <h3>Dünyamız</h3>
+                <p>Gezegenimiz hakkında bilgi edin ve doğayı koru!</p>
             </div>
 
             <div class="game-card" onclick="alert('Oyun yakında eklenecek!')">
-                <div class="game-icon">🐶</div>
-                <h3>Hayvanlar (Animals)</h3>
-                <p>Hayvan isimlerini İngilizce öğren!</p>
+                <div class="game-icon">🚀</div>
+                <h3>Uzay Macerası</h3>
+                <p>Gezegenleri, yıldızları ve uzayı keşfet!</p>
             </div>
 
             <div class="game-card" onclick="alert('Oyun yakında eklenecek!')">
-                <div class="game-icon">🍎</div>
-                <h3>Meyveler (Fruits)</h3>
-                <p>Meyve isimlerini İngilizce öğren ve ezberleme!</p>
+                <div class="game-icon">🧪</div>
+                <h3>Eğlenceli Deneyler</h3>
+                <p>Basit ve güvenli fen deneylerini öğren!</p>
             </div>
 
             <div class="game-card" onclick="alert('Oyun yakında eklenecek!')">
-                <div class="game-icon">👋</div>
-                <h3>Günlük Kelimeler</h3>
-                <p>Hello, Goodbye gibi günlük kelimeleri öğren!</p>
+                <div class="game-icon">🌡️</div>
+                <h3>Hava Durumu</h3>
+                <p>Mevsimler ve hava olayları hakkında bilgi edin!</p>
             </div>
         </div>
 
         <div class="footer">
-            <p>✨ Learning is fun! ✨</p>
+            <p>✨ Bilim çok eğlenceli! ✨</p>
         </div>
     </div>
 </body>

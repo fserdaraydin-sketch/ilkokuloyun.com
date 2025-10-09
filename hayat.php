@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="İlkokul fen bilimleri oyunları - Hayvanlar, bitkiler, uzay ve deney oyunları!">
-    <title>Fen Bilimleri Oyunları - İlkokulOyun.com</title>
+    <meta name="description" content="İlkokul Hayat Bilgisi oyunları - Meslek, aile, sağlık ve çevre oyunları!">
+    <title>Hayat Bilgisi Oyunları - İlkokulOyun.com</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -26,51 +26,51 @@
 
     <div class="container">
         <header>
-            <a href="index.html" class="home-btn">← Ana Sayfa</a>
-            <h1>🔬 Fen Bilimleri Oyunları 🔬</h1>
-            <p class="subtitle">Doğayı keşfetmeye hazır mısın?</p>
+            <a href="index.php" class="home-btn">← Ana Sayfa</a>
+            <h1>🌈 Hayat Bilgisi Oyunları 🌈</h1>
+            <p class="subtitle">Hayatı öğrenmeye hazır mısın?</p>
         </header>
 
         <div class="games-grid">
             <div class="game-card" onclick="alert('Oyun yakında eklenecek!')">
-                <div class="game-icon">🐾</div>
-                <h3>Hayvanları Tanı</h3>
-                <p>Farklı hayvanları tanı ve özelliklerini öğren!</p>
+                <div class="game-icon">👨‍⚕️</div>
+                <h3>Meslekleri Tanı</h3>
+                <p>Farklı meslekleri tanı ve ne yaptıklarını öğren!</p>
             </div>
 
             <div class="game-card" onclick="alert('Oyun yakında eklenecek!')">
-                <div class="game-icon">🌱</div>
-                <h3>Bitkiler Dünyası</h3>
-                <p>Bitkileri öğren ve nasıl büyüdüklerini keşfet!</p>
+                <div class="game-icon">👨‍👩‍👧‍👦</div>
+                <h3>Ailem</h3>
+                <p>Aile bireylerini ve akrabalık ilişkilerini öğren!</p>
             </div>
 
             <div class="game-card" onclick="alert('Oyun yakında eklenecek!')">
-                <div class="game-icon">🌍</div>
-                <h3>Dünyamız</h3>
-                <p>Gezegenimiz hakkında bilgi edin ve doğayı koru!</p>
+                <div class="game-icon">💪</div>
+                <h3>Sağlıklı Yaşam</h3>
+                <p>Sağlıklı beslenme ve spor alışkanlıklarını öğren!</p>
             </div>
 
             <div class="game-card" onclick="alert('Oyun yakında eklenecek!')">
-                <div class="game-icon">🚀</div>
-                <h3>Uzay Macerası</h3>
-                <p>Gezegenleri, yıldızları ve uzayı keşfet!</p>
+                <div class="game-icon">♻️</div>
+                <h3>Çevre Bilinci</h3>
+                <p>Doğayı koruma ve geri dönüşüm hakkında bilgi edin!</p>
             </div>
 
             <div class="game-card" onclick="alert('Oyun yakında eklenecek!')">
-                <div class="game-icon">🧪</div>
-                <h3>Eğlenceli Deneyler</h3>
-                <p>Basit ve güvenli fen deneylerini öğren!</p>
+                <div class="game-icon">🚦</div>
+                <h3>Trafik Kuralları</h3>
+                <p>Trafik işaretlerini ve güvenli yol geçişini öğren!</p>
             </div>
 
             <div class="game-card" onclick="alert('Oyun yakında eklenecek!')">
-                <div class="game-icon">🌡️</div>
-                <h3>Hava Durumu</h3>
-                <p>Mevsimler ve hava olayları hakkında bilgi edin!</p>
+                <div class="game-icon">🏫</div>
+                <h3>Okul Hayatı</h3>
+                <p>Okulda nasıl davranılır, kurallar nelerdir öğren!</p>
             </div>
         </div>
 
         <div class="footer">
-            <p>✨ Bilim çok eğlenceli! ✨</p>
+            <p>✨ Hayat bir öğrenme macerası! ✨</p>
         </div>
     </div>
 </body>
