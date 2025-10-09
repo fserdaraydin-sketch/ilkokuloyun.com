@@ -75,11 +75,11 @@
     <script>
         function goToCategory(category) {
             const pages = {
-                'matematik': 'mat.html',
-                'fen': 'fen.html',
-                'turkce': 'trk.html',
-                'ingilizce': 'ing.html',
-                'hayatbilgisi': 'hayat.html'
+                'matematik': 'mat.php',
+                'fen': 'fen.php',
+                'turkce': 'trk.php',
+                'ingilizce': 'ing.php',
+                'hayatbilgisi': 'hayat.php'
             };
             window.location.href = pages[category];
         }

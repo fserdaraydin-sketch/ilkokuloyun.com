@@ -35,7 +35,7 @@
 <body class="min-h-screen bg-gradient-to-br from-indigo-400 via-fuchsia-400 to-pink-400">
   <div class="max-w-3xl mx-auto px-4 py-6">
     <header class="mb-4 flex items-center justify-between">
-      <a href="carpma-oyunlar.html" class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-white font-bold bg-indigo-600 active:bg-indigo-700 shadow">
+      <a href="carpma-oyunlar.php" class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-white font-bold bg-indigo-600 active:bg-indigo-700 shadow">
         ← Çarpma Oyunları
       </a>
       <h1 class="text-white text-2xl md:text-3xl font-extrabold drop-shadow">🧮 Çarpım Tablosu Ezberle</h1>
@@ -335,7 +335,7 @@
       resetFlash();
     });
     $("#btnHome").addEventListener('click', ()=>{
-      window.location.href = 'carpma-oyunlar.html';
+      window.location.href = 'carpma-oyunlar.php';
     });
     $("#tableSelect").addEventListener('change', (e)=>{
       table = parseInt(e.target.value,10);

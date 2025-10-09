@@ -18,7 +18,7 @@
   <div class="max-w-4xl mx-auto px-4 py-6">
     <header class="mb-4 flex items-center justify-between gap-3">
       <h1 class="text-2xl md:text-3xl font-extrabold text-white drop-shadow">🔤 Kelime Sıralama Oyunu</h1>
-      <a href="index.html" class="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-full text-white font-bold bg-black/20 hover:bg-black/30">← Ana Sayfa</a>
+      <a href="index.php" class="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-full text-white font-bold bg-black/20 hover:bg-black/30">← Ana Sayfa</a>
     </header>
 
     <!-- Kontroller -->

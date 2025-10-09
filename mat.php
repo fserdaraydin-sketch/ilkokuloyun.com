@@ -26,7 +26,7 @@
 
     <div class="container">
         <header>
-            <a href="index.html" class="home-btn">← Ana Sayfa</a>
+            <a href="index.php" class="home-btn">← Ana Sayfa</a>
             <h1>🔢 Matematik Oyunları 🔢</h1>
             <p class="subtitle">Sayılarla eğlenmeye hazır mısın?</p>
         </header>
@@ -46,7 +46,7 @@
             </div>
 
             <!-- 🔹 Güncellendi: Çarpma Oyunu artık alt sayfaya yönlendiriyor -->
-            <div class="game-card" onclick="window.location.href='carpma-oyunlar.html'">
+            <div class="game-card" onclick="window.location.href='carpma-oyunlar.php'">
                 <div class="game-icon">✖️</div>
                 <h3>Çarpma Oyunları</h3>
                 <p>Çarpım oyunlarını keşfet ve oynamaya başla!</p>

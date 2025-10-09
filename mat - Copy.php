@@ -26,7 +26,7 @@
 
     <div class="container">
         <header>
-            <a href="index.html" class="home-btn">← Ana Sayfa</a>
+            <a href="index.php" class="home-btn">← Ana Sayfa</a>
             <h1>🔢 Matematik Oyunları 🔢</h1>
             <p class="subtitle">Sayılarla eğlenmeye hazır mısın?</p>
         </header>
