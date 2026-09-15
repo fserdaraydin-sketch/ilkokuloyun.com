@@ -441,22 +441,21 @@
             ctx.arc(centerX, centerY, radius, 0, Math.PI * 2, false);
             ctx.stroke();
 
-            // Ok başı - Sağ tarafta (3 o'clock)
-            const arrowX = centerX + radius;
+            // Ok başı - Sağ tarafta (3 o'clock) - İki kısa çizgi
+            const arrowX = centerX + radius + 5;
             const arrowY = centerY;
-            const arrowSize = 20;
-            const arrowAngle = 0; // Sağa doğru
+            const arrowLen = 25;
             
+            // Üst ok çizgisi
             ctx.beginPath();
-            ctx.moveTo(
-                arrowX - arrowSize * Math.cos(arrowAngle - Math.PI / 6),
-                arrowY - arrowSize * Math.sin(arrowAngle - Math.PI / 6)
-            );
-            ctx.lineTo(arrowX, arrowY);
-            ctx.lineTo(
-                arrowX - arrowSize * Math.cos(arrowAngle + Math.PI / 6),
-                arrowY - arrowSize * Math.sin(arrowAngle + Math.PI / 6)
-            );
+            ctx.moveTo(arrowX, arrowY - 12);
+            ctx.lineTo(arrowX + arrowLen, arrowY - 12);
+            ctx.stroke();
+            
+            // Alt ok çizgisi
+            ctx.beginPath();
+            ctx.moveTo(arrowX, arrowY + 12);
+            ctx.lineTo(arrowX + arrowLen, arrowY + 12);
             ctx.stroke();
         }
 
@@ -473,22 +472,21 @@
             ctx.arc(centerX, centerY, radius, 0, Math.PI * 2, true);
             ctx.stroke();
 
-            // Ok başı - Sol tarafta (9 o'clock)
-            const arrowX = centerX - radius;
+            // Ok başı - Sol tarafta (9 o'clock) - İki kısa çizgi
+            const arrowX = centerX - radius - 5;
             const arrowY = centerY;
-            const arrowSize = 20;
-            const arrowAngle = Math.PI; // Sola doğru
+            const arrowLen = 25;
             
+            // Üst ok çizgisi
             ctx.beginPath();
-            ctx.moveTo(
-                arrowX - arrowSize * Math.cos(arrowAngle - Math.PI / 6),
-                arrowY - arrowSize * Math.sin(arrowAngle - Math.PI / 6)
-            );
-            ctx.lineTo(arrowX, arrowY);
-            ctx.lineTo(
-                arrowX - arrowSize * Math.cos(arrowAngle + Math.PI / 6),
-                arrowY - arrowSize * Math.sin(arrowAngle + Math.PI / 6)
-            );
+            ctx.moveTo(arrowX, arrowY - 12);
+            ctx.lineTo(arrowX - arrowLen, arrowY - 12);
+            ctx.stroke();
+            
+            // Alt ok çizgisi
+            ctx.beginPath();
+            ctx.moveTo(arrowX, arrowY + 12);
+            ctx.lineTo(arrowX - arrowLen, arrowY + 12);
             ctx.stroke();
         }
 
