@@ -510,45 +510,45 @@
             drawStartPoint(startX, startY);
         }
 
-        // SAĞ DAİRE (Saat yönü) - Ok dairenin ÜST noktasında SAĞA bakar
+        // SAĞ DAİRE (Saat yönü) - Başlangıç üstte, ok SAĞ tarafta aşağı bakar
         function drawCircleRight() {
             setLineStyle();
             const centerX = canvas.width / 2;
             const centerY = canvas.height / 2;
             const radius = Math.min(canvas.width, canvas.height) * 0.28;
 
-            // Daireyi çiz - üst noktada küçük boşluk bırak (ok için)
+            // Tam daire çiz
             ctx.beginPath();
-            ctx.arc(centerX, centerY, radius, -Math.PI / 2 + 0.25, -Math.PI / 2 + 0.05 + Math.PI * 2);
+            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
             ctx.stroke();
 
-            // Ok başı - üst noktada, SAĞA doğru (saat yönü hareketi)
-            const tipX = centerX + radius * Math.sin(0.25);
-            const tipY = centerY - radius * Math.cos(0.25);
-            drawArrowHead(tipX, tipY, 0.25); // Sağa-hafif aşağı (teğet yönü)
+            // Ok başı - SAĞ tarafta (3 o'clock), saat yönünde AŞAĞI bakar
+            const tipX = centerX + radius;
+            const tipY = centerY + 12;
+            drawArrowHead(tipX, tipY, Math.PI / 2); // Aşağı yön (saat yönü hareketi)
 
-            // Başlangıç noktası - okun az gerisinde (üstte)
+            // Başlangıç noktası - üstte (12 o'clock)
             drawStartPoint(centerX, centerY - radius);
         }
 
-        // SOL DAİRE (Saat tersi) - Ok dairenin ÜST noktasında SOLA bakar
+        // SOL DAİRE (Saat tersi) - Başlangıç üstte, ok SOL tarafta aşağı bakar
         function drawCircleLeft() {
             setLineStyle();
             const centerX = canvas.width / 2;
             const centerY = canvas.height / 2;
             const radius = Math.min(canvas.width, canvas.height) * 0.28;
 
-            // Daireyi çiz - üst noktada küçük boşluk bırak (ok için)
+            // Tam daire çiz
             ctx.beginPath();
-            ctx.arc(centerX, centerY, radius, -Math.PI / 2 - 0.25, -Math.PI / 2 - 0.05 - Math.PI * 2, true);
+            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
             ctx.stroke();
 
-            // Ok başı - üst noktada, SOLA doğru (saat tersi hareketi)
-            const tipX = centerX - radius * Math.sin(0.25);
-            const tipY = centerY - radius * Math.cos(0.25);
-            drawArrowHead(tipX, tipY, Math.PI - 0.25); // Sola-hafif aşağı (teğet yönü)
+            // Ok başı - SOL tarafta (9 o'clock), saat tersine AŞAĞI bakar
+            const tipX = centerX - radius;
+            const tipY = centerY + 12;
+            drawArrowHead(tipX, tipY, Math.PI / 2); // Aşağı yön (saat tersi hareketi)
 
-            // Başlangıç noktası - okun az gerisinde (üstte)
+            // Başlangıç noktası - üstte (12 o'clock)
             drawStartPoint(centerX, centerY - radius);
         }
 
