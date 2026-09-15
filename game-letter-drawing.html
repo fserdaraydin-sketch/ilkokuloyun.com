@@ -91,16 +91,19 @@
         }
 
         .current-letter {
-            font-size: 18px;
-            color: #4ECDC4;
-            font-weight: bold;
-        }
-
-        .target-letter {
-            font-size: 18px;
-            color: #FF6B6B;
+            font-size: 28px;
             font-weight: bold;
             margin-top: 5px;
+        }
+
+        .current-letter.uppercase {
+            color: #4ECDC4;
+            font-size: 32px;
+        }
+
+        .current-letter.lowercase {
+            color: #FF6B6B;
+            font-size: 28px;
         }
 
         .score {
@@ -301,7 +304,7 @@
             </div>
             <div class="score-item">
                 <h3>Sırada</h3>
-                <p id="currentLetterNum">1 / 29</p>
+                <p id="currentLetterNum">1 / 58</p>
             </div>
             <div class="score-item">
                 <h3>Puan</h3>
@@ -310,13 +313,12 @@
         </div>
 
         <div class="letter-display">
-            <div class="letter-name">Parmakla takip et</div>
+            <div class="letter-name" id="letterType">Takip et</div>
             <div class="current-letter" id="currentLetter">A</div>
-            <div class="target-letter" id="targetLetter">a</div>
         </div>
 
         <div class="instruction" id="instruction">
-            👇 Büyük harfin üzerinden parmağınla geçin!
+            👇 Harfin üzerinden parmağını geç!
         </div>
 
         <div class="accuracy-indicator" id="accuracyIndicator">
@@ -328,7 +330,7 @@
         </div>
 
         <div class="completion-message" id="completionMsg">
-            ✅ Tebrikler! Sonraki harfe geçiyoruz...
+            ✅ Tebrikler!
         </div>
 
         <canvas id="canvas"></canvas>
@@ -350,7 +352,14 @@
                          'I', 'İ', 'J', 'K', 'L', 'M', 'N', 'O', 'Ö', 'P', 
                          'R', 'S', 'Ş', 'T', 'U', 'Ü', 'V', 'Y', 'Z'];
 
-        let currentLetterIndex = 0;
+        // Adımlar: A, a, B, b, C, c, ... Z, z (toplam 58)
+        const steps = [];
+        alphabet.forEach(letter => {
+            steps.push({ letter, isUpper: true });
+            steps.push({ letter, isUpper: false });
+        });
+
+        let currentStepIndex = 0;
         let score = 0;
         let lettersDone = 0;
         let touchCoverage = 0;
@@ -372,15 +381,20 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             coveredPixels.clear();
 
-            const letter = alphabet[currentLetterIndex];
+            const step = steps[currentStepIndex];
+            const displayLetter = step.isUpper ? step.letter : step.letter.toLowerCase();
             const centerX = canvas.width / 2;
             const centerY = canvas.height / 2;
 
-            // Büyük harf çiz (daha belirgin)
-            ctx.font = 'bold 200px Arial';
-            ctx.fillStyle = '#E8F8F7'; // Çok açık turkuaz arka plan
-            ctx.strokeStyle = '#4ECDC4';
-            ctx.lineWidth = 6; // Daha kalın
+            // Harf çiz
+            const fontSize = step.isUpper ? 200 : 150;
+            const bgColor = step.isUpper ? '#E8F8F7' : '#FFE8E8';
+            const lineColor = step.isUpper ? '#4ECDC4' : '#FF6B6B';
+
+            ctx.font = `bold ${fontSize}px Arial`;
+            ctx.fillStyle = bgColor;
+            ctx.strokeStyle = lineColor;
+            ctx.lineWidth = step.isUpper ? 6 : 5;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
 
@@ -389,15 +403,15 @@
             ctx.shadowBlur = 10;
 
             // Dolgulu
-            ctx.fillText(letter, centerX, centerY);
+            ctx.fillText(displayLetter, centerX, centerY);
             // Outline
-            ctx.strokeText(letter, centerX, centerY);
+            ctx.strokeText(displayLetter, centerX, centerY);
             
             ctx.shadowColor = 'transparent';
 
             // Talimat
             ctx.font = 'bold 24px Arial';
-            ctx.fillStyle = '#FF6B6B';
+            ctx.fillStyle = step.isUpper ? '#4ECDC4' : '#FF6B6B';
             ctx.fillText('Harfin üzerinden parmağını geç!', centerX, canvas.height - 30);
 
             updateDisplay();
@@ -455,7 +469,7 @@
 
         function updateProgress() {
             // Harf alanını yaklaşık hesapla
-            const estimatedLetterPixels = 8000; // Yaklaşık
+            const estimatedLetterPixels = 8000;
             touchCoverage = Math.min(100, Math.round((coveredPixels.size / estimatedLetterPixels) * 100));
             
             // Doğruluk göstergesi güncelle
@@ -468,17 +482,19 @@
         }
 
         function updateDisplay() {
-            const letter = alphabet[currentLetterIndex];
-            const smallLetter = letter.toLowerCase();
+            const step = steps[currentStepIndex];
+            const displayLetter = step.isUpper ? step.letter : step.letter.toLowerCase();
+            const typeText = step.isUpper ? '📘 Büyük Harf' : '📗 Küçük Harf';
 
-            document.getElementById('currentLetter').textContent = letter;
-            document.getElementById('targetLetter').textContent = smallLetter;
-            document.getElementById('currentLetterNum').textContent = `${currentLetterIndex + 1} / ${alphabet.length}`;
+            document.getElementById('currentLetter').textContent = displayLetter;
+            document.getElementById('currentLetter').className = 'current-letter ' + (step.isUpper ? 'uppercase' : 'lowercase');
+            document.getElementById('letterType').textContent = typeText;
+            document.getElementById('currentLetterNum').textContent = `${currentStepIndex + 1} / ${steps.length}`;
             document.getElementById('lettersDone').textContent = lettersDone;
             document.getElementById('score').textContent = score;
 
             // Progress bar
-            const progress = ((currentLetterIndex) / alphabet.length) * 100;
+            const progress = ((currentStepIndex) / steps.length) * 100;
             document.getElementById('progressFill').style.width = progress + '%';
             document.getElementById('progressPercent').textContent = Math.round(progress) + '%';
             document.getElementById('progressLabel').textContent = `${lettersDone} tamamlandı`;
@@ -488,63 +504,37 @@
             if (touchCoverage < 60) return;
 
             isDrawing = false;
-            const letter = alphabet[currentLetterIndex];
+            const step = steps[currentStepIndex];
+            const displayLetter = step.isUpper ? step.letter : step.letter.toLowerCase();
             const msg = document.getElementById('completionMsg');
-            msg.textContent = `✅ "${letter}" tamamlandı! Küçük "${letter.toLowerCase()}" yazıyoruz...`;
+            msg.textContent = `✅ "${displayLetter}" tamamlandı!`;
             msg.classList.add('show');
 
             score += 50 + Math.round(touchCoverage);
             lettersDone++;
 
             setTimeout(() => {
-                showSmallLetter();
-            }, 1500);
-        }
-
-        function showSmallLetter() {
-            const letter = alphabet[currentLetterIndex];
-            const smallLetter = letter.toLowerCase();
-            
-            // Küçük harfi göster
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-
-            // Küçük harf gösterimi
-            ctx.font = 'bold 150px Arial';
-            ctx.fillStyle = '#FFE0E0'; // Açık kırmızı arka plan
-            ctx.strokeStyle = '#FF6B6B';
-            ctx.lineWidth = 4;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-
-            ctx.fillText(smallLetter, centerX, centerY);
-            ctx.strokeText(smallLetter, centerX, centerY);
-
-            // Mesaj
-            ctx.font = 'bold 20px Arial';
-            ctx.fillStyle = '#FF6B6B';
-            ctx.fillText('Bu şekilde yazılır!', centerX, canvas.height - 30);
-
-            const msg = document.getElementById('completionMsg');
-            msg.classList.remove('show');
-
-            // Sonra otomatik ilerleme
-            setTimeout(() => {
+                msg.classList.remove('show');
                 nextLetter();
-            }, 1000);
+            }, 1200);
         }
 
         function nextLetter() {
-            if (currentLetterIndex < alphabet.length - 1) {
-                currentLetterIndex++;
+            if (currentStepIndex < steps.length - 1) {
+                currentStepIndex++;
                 coveredPixels.clear();
                 touchCoverage = 0;
+                document.getElementById('accuracyIndicator').classList.remove('show');
+                document.getElementById('accuracyPercent').textContent = '0';
+                document.getElementById('accuracyFill').style.width = '0%';
                 drawLetter();
 
                 // Seslendirme (opsiyonel)
                 if ('speechSynthesis' in window) {
-                    const utterance = new SpeechSynthesisUtterance(alphabet[currentLetterIndex]);
+                    const step = steps[currentStepIndex];
+                    const utterance = new SpeechSynthesisUtterance(
+                        step.isUpper ? step.letter : step.letter.toLowerCase()
+                    );
                     utterance.lang = 'tr-TR';
                     speechSynthesis.speak(utterance);
                 }
@@ -561,7 +551,6 @@
             document.getElementById('accuracyIndicator').classList.remove('show');
             document.getElementById('accuracyPercent').textContent = '0';
             document.getElementById('accuracyFill').style.width = '0%';
-            document.getElementById('instruction').textContent = '👇 Büyük harfin üzerinden parmağınla geçin!';
         }
 
         function skipLetter() {
@@ -571,7 +560,7 @@
         }
 
         function resetGame() {
-            currentLetterIndex = 0;
+            currentStepIndex = 0;
             score = 0;
             lettersDone = 0;
             touchCoverage = 0;
