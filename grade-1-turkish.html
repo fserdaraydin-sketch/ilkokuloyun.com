@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1. Sınıf Türkçe Oyunları - İlkokulOyun.com</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .game-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .game-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            border-left: 5px solid #FF6B6B;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(255,107,107,0.3);
+        }
+
+        .game-card .icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+
+        .game-card h3 {
+            color: #FF6B6B;
+            font-size: 20px;
+            margin: 10px 0;
+        }
+
+        .game-card p {
+            color: #666;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+
+        .difficulty {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 5px 12px;
+            background: #FFE5E5;
+            color: #FF6B6B;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .play-button {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: #FF6B6B;
+            color: white;
+            border-radius: 15px;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .play-button:hover {
+            background: #FF5252;
+            transform: scale(1.05);
+        }
+
+        .header-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+
+        .back-button {
+            padding: 12px 25px;
+            background: #667eea;
+            color: white;
+            border-radius: 25px;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            background: #5568d3;
+        }
+
+        @media (max-width: 768px) {
+            .game-list {
+                grid-template-columns: 1fr;
+            }
+
+            .header-nav {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation">
+        <div class="butterfly">🦋</div>
+        <div class="butterfly">🦋</div>
+        <div class="kite">🪁</div>
+        <div class="flower">🌸</div>
+    </div>
+
+    <div class="container">
+        <div class="header-nav">
+            <button class="back-button" onclick="history.back()">← Geri Dön</button>
+            <div></div>
+        </div>
+
+        <header>
+            <h1>📚 1. Sınıf Türkçe Oyunları 📚</h1>
+            <p class="subtitle">Harfleri tanı, parmakla harf çiz!</p>
+        </header>
+
+        <div class="game-list">
+            <!-- Oyun 1: Harf Çizme -->
+            <div class="game-card">
+                <div class="icon">✍️</div>
+                <h3>Harf Çiz</h3>
+                <p>Parmağınla harfleri ekrana çizin</p>
+                <div class="difficulty">Kolay</div>
+                <button class="play-button" onclick="playGame('drawing')">Oyna!</button>
+            </div>
+
+            <!-- Oyun 2: Harf Tanıma -->
+            <div class="game-card">
+                <div class="icon">🔤</div>
+                <h3>Harfleri Tanı</h3>
+                <p>Gösterilen harfi bul ve dokunun</p>
+                <div class="difficulty">Kolay</div>
+                <button class="play-button" onclick="playGame('recognition')">Oyna!</button>
+            </div>
+
+            <!-- Oyun 3: Harf Sırası -->
+            <div class="game-card">
+                <div class="icon">🔡</div>
+                <h3>Alfabeyi Düzenle</h3>
+                <p>A-Z harflerini sırayla yerleştirin</p>
+                <div class="difficulty">Orta</div>
+                <button class="play-button" onclick="playGame('sequence')">Oyna!</button>
+            </div>
+
+            <!-- Oyun 4: Sesli Harfler -->
+            <div class="game-card">
+                <div class="icon">🔊</div>
+                <h3>Sesli Harfler</h3>
+                <p>Sesli harfleri öğren ve söyle</p>
+                <div class="difficulty">Kolay</div>
+                <button class="play-button" onclick="playGame('vowels')">Oyna!</button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>✨ Harfleri öğrenin! ✨</p>
+        </div>
+    </div>
+
+    <script>
+        function playGame(game) {
+            const games = {
+                'drawing': 'game-letter-drawing.html',
+                'recognition': 'game-letter-recognition.html',
+                'sequence': 'game-alphabet-sequence.html',
+                'vowels': 'game-vowels.html'
+            };
+            window.location.href = games[game];
+        }
+
+        document.querySelectorAll('.game-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                if (e.target.classList.contains('play-button')) return;
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+            });
+        });
+    </script>
+</body>
+</html>

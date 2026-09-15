@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Şekilleri Takip Et - İlkokulOyun.com</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #FF6B6B;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .instruction {
+            text-align: center;
+            background: #FFF3E0;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            color: #E65100;
+            font-weight: bold;
+        }
+
+        .score {
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+            margin-bottom: 20px;
+            background: #F5F5F5;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .score-item h3 {
+            color: #FF6B6B;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .score-item p {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        #canvas {
+            display: block;
+            border: 3px solid #FF6B6B;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #FFF9E6 0%, #FFF3E0 100%);
+            cursor: crosshair;
+            width: 100%;
+            max-width: 500px;
+            height: 400px;
+            margin: 0 auto 20px;
+            touch-action: none;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: #FF6B6B;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #FF5252;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #DDD;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #CCC;
+            transform: translateY(-2px);
+        }
+
+        .back-button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 600px) {
+            .game-container {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            #canvas {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>🔵 Şekilleri Takip Et!</h1>
+            <p>Parmağınla şekillerin üstünden geçin</p>
+        </div>
+
+        <div class="instruction">
+            Verilen şekli parmağınla takip edin! Doğru yaparsanız puan alırsınız! 🎯
+        </div>
+
+        <div class="score">
+            <div class="score-item">
+                <h3>Şekiller</h3>
+                <p id="shapesCount">0</p>
+            </div>
+            <div class="score-item">
+                <h3>Puan</h3>
+                <p id="score">0</p>
+            </div>
+            <div class="score-item">
+                <h3>Doğruluk</h3>
+                <p id="accuracy">0%</p>
+            </div>
+        </div>
+
+        <canvas id="canvas"></canvas>
+
+        <div class="controls">
+            <button class="btn btn-secondary" onclick="nextShape()">➡️ Sonraki</button>
+            <button class="btn btn-primary" onclick="resetGame()">🔄 Yeniden Başla</button>
+        </div>
+
+        <button class="back-button" onclick="history.back()">← Geri Dön</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+        }
+
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const shapes = ['circle', 'square', 'triangle'];
+        let currentShapeIndex = 0;
+        let shapesCompleted = 0;
+        let score = 0;
+        let touchPath = [];
+        let isDrawing = false;
+
+        // Şekilleri çiz
+        function drawShape(shape) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+
+            ctx.strokeStyle = '#4ECDC4';
+            ctx.lineWidth = 4;
+            ctx.fillStyle = 'rgba(78, 205, 196, 0.1)';
+
+            if (shape === 'circle') {
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 80, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+            } else if (shape === 'square') {
+                ctx.fillRect(centerX - 80, centerY - 80, 160, 160);
+                ctx.strokeRect(centerX - 80, centerY - 80, 160, 160);
+            } else if (shape === 'triangle') {
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY - 90);
+                ctx.lineTo(centerX + 90, centerY + 80);
+                ctx.lineTo(centerX - 90, centerY + 80);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            // İsim yaz
+            ctx.fillStyle = '#FF6B6B';
+            ctx.font = 'bold 20px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(getShapeName(shape), centerX, canvas.height - 30);
+        }
+
+        function getShapeName(shape) {
+            const names = { circle: 'Daire', square: 'Kare', triangle: 'Üçgen' };
+            return names[shape];
+        }
+
+        function getMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            let x, y;
+            if (e.touches) {
+                x = e.touches[0].clientX - rect.left;
+                y = e.touches[0].clientY - rect.top;
+            } else {
+                x = e.clientX - rect.left;
+                y = e.clientY - rect.top;
+            }
+            return { x, y };
+        }
+
+        function isNearShape(x, y) {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const shape = shapes[currentShapeIndex];
+
+            if (shape === 'circle') {
+                const dist = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
+                return dist > 60 && dist < 100;
+            } else if (shape === 'square') {
+                return x > centerX - 100 && x < centerX + 100 && y > centerY - 100 && y < centerY + 100;
+            } else if (shape === 'triangle') {
+                // Basit triangle içi kontrolü
+                return y > centerY - 90 && y < centerY + 90;
+            }
+            return false;
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            touchPath = [];
+            const pos = getMousePos(e);
+            if (isNearShape(pos.x, pos.y)) {
+                touchPath.push(pos);
+            }
+        }
+
+        function draw(e) {
+            if (!isDrawing || touchPath.length === 0) return;
+            e.preventDefault();
+            const pos = getMousePos(e);
+            if (isNearShape(pos.x, pos.y)) {
+                touchPath.push(pos);
+                drawPath();
+            }
+        }
+
+        function drawPath() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const shape = shapes[currentShapeIndex];
+
+            // Orijinal şekli çiz
+            ctx.strokeStyle = '#4ECDC4';
+            ctx.lineWidth = 4;
+            ctx.fillStyle = 'rgba(78, 205, 196, 0.1)';
+
+            if (shape === 'circle') {
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 80, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            // Çizilen yolu göster
+            if (touchPath.length > 0) {
+                ctx.strokeStyle = '#FF6B6B';
+                ctx.lineWidth = 6;
+                ctx.beginPath();
+                ctx.moveTo(touchPath[0].x, touchPath[0].y);
+                for (let i = 1; i < touchPath.length; i++) {
+                    ctx.lineTo(touchPath[i].x, touchPath[i].y);
+                }
+                ctx.stroke();
+            }
+        }
+
+        function stopDrawing() {
+            if (!isDrawing) return;
+            isDrawing = false;
+
+            if (touchPath.length > 30) {
+                score += 50;
+                shapesCompleted++;
+                updateScore();
+                setTimeout(() => nextShape(), 1000);
+            } else {
+                alert('❌ Şekli daha iyi takip etmeye çalış!');
+                drawShape(shapes[currentShapeIndex]);
+            }
+        }
+
+        function updateScore() {
+            document.getElementById('shapesCount').textContent = shapesCompleted;
+            document.getElementById('score').textContent = score;
+            document.getElementById('accuracy').textContent = Math.round((shapesCompleted / (currentShapeIndex + 1)) * 100) + '%';
+        }
+
+        function nextShape() {
+            currentShapeIndex = (currentShapeIndex + 1) % shapes.length;
+            drawShape(shapes[currentShapeIndex]);
+        }
+
+        function resetGame() {
+            currentShapeIndex = 0;
+            shapesCompleted = 0;
+            score = 0;
+            touchPath = [];
+            updateScore();
+            drawShape(shapes[currentShapeIndex]);
+        }
+
+        // Event listeners
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('touchend', stopDrawing);
+
+        // Başlat
+        drawShape(shapes[currentShapeIndex]);
+    </script>
+</body>
+</html>

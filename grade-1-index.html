@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="1. Sınıf - Parmak kontrolü ve temel beceriler için oyunlar.">
+    <title>1. Sınıf Dersleri - İlkokulOyun.com</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .subject-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .subject-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            border: 3px solid #FF6B6B;
+        }
+
+        .subject-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(255,107,107,0.3);
+        }
+
+        .subject-card .icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+
+        .subject-card h3 {
+            color: #FF6B6B;
+            font-size: 22px;
+            margin: 10px 0;
+        }
+
+        .subject-card p {
+            color: #666;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+
+        .back-button {
+            display: inline-block;
+            margin-bottom: 30px;
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 25px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .grade-title {
+            font-size: 28px;
+            color: #FF6B6B;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .subject-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation">
+        <div class="butterfly">🦋</div>
+        <div class="butterfly">🦋</div>
+        <div class="kite">🪁</div>
+        <div class="flower">🌸</div>
+        <div class="flower">🌼</div>
+    </div>
+
+    <div class="container">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <button class="back-button" onclick="history.back()">← Geri Dön</button>
+        </div>
+
+        <header>
+            <h1>🌟 1. Sınıf Dersleri 🌟</h1>
+            <p class="subtitle">Parmak kontrolü ve temel becerilerinizi geliştirin!</p>
+            <div class="grade-title">Sınıf Seviyesi: Başlangıç</div>
+        </header>
+
+        <div class="subject-grid">
+            <!-- Matematik -->
+            <div class="subject-card" onclick="goToSubject('math')">
+                <div class="icon">🔢</div>
+                <h3>Matematik</h3>
+                <p>Sayılar, temel işlemler</p>
+                <small>3 Oyun</small>
+            </div>
+
+            <!-- Türkçe -->
+            <div class="subject-card" onclick="goToSubject('turkish')">
+                <div class="icon">📚</div>
+                <h3>Türkçe</h3>
+                <p>Harf tanıma, yazma</p>
+                <small>3 Oyun</small>
+            </div>
+
+            <!-- Fen -->
+            <div class="subject-card" onclick="goToSubject('science')">
+                <div class="icon">🔬</div>
+                <h3>Fen Bilimleri</h3>
+                <p>Hayvanlar, bitkiler, doğa</p>
+                <small>2 Oyun</small>
+            </div>
+
+            <!-- İngilizce -->
+            <div class="subject-card" onclick="goToSubject('english')">
+                <div class="icon">🌍</div>
+                <h3>İngilizce</h3>
+                <p>Temel kelimeler</p>
+                <small>2 Oyun</small>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>✨ Oyun oynayarak öğren! ✨</p>
+        </div>
+    </div>
+
+    <script>
+        function goToSubject(subject) {
+            const pages = {
+                'math': 'grade-1-math.html',
+                'turkish': 'grade-1-turkish.html',
+                'science': 'grade-1-science.html',
+                'english': 'grade-1-english.html'
+            };
+            window.location.href = pages[subject];
+        }
+
+        // Kart tıklama animasyonu
+        document.querySelectorAll('.subject-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -3,88 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="İlkokul öğrencileri için eğlenceli ve eğitici oyunlar. Matematik, Fen, Türkçe, İngilizce ve Hayat Bilgisi oyunları ile öğrenmenin keyfini çıkarın!">
-    <title>İlkokulOyun.com - Eğlenerek Öğren</title>
+    <meta name="description" content="1-4 sınıf öğrencileri için eğlenceli oyunlar ve öğrenme aktiviteleri.">
+    <title>İlkokulOyun.com - Sınıf Seç</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .grade-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+
+        .grade-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            color: white;
+        }
+
+        .grade-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .grade-card.grade-1 {
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E72 100%);
+        }
+
+        .grade-card.grade-2 {
+            background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
+        }
+
+        .grade-card.grade-3 {
+            background: linear-gradient(135deg, #F7DC6F 0%, #F39C12 100%);
+        }
+
+        .grade-card.grade-4 {
+            background: linear-gradient(135deg, #BB8FCE 0%, #9B59B6 100%);
+        }
+
+        .grade-card .icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .grade-card h2 {
+            font-size: 32px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+
+        .grade-card p {
+            font-size: 16px;
+            opacity: 0.95;
+            margin: 10px 0;
+        }
+
+        .grade-card .subject-count {
+            font-size: 14px;
+            margin-top: 15px;
+            opacity: 0.85;
+        }
+
+        @media (max-width: 768px) {
+            .grade-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .grade-card h2 {
+                font-size: 24px;
+            }
+
+            .grade-card .icon {
+                font-size: 60px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="bg-animation">
         <div class="butterfly">🦋</div>
         <div class="butterfly">🦋</div>
         <div class="butterfly">🦋</div>
-        <div class="butterfly">🦋</div>
-        <div class="kite">🪁</div>
         <div class="kite">🪁</div>
         <div class="kite">🪁</div>
         <div class="flower">🌸</div>
         <div class="flower">🌼</div>
         <div class="flower">🌺</div>
-        <div class="flower">🌻</div>
-        <div class="flower">🌷</div>
-        <div class="flower">🌹</div>
     </div>
 
     <div class="container">
         <header>
-            <h1>🎮 Eğlenerek Öğren! 🎮</h1>
-            <p class="subtitle">Oyun oynayarak öğrenmenin keyfini çıkar!</p>
+            <h1>🎓 Sınıfını Seç! 🎓</h1>
+            <p class="subtitle">Kendi sınıfına uygun oyunları oyna ve öğren!</p>
         </header>
 
-        <div class="categories">
-            <div class="category-card math" onclick="goToCategory('matematik')">
-                <div class="icon">🔢</div>
-                <h2>Matematik</h2>
-                <p>Sayılarla oyna, matematik öğren! Toplama, çıkarma ve daha fazlası...</p>
-                <span class="game-count">Oyunlara Git →</span>
+        <div class="grade-grid">
+            <!-- 1. Sınıf -->
+            <div class="grade-card grade-1" onclick="goToGrade(1)">
+                <div class="icon">🌟</div>
+                <h2>1. Sınıf</h2>
+                <p>Parmak kontrolü, temel beceriler</p>
+                <div class="subject-count">4 Ders</div>
             </div>
 
-            <div class="category-card science" onclick="goToCategory('fen')">
-                <div class="icon">🔬</div>
-                <h2>Fen Bilimleri</h2>
-                <p>Doğayı keşfet, bilimi öğren! Hayvanlar, bitkiler ve deney zamanı!</p>
-                <span class="game-count">Oyunlara Git →</span>
+            <!-- 2. Sınıf -->
+            <div class="grade-card grade-2" onclick="goToGrade(2)">
+                <div class="icon">✨</div>
+                <h2>2. Sınıf</h2>
+                <p>Kelime öğrenme, basit matematik</p>
+                <div class="subject-count">4 Ders</div>
             </div>
 
-            <div class="category-card turkish" onclick="goToCategory('turkce')">
-                <div class="icon">📚</div>
-                <h2>Türkçe</h2>
-                <p>Kelimelerle oyna, okumayı öğren! Harfler, kelimeler ve hikayeler!</p>
-                <span class="game-count">Oyunlara Git →</span>
-            </div>
-
-            <div class="category-card english" onclick="goToCategory('ingilizce')">
-                <div class="icon">🌍</div>
-                <h2>İngilizce</h2>
-                <p>Yeni bir dil öğren! İngilizce kelimeler, renkler ve sayılar!</p>
-                <span class="game-count">Oyunlara Git →</span>
-            </div>
-
-            <div class="category-card life" onclick="goToCategory('hayatbilgisi')">
+            <!-- 3. Sınıf -->
+            <div class="grade-card grade-3" onclick="goToGrade(3)">
                 <div class="icon">🌈</div>
-                <h2>Hayat Bilgisi</h2>
-                <p>Hayatı keşfet! Meslek, aile, sağlık ve çevremizi tanıyalım!</p>
-                <span class="game-count">Oyunlara Git →</span>
+                <h2>3. Sınıf</h2>
+                <p>Çarpım tablosu, metin anlama</p>
+                <div class="subject-count">4 Ders</div>
+            </div>
+
+            <!-- 4. Sınıf -->
+            <div class="grade-card grade-4" onclick="goToGrade(4)">
+                <div class="icon">🚀</div>
+                <h2>4. Sınıf</h2>
+                <p>Zorlayıcı oyunlar, gelişmiş beceriler</p>
+                <div class="subject-count">4 Ders</div>
             </div>
         </div>
 
         <div class="footer">
-            <p>✨ Her gün yeni bir şeyler öğren! ✨</p>
+            <p>✨ Eğlenerek öğren, öğrenerek eğlen! ✨</p>
         </div>
     </div>
 
     <script>
-        function goToCategory(category) {
-            const pages = {
-                'matematik': 'mat.html',
-                'fen': 'fen.html',
-                'turkce': 'trk.html',
-                'ingilizce': 'ing.html',
-                'hayatbilgisi': 'hayat.html'
-            };
-            window.location.href = pages[category];
+        function goToGrade(grade) {
+            window.location.href = `grade-${grade}-index.html`;
         }
 
-        document.querySelectorAll('.category-card').forEach(card => {
+        // Kart tıklama animasyonu
+        document.querySelectorAll('.grade-card').forEach(card => {
             card.addEventListener('click', function(e) {
                 this.style.transform = 'scale(0.95)';
                 setTimeout(() => {
