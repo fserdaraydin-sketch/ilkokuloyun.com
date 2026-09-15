@@ -136,6 +136,35 @@
             font-size: 14px;
         }
 
+        .accuracy-indicator {
+            text-align: center;
+            padding: 10px;
+            background: #F0F0F0;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .accuracy-indicator.show {
+            display: block;
+        }
+
+        .accuracy-bar {
+            width: 100%;
+            height: 20px;
+            background: #DDD;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .accuracy-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FF6B6B 0%, #FFC300 50%, #4CAF50 100%);
+            width: 0%;
+            transition: width 0.2s ease;
+        }
+
         #canvas {
             display: block;
             border: 3px solid #FF6B6B;
@@ -290,6 +319,14 @@
             👇 Büyük harfin üzerinden parmağınla geçin!
         </div>
 
+        <div class="accuracy-indicator" id="accuracyIndicator">
+            <div>Doğruluk: <span id="accuracyPercent">0</span>%</div>
+            <div class="accuracy-bar">
+                <div class="accuracy-fill" id="accuracyFill"></div>
+            </div>
+            <small>60% = Tamamlandı ✅</small>
+        </div>
+
         <div class="completion-message" id="completionMsg">
             ✅ Tebrikler! Sonraki harfe geçiyoruz...
         </div>
@@ -339,23 +376,29 @@
             const centerX = canvas.width / 2;
             const centerY = canvas.height / 2;
 
-            // Büyük harf çiz (çizgili outline)
+            // Büyük harf çiz (daha belirgin)
             ctx.font = 'bold 200px Arial';
-            ctx.fillStyle = 'rgba(78, 205, 196, 0.1)';
+            ctx.fillStyle = '#E8F8F7'; // Çok açık turkuaz arka plan
             ctx.strokeStyle = '#4ECDC4';
-            ctx.lineWidth = 4;
+            ctx.lineWidth = 6; // Daha kalın
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
+
+            // Dış shadow efekti
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
+            ctx.shadowBlur = 10;
 
             // Dolgulu
             ctx.fillText(letter, centerX, centerY);
             // Outline
             ctx.strokeText(letter, centerX, centerY);
+            
+            ctx.shadowColor = 'transparent';
 
             // Talimat
             ctx.font = 'bold 24px Arial';
             ctx.fillStyle = '#FF6B6B';
-            ctx.fillText('Harfin üzerinden geç!', centerX, canvas.height - 30);
+            ctx.fillText('Harfin üzerinden parmağını geç!', centerX, canvas.height - 30);
 
             updateDisplay();
         }
@@ -414,6 +457,14 @@
             // Harf alanını yaklaşık hesapla
             const estimatedLetterPixels = 8000; // Yaklaşık
             touchCoverage = Math.min(100, Math.round((coveredPixels.size / estimatedLetterPixels) * 100));
+            
+            // Doğruluk göstergesi güncelle
+            const indicator = document.getElementById('accuracyIndicator');
+            if (touchCoverage > 0) {
+                indicator.classList.add('show');
+                document.getElementById('accuracyPercent').textContent = touchCoverage;
+                document.getElementById('accuracyFill').style.width = touchCoverage + '%';
+            }
         }
 
         function updateDisplay() {
@@ -437,16 +488,51 @@
             if (touchCoverage < 60) return;
 
             isDrawing = false;
+            const letter = alphabet[currentLetterIndex];
             const msg = document.getElementById('completionMsg');
+            msg.textContent = `✅ "${letter}" tamamlandı! Küçük "${letter.toLowerCase()}" yazıyoruz...`;
             msg.classList.add('show');
 
             score += 50 + Math.round(touchCoverage);
             lettersDone++;
 
             setTimeout(() => {
-                msg.classList.remove('show');
+                showSmallLetter();
+            }, 1500);
+        }
+
+        function showSmallLetter() {
+            const letter = alphabet[currentLetterIndex];
+            const smallLetter = letter.toLowerCase();
+            
+            // Küçük harfi göster
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+
+            // Küçük harf gösterimi
+            ctx.font = 'bold 150px Arial';
+            ctx.fillStyle = '#FFE0E0'; // Açık kırmızı arka plan
+            ctx.strokeStyle = '#FF6B6B';
+            ctx.lineWidth = 4;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            ctx.fillText(smallLetter, centerX, centerY);
+            ctx.strokeText(smallLetter, centerX, centerY);
+
+            // Mesaj
+            ctx.font = 'bold 20px Arial';
+            ctx.fillStyle = '#FF6B6B';
+            ctx.fillText('Bu şekilde yazılır!', centerX, canvas.height - 30);
+
+            const msg = document.getElementById('completionMsg');
+            msg.classList.remove('show');
+
+            // Sonra otomatik ilerleme
+            setTimeout(() => {
                 nextLetter();
-            }, 1200);
+            }, 1000);
         }
 
         function nextLetter() {
@@ -472,6 +558,9 @@
             coveredPixels.clear();
             touchCoverage = 0;
             drawLetter();
+            document.getElementById('accuracyIndicator').classList.remove('show');
+            document.getElementById('accuracyPercent').textContent = '0';
+            document.getElementById('accuracyFill').style.width = '0%';
             document.getElementById('instruction').textContent = '👇 Büyük harfin üzerinden parmağınla geçin!';
         }
 
