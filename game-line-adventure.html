@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Çizgi Macerası - İlkokulOyun.com</title>
+    <title>Çizgi Çizme - İlkokulOyun.com</title>
     <style>
         * {
             margin: 0;
@@ -11,7 +11,6 @@
             box-sizing: border-box;
             user-select: none;
             -webkit-user-select: none;
-            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -24,7 +23,7 @@
             padding: 10px;
         }
 
-        .game-container {
+        .container {
             background: white;
             border-radius: 20px;
             padding: 20px;
@@ -33,187 +32,76 @@
             width: 100%;
         }
 
-        /* HİKAYE KUTUSU */
-        .story-box {
-            background: linear-gradient(135deg, #FFE5E5 0%, #FFF5F5 100%);
-            border-left: 5px solid #FF6B6B;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-
-        .story-title {
-            font-weight: bold;
-            color: #FF6B6B;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
-            font-size: 16px;
-        }
-
-        .story-text {
-            color: #555;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
         .header {
             text-align: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .header h1 {
             color: #FF6B6B;
-            font-size: 28px;
+            font-size: 32px;
             margin-bottom: 5px;
         }
 
         .header p {
-            color: #666;
-            font-size: 14px;
-        }
-
-        .level-info {
-            background: linear-gradient(135deg, #FFE5E5 0%, #FFF0F0 100%);
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border-left: 4px solid #FF6B6B;
-            text-align: center;
-        }
-
-        .level-title {
-            font-weight: bold;
-            color: #FF6B6B;
-            font-size: 14px;
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .stat-box {
-            background: #F5F5F5;
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        .stat-label {
-            font-size: 11px;
             color: #999;
-            font-weight: bold;
+            font-size: 16px;
         }
 
-        .stat-value {
-            font-size: 20px;
+        .story {
+            background: #FFE5E5;
+            border-left: 5px solid #FF6B6B;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 15px;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .instruction {
+            background: #FFF3E0;
+            border: 2px solid #FF9800;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
             font-weight: bold;
-            color: #FF6B6B;
-            margin-top: 3px;
+            color: #E65100;
+            font-size: 18px;
         }
 
         .game-area {
             position: relative;
-            background: linear-gradient(to right, #FFF9E6 0%, #FFF3E0 100%);
+            background: white;
             border: 3px solid #FF6B6B;
-            border-radius: 10px;
-            height: 400px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
+            border-radius: 15px;
+            width: 100%;
+            height: 350px;
+            margin-bottom: 20px;
             overflow: hidden;
             touch-action: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         #canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            background: transparent;
+            display: block;
             cursor: crosshair;
             touch-action: none;
+            background: white;
         }
 
-        .robot {
-            position: absolute;
-            font-size: 50px;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            transition: bottom 0.4s ease, transform 0.2s ease;
-            z-index: 10;
-        }
-
-        .treasure {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            font-size: 35px;
-            z-index: 15;
-            animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-10px) rotate(5deg); }
-        }
-
-        .step-counter {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: rgba(255,107,107,0.9);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 14px;
-            z-index: 20;
-        }
-
-        .feedback {
+        .score {
             text-align: center;
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 10px;
+            font-size: 20px;
             font-weight: bold;
-            font-size: 16px;
-            min-height: 20px;
-            display: none;
+            color: #FF6B6B;
+            margin-bottom: 20px;
         }
 
-        .feedback.show {
-            display: block;
-            animation: slideDown 0.3s ease;
-        }
-
-        .feedback.success {
-            background: #C8E6C9;
-            color: #2E7D32;
-        }
-
-        .feedback.warning {
-            background: #FFE0B2;
-            color: #E65100;
-        }
-
-        @keyframes slideDown {
-            from {
-                transform: translateY(-10px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .controls {
+        .buttons {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
@@ -221,38 +109,34 @@
         }
 
         .btn {
-            padding: 12px;
+            padding: 15px;
             border: none;
             border-radius: 10px;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 14px;
+            font-size: 16px;
+            transition: all 0.2s;
         }
 
-        .btn-secondary {
-            background: #E0E0E0;
+        .btn-reset {
+            background: #EFEFEF;
             color: #333;
         }
 
-        .btn-secondary:hover {
-            background: #CCC;
-            transform: translateY(-2px);
+        .btn-reset:hover {
+            background: #DDD;
         }
 
-        .btn-primary {
+        .btn-next {
             background: #FF6B6B;
             color: white;
-            grid-column: 2;
         }
 
-        .btn-primary:hover {
+        .btn-next:hover {
             background: #FF5252;
-            transform: translateY(-2px);
         }
 
-        .back-button {
-            display: block;
+        .back-btn {
             width: 100%;
             padding: 12px;
             background: #667eea;
@@ -261,239 +145,192 @@
             border-radius: 10px;
             font-weight: bold;
             cursor: pointer;
+            font-size: 15px;
         }
 
-        .back-button:hover {
+        .back-btn:hover {
             background: #5568d3;
         }
 
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .modal.show {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            max-width: 400px;
+        .message {
             text-align: center;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-        }
-
-        .modal-title {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: bold;
-            color: #FF6B6B;
             margin-bottom: 15px;
+            min-height: 25px;
         }
 
-        .modal-text {
-            color: #555;
-            margin-bottom: 15px;
-            line-height: 1.6;
-            font-size: 14px;
+        .message.success {
+            color: #2E7D32;
         }
 
-        .modal-btn {
-            background: #FF6B6B;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .modal-btn:hover {
-            background: #FF5252;
+        .message.fail {
+            color: #E65100;
         }
 
         @media (max-width: 600px) {
             .game-area {
-                height: 300px;
+                height: 280px;
             }
-
+            
             .header h1 {
-                font-size: 24px;
-            }
-
-            .robot {
-                font-size: 40px;
+                font-size: 28px;
             }
         }
     </style>
 </head>
 <body>
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-title">🤖 Merdiven Çıkma</div>
-            <div class="modal-text">
-                <p style="margin-bottom: 10px;">Cıvata Rob hazinesine ulaşmak istiyor!</p>
-                <p style="margin-bottom: 15px; font-size: 13px; color: #999;">Ekranda YUKARI doğru çizgi çiz. Rob basamakları tırmanıyor. Tüm basamakları tırmanınca hazineyi almış olursun! 💎</p>
-            </div>
-            <button class="modal-btn" onclick="startGame()">OYUNA BAŞLA ▶️</button>
-        </div>
-    </div>
-
-    <div class="game-container">
-        <!-- HİKAYE KUTUSU -->
-        <div class="story-box">
-            <div class="story-title">
-                📖 Hikaye
-            </div>
-            <div class="story-text">
-                Cıvata Rob'un tepedeki hazine kutusuna ulaşması lazım! Yukarı doğru düz çizgiler çizerek basamakları oluştur. Ne kadar doğru çizersen, Rob o kadar hızlı çıkıyor! 🚀
-            </div>
-        </div>
-
+    <div class="container">
         <div class="header">
-            <h1>🔨 DİKEY ÇİZGİLER ÇİZ</h1>
+            <h1>✏️ Çizgi Çiz</h1>
+            <p>Sağlam ve düz çizgi çizmeyi öğren</p>
         </div>
 
-        <div class="level-info">
-            <div class="level-title" id="levelTitle">SEVİYE 1: KOLAY</div>
+        <div class="story">
+            📖 <strong>Hikaye:</strong> Cıvata Rob hazinesini almak istediğinde engeller var. Her engeli çizgi çizerek aşmalısın. Düz ve güçlü çizgiler çiz! 🚀
         </div>
 
-        <div class="stats">
-            <div class="stat-box">
-                <div class="stat-label">PUAN</div>
-                <div class="stat-value" id="score">0</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">BASKAMA</div>
-                <div class="stat-value" id="stepCount">0/3</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">BAŞARI</div>
-                <div class="stat-value" id="accuracy">0%</div>
-            </div>
+        <div class="instruction">
+            👇 YUKARI DOĞRU DÜZEN ÇİZGİ ÇİZ 👆
         </div>
 
-        <div class="feedback" id="feedback"></div>
+        <div class="message" id="message"></div>
 
         <div class="game-area" id="gameArea">
-            <div class="step-counter" id="stepDisplay">Adım: 0/3</div>
             <canvas id="canvas"></canvas>
-            <div class="treasure">💎</div>
-            <div class="robot" id="robot">🤖</div>
         </div>
 
-        <div class="controls">
-            <button class="btn btn-secondary" onclick="resetLevel()">🔄 Baştan Başla</button>
-            <button class="btn btn-primary" onclick="nextLevel()">➡️ Atla</button>
+        <div class="score">
+            Puan: <span id="score">0</span> | Seviye: <span id="level">1/3</span>
         </div>
 
-        <button class="back-button" onclick="history.back()">← Geri Dön</button>
+        <div class="buttons">
+            <button class="btn btn-reset" onclick="resetLevel()">🔄 Yeniden Çiz</button>
+            <button class="btn btn-next" onclick="nextLevel()">✓ Devam</button>
+        </div>
+
+        <button class="back-btn" onclick="history.back()">← Geri Dön</button>
     </div>
 
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         const gameArea = document.getElementById('gameArea');
-        const robot = document.getElementById('robot');
-        const feedback = document.getElementById('feedback');
-        const modal = document.getElementById('modal');
+        const messageEl = document.getElementById('message');
 
         let score = 0;
-        let currentLevel = 0;
-        let currentStep = 0;
-        let touchAccuracy = 0;
+        let level = 1;
+        let maxLevels = 3;
         let isDrawing = false;
-        let coveredPixels = new Set();
-        let gameStarted = false;
+        let points = [];
+        let minY = Infinity;
+        let maxY = -Infinity;
 
-        const levels = [
-            { steps: 3, difficulty: 'KOLAY', description: '3 basamak' },
-            { steps: 5, difficulty: 'NORMAL', description: '5 basamak' },
-            { steps: 7, difficulty: 'ZOR', description: '7 basamak' }
-        ];
-
-        function startGame() {
-            gameStarted = true;
-            modal.classList.remove('show');
-            resizeCanvas();
-        }
-
+        // Canvas boyutunu ayarla
         function resizeCanvas() {
             const rect = gameArea.getBoundingClientRect();
             canvas.width = rect.width;
             canvas.height = rect.height;
-            drawLevel();
+            drawGuides();
         }
 
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
 
-        function drawLevel() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            coveredPixels.clear();
+        // Rehber çizgileri çiz
+        function drawGuides() {
+            ctx.fillStyle = '#F5F5F5';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            const level = levels[currentLevel];
-            const stepHeight = canvas.height / (level.steps + 1);
+            // BAŞLA noktası (sol altta yeşil)
+            ctx.fillStyle = '#4CAF50';
+            ctx.beginPath();
+            ctx.arc(50, canvas.height - 50, 15, 0, Math.PI * 2);
+            ctx.fill();
             
-            // Basamakları çiz (ışık gri, kalın)
-            ctx.strokeStyle = '#D0D0D0';
-            ctx.lineWidth = 14;
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-
-            for (let i = 1; i <= level.steps; i++) {
-                const y = canvas.height - i * stepHeight;
-                ctx.beginPath();
-                ctx.moveTo(canvas.width * 0.15, y);
-                ctx.lineTo(canvas.width * 0.85, y);
-                ctx.stroke();
-            }
-
-            // Büyük talimat
-            ctx.fillStyle = '#FF6B6B';
-            ctx.font = 'bold 22px Arial';
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 12px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText('⬆️ YUKARI DOĞRU ÇİZ ⬆️', canvas.width / 2, 35);
+            ctx.textBaseline = 'middle';
+            ctx.fillText('BAŞLA', 50, canvas.height - 50);
 
-            updateDisplay();
+            // BİTİR noktası (sağ üstte kırmızı)
+            ctx.fillStyle = '#FF6B6B';
+            ctx.beginPath();
+            ctx.arc(canvas.width - 50, 50, 15, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = 'white';
+            ctx.fillText('BİTİR', canvas.width - 50, 50);
+
+            // Talimat yazısı
+            ctx.fillStyle = '#CCC';
+            ctx.font = 'bold 20px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('↑', canvas.width / 2, canvas.height / 2);
         }
 
-        function getMousePos(e) {
+        // Mouse/Touch olayları
+        function getPos(e) {
             const rect = canvas.getBoundingClientRect();
-            let x, y;
             if (e.touches) {
-                x = e.touches[0].clientX - rect.left;
-                y = e.touches[0].clientY - rect.top;
-            } else {
-                x = e.clientX - rect.left;
-                y = e.clientY - rect.top;
+                return {
+                    x: e.touches[0].clientX - rect.left,
+                    y: e.touches[0].clientY - rect.top
+                };
             }
-            return { x, y };
+            return {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
         }
 
         canvas.addEventListener('mousedown', startDrawing);
-        canvas.addEventListener('mouseup', finishDrawing);
-        canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('mouseout', finishDrawing);
-
         canvas.addEventListener('touchstart', startDrawing);
-        canvas.addEventListener('touchend', finishDrawing);
+        canvas.addEventListener('mousemove', draw);
         canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('mouseup', finishDrawing);
+        canvas.addEventListener('touchend', finishDrawing);
 
         function startDrawing(e) {
-            if (!gameStarted) return;
+            e.preventDefault();
             isDrawing = true;
+            points = [];
+            minY = Infinity;
+            maxY = -Infinity;
+            messageEl.textContent = '';
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            e.preventDefault();
+
+            const pos = getPos(e);
+            points.push(pos);
+            minY = Math.min(minY, pos.y);
+            maxY = Math.max(maxY, pos.y);
+
+            // Çizgiyi canlı çiz
+            redraw();
+        }
+
+        function redraw() {
+            drawGuides();
+
+            if (points.length > 1) {
+                ctx.strokeStyle = '#FF6B6B';
+                ctx.lineWidth = 8;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+
+                ctx.beginPath();
+                ctx.moveTo(points[0].x, points[0].y);
+                for (let i = 1; i < points.length; i++) {
+                    ctx.lineTo(points[i].x, points[i].y);
+                }
+                ctx.stroke();
+            }
         }
 
         function finishDrawing() {
@@ -501,115 +338,72 @@
             checkSuccess();
         }
 
-        function draw(e) {
-            if (!isDrawing || !gameStarted) return;
-            e.preventDefault();
-
-            const pos = getMousePos(e);
-            
-            // Pikselleri kontrol et
-            const imageData = ctx.getImageData(pos.x - 8, pos.y - 8, 16, 16);
-            const data = imageData.data;
-
-            for (let i = 0; i < data.length; i += 4) {
-                if (data[i + 3] > 150) {
-                    coveredPixels.add(`${Math.round(pos.x/5)},${Math.round(pos.y/5)}`);
-                }
-            }
-
-            // Çizimi göster (kırmızı, kalın)
-            ctx.fillStyle = 'rgba(255, 107, 107, 0.6)';
-            ctx.beginPath();
-            ctx.arc(pos.x, pos.y, 12, 0, Math.PI * 2);
-            ctx.fill();
-
-            updateAccuracy();
-        }
-
-        function updateAccuracy() {
-            touchAccuracy = Math.min(100, Math.round((coveredPixels.size / 120) * 100));
-            document.getElementById('accuracy').textContent = touchAccuracy + '%';
-        }
-
         function checkSuccess() {
-            if (touchAccuracy > 50) {
-                // BAŞARILI!
-                currentStep++;
-                score += 100 + touchAccuracy;
-                
-                const level = levels[currentLevel];
-                if (currentStep < level.steps) {
-                    animateRobotClimb();
-                    showFeedback('✅ TEBRIKLER! ' + touchAccuracy + '%', 'success');
-                } else {
-                    completeLevel();
-                }
-            } else {
-                showFeedback('❌ Biraz daha çiz! (Min %50)', 'warning');
+            if (points.length < 20) {
+                showMessage('❌ Çok kısa çizdi!', 'fail');
+                return;
             }
 
-            updateDisplay();
-            resetLevel();
+            // Düzlüğü kontrol et (X ekseninde sapmaya bak)
+            let xVariance = 0;
+            for (let i = 0; i < points.length; i++) {
+                xVariance += Math.abs(points[i].x - (canvas.width / 2));
+            }
+            xVariance = xVariance / points.length;
+
+            // Dikey mi kontrolü
+            const height = maxY - minY;
+            const width = Math.max(...points.map(p => p.x)) - Math.min(...points.map(p => p.x));
+
+            if (xVariance > 80) {
+                showMessage('❌ Daha düz çiz!', 'fail');
+                return;
+            }
+
+            if (height < 100) {
+                showMessage('❌ Daha uzun çiz!', 'fail');
+                return;
+            }
+
+            if (width > 150) {
+                showMessage('❌ Sağa sola kaymış! Düz çiz!', 'fail');
+                return;
+            }
+
+            // BAŞARILI!
+            showMessage('✅ BRİLYAN ÇIZDI! +' + (100 + Math.floor(100 - xVariance)), 'success');
+            score += 100 + Math.floor(100 - xVariance);
+            updateScore();
         }
 
-        function animateRobotClimb() {
-            const level = levels[currentLevel];
-            const stepHeight = canvas.height / (level.steps + 1);
-            const newBottom = currentStep * stepHeight + 10;
-            
-            robot.style.bottom = newBottom + 'px';
-            robot.textContent = '😊';
-            
-            setTimeout(() => {
-                robot.textContent = '🤖';
-            }, 300);
+        function showMessage(text, type) {
+            messageEl.textContent = text;
+            messageEl.className = 'message ' + type;
         }
 
-        function completeLevel() {
-            showFeedback('🎉 LEVEL TESLİM!', 'success');
-            setTimeout(() => {
-                nextLevel();
-            }, 1500);
-        }
-
-        function updateDisplay() {
+        function updateScore() {
             document.getElementById('score').textContent = score;
-            const level = levels[currentLevel];
-            document.getElementById('stepCount').textContent = currentStep + '/' + level.steps;
-            document.getElementById('stepDisplay').textContent = 'Adım: ' + currentStep + '/' + level.steps;
-            document.getElementById('levelTitle').textContent = 'SEVİYE ' + (currentLevel + 1) + ': ' + level.difficulty;
-        }
-
-        function showFeedback(text, type) {
-            feedback.textContent = text;
-            feedback.className = 'feedback show ' + type;
-            setTimeout(() => {
-                feedback.classList.remove('show');
-            }, 2000);
+            document.getElementById('level').textContent = level + '/' + maxLevels;
         }
 
         function resetLevel() {
-            coveredPixels.clear();
-            touchAccuracy = 0;
-            drawLevel();
+            points = [];
+            messageEl.textContent = '';
+            drawGuides();
         }
 
         function nextLevel() {
-            if (currentLevel < levels.length - 1) {
-                currentLevel++;
-                currentStep = 0;
-                robot.style.bottom = '10px';
-                robot.textContent = '🤖';
-                updateDisplay();
+            if (level < maxLevels) {
+                level++;
+                updateScore();
                 resetLevel();
             } else {
-                alert('🎉🎉🎉 OYUNU BİTİRDİN!\n\nToplam Puan: ' + score + ' 🏆');
+                alert('🎉 OYUNU BİTİRDİN!\n\nToplam Puan: ' + score + ' 🏆\n\nEvet! Çizgi çizmeyi öğrendin!');
                 location.reload();
             }
         }
 
-        // Modal göster
-        modal.classList.add('show');
+        updateScore();
     </script>
 </body>
 </html>
