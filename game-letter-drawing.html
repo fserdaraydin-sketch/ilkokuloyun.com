@@ -447,7 +447,7 @@
 
             // Harf piksellerine dokunup dokunmadığını kontrol et
             for (let i = 0; i < data.length; i += 4) {
-                if (data[i + 3] > 100) { // Alpha channel > 100
+                if (data[i + 3] > 180) { // Alpha channel > 180 (sadece tam çizilen alanlar)
                     coveredPixels.add(`${pos.x},${pos.y}`);
                 }
             }
