@@ -33,6 +33,31 @@
             width: 100%;
         }
 
+        /* HİKAYE KUTUSU */
+        .story-box {
+            background: linear-gradient(135deg, #FFE5E5 0%, #FFF5F5 100%);
+            border-left: 5px solid #FF6B6B;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .story-title {
+            font-weight: bold;
+            color: #FF6B6B;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .story-text {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
         .header {
             text-align: center;
             margin-bottom: 15px;
@@ -89,18 +114,6 @@
             font-weight: bold;
             color: #FF6B6B;
             margin-top: 3px;
-        }
-
-        .instruction-box {
-            background: #FFF3E0;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border: 2px solid #FF9800;
-            text-align: center;
-            color: #E65100;
-            font-weight: bold;
-            font-size: 14px;
         }
 
         .game-area {
@@ -201,13 +214,13 @@
         }
 
         .controls {
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 10px;
             margin-bottom: 15px;
         }
 
         .btn {
-            flex: 1;
             padding: 12px;
             border: none;
             border-radius: 10px;
@@ -217,23 +230,25 @@
             font-size: 14px;
         }
 
-        .btn-primary {
-            background: #FF6B6B;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #FF5252;
-            transform: translateY(-2px);
-        }
-
         .btn-secondary {
-            background: #DDD;
+            background: #E0E0E0;
             color: #333;
         }
 
         .btn-secondary:hover {
             background: #CCC;
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: #FF6B6B;
+            color: white;
+            grid-column: 2;
+        }
+
+        .btn-primary:hover {
+            background: #FF5252;
+            transform: translateY(-2px);
         }
 
         .back-button {
@@ -336,9 +351,18 @@
     </div>
 
     <div class="game-container">
+        <!-- HİKAYE KUTUSU -->
+        <div class="story-box">
+            <div class="story-title">
+                📖 Hikaye
+            </div>
+            <div class="story-text">
+                Cıvata Rob'un tepedeki hazine kutusuna ulaşması lazım! Yukarı doğru düz çizgiler çizerek basamakları oluştur. Ne kadar doğru çizersen, Rob o kadar hızlı çıkıyor! 🚀
+            </div>
+        </div>
+
         <div class="header">
-            <h1>🤖 Merdiven Çıkma</h1>
-            <p>Cıvata Rob'u yukarı çıkar!</p>
+            <h1>🔨 DİKEY ÇİZGİLER ÇİZ</h1>
         </div>
 
         <div class="level-info">
@@ -360,10 +384,6 @@
             </div>
         </div>
 
-        <div class="instruction-box" id="instructionBox">
-            👇 YUKARI DOĞRU ÇİZGİ ÇİZ
-        </div>
-
         <div class="feedback" id="feedback"></div>
 
         <div class="game-area" id="gameArea">
@@ -374,8 +394,8 @@
         </div>
 
         <div class="controls">
-            <button class="btn btn-secondary" onclick="resetLevel()">🔄 Yeniden Çiz</button>
-            <button class="btn btn-primary" onclick="nextLevel()">➡️ SONRAKI</button>
+            <button class="btn btn-secondary" onclick="resetLevel()">🔄 Baştan Başla</button>
+            <button class="btn btn-primary" onclick="nextLevel()">➡️ Atla</button>
         </div>
 
         <button class="back-button" onclick="history.back()">← Geri Dön</button>
@@ -428,22 +448,23 @@
             
             // Basamakları çiz (ışık gri, kalın)
             ctx.strokeStyle = '#D0D0D0';
-            ctx.lineWidth = 12;
+            ctx.lineWidth = 14;
             ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
 
             for (let i = 1; i <= level.steps; i++) {
                 const y = canvas.height - i * stepHeight;
                 ctx.beginPath();
-                ctx.moveTo(canvas.width * 0.2, y);
-                ctx.lineTo(canvas.width * 0.8, y);
+                ctx.moveTo(canvas.width * 0.15, y);
+                ctx.lineTo(canvas.width * 0.85, y);
                 ctx.stroke();
             }
 
             // Büyük talimat
             ctx.fillStyle = '#FF6B6B';
-            ctx.font = 'bold 24px Arial';
+            ctx.font = 'bold 22px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText('⬆️ YUKARI DOĞRU ÇİZ ⬆️', canvas.width / 2, 40);
+            ctx.fillText('⬆️ YUKARI DOĞRU ÇİZ ⬆️', canvas.width / 2, 35);
 
             updateDisplay();
         }
@@ -497,16 +518,16 @@
             }
 
             // Çizimi göster (kırmızı, kalın)
-            ctx.fillStyle = 'rgba(255, 107, 107, 0.5)';
+            ctx.fillStyle = 'rgba(255, 107, 107, 0.6)';
             ctx.beginPath();
-            ctx.arc(pos.x, pos.y, 10, 0, Math.PI * 2);
+            ctx.arc(pos.x, pos.y, 12, 0, Math.PI * 2);
             ctx.fill();
 
             updateAccuracy();
         }
 
         function updateAccuracy() {
-            touchAccuracy = Math.min(100, Math.round((coveredPixels.size / 100) * 100));
+            touchAccuracy = Math.min(100, Math.round((coveredPixels.size / 120) * 100));
             document.getElementById('accuracy').textContent = touchAccuracy + '%';
         }
 
