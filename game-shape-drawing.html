@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Şekil Çizme - İlkokulOyun.com</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Fredoka', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 12px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 28px;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            max-width: 720px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .header h1 {
+            font-size: 30px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f77f00, #d62828);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 4px;
+        }
+
+        .header p {
+            color: #9E9E9E;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .progress-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .dot {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #EEE;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            color: #BBB;
+            font-weight: 600;
+        }
+
+        .dot.done {
+            background: linear-gradient(135deg, #43e97b, #38f9d7);
+            color: white;
+            transform: scale(0.9);
+        }
+
+        .dot.active {
+            background: linear-gradient(135deg, #f77f00, #fda085);
+            color: white;
+            transform: scale(1.15);
+            box-shadow: 0 4px 14px rgba(247, 127, 0, 0.4);
+        }
+
+        /* BİLGİ KARTI */
+        .info-card {
+            background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+            border-radius: 16px;
+            padding: 16px 18px;
+            margin-bottom: 14px;
+            border: 2px solid #ffd54f;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .info-icon {
+            font-size: 42px;
+            flex-shrink: 0;
+        }
+
+        .info-content {
+            flex: 1;
+        }
+
+        .info-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #e65100;
+            margin-bottom: 4px;
+        }
+
+        .info-text {
+            font-size: 14px;
+            color: #795548;
+            line-height: 1.5;
+        }
+
+        .speak-btn {
+            flex-shrink: 0;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #f77f00, #fda085);
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(247, 127, 0, 0.3);
+        }
+
+        .speak-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .speak-btn:active {
+            transform: scale(0.95);
+        }
+
+        .game-area {
+            position: relative;
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            height: 380px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            touch-action: none;
+            box-shadow: inset 0 2px 12px rgba(0,0,0,0.06);
+            border: 3px solid #FFF3E0;
+        }
+
+        #canvas {
+            display: block;
+            cursor: crosshair;
+            touch-action: none;
+            width: 100%;
+            height: 100%;
+        }
+
+        .message {
+            text-align: center;
+            font-size: 19px;
+            font-weight: 600;
+            margin-bottom: 14px;
+            min-height: 28px;
+            transition: all 0.3s ease;
+        }
+
+        .message.success {
+            color: #2ecc71;
+            animation: pop 0.4s ease;
+        }
+
+        .message.fail {
+            color: #ff7043;
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(0.5); opacity: 0; }
+            70% { transform: scale(1.15); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat {
+            background: linear-gradient(135deg, #f5f7fa 0%, #f0f2f8 100%);
+            border-radius: 14px;
+            padding: 10px 22px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #999;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-size: 22px;
+            font-weight: 700;
+            color: #f77f00;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .btn {
+            padding: 15px;
+            border: none;
+            border-radius: 16px;
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .btn-reset {
+            background: #F1F3F5;
+            color: #555;
+        }
+
+        .btn-reset:hover {
+            background: #E4E7EB;
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, #f77f00, #fda085);
+            color: white;
+            box-shadow: 0 4px 14px rgba(247, 127, 0, 0.35);
+        }
+
+        .btn-next:hover {
+            box-shadow: 0 6px 18px rgba(247, 127, 0, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .back-btn {
+            width: 100%;
+            padding: 13px;
+            background: transparent;
+            color: #999;
+            border: 2px solid #E0E0E0;
+            border-radius: 16px;
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 15px;
+            transition: all 0.2s ease;
+        }
+
+        .back-btn:hover {
+            border-color: #f77f00;
+            color: #f77f00;
+        }
+
+        .confetti {
+            position: fixed;
+            width: 12px;
+            height: 12px;
+            top: -20px;
+            z-index: 999;
+            animation: fall linear forwards;
+            border-radius: 3px;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(110vh) rotate(720deg);
+                opacity: 0.3;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 16px;
+            }
+
+            .game-area {
+                height: 300px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .dot {
+                width: 28px;
+                height: 28px;
+                font-size: 13px;
+            }
+
+            .info-icon {
+                font-size: 32px;
+            }
+
+            .info-title {
+                font-size: 17px;
+            }
+
+            .info-text {
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔷 Şekil Çizme</h1>
+            <p>Şekilleri öğren ve üzerinden çiz</p>
+        </div>
+
+        <div class="progress-dots" id="progressDots"></div>
+
+        <!-- BİLGİ KARTI -->
+        <div class="info-card">
+            <div class="info-icon" id="infoIcon">🔺</div>
+            <div class="info-content">
+                <div class="info-title" id="infoTitle">Üçgen</div>
+                <div class="info-text" id="infoText">3 kenarı ve 3 köşesi vardır.</div>
+            </div>
+            <button class="speak-btn" onclick="speakInfo()" title="Sesli dinle">🔊</button>
+        </div>
+
+        <div class="message" id="message"></div>
+
+        <div class="game-area" id="gameArea">
+            <canvas id="canvas"></canvas>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat">
+                <div class="stat-label">PUAN</div>
+                <div class="stat-value" id="score">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">SEVİYE</div>
+                <div class="stat-value" id="level">1/6</div>
+            </div>
+        </div>
+
+        <div class="buttons">
+            <button class="btn btn-reset" onclick="resetLevel()">🔄 Yeniden Çiz</button>
+            <button class="btn btn-next" onclick="nextLevel()">Devam ➜</button>
+        </div>
+
+        <button class="back-btn" onclick="history.back()">← Geri Dön</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const gameArea = document.getElementById('gameArea');
+        const messageEl = document.getElementById('message');
+
+        let score = 0;
+        let level = 0;
+        let isDrawing = false;
+        let coveredPixels = new Set();
+
+        const LINE_COLOR = '#FB8C00';
+        const LINE_WIDTH = 10;
+
+        const shapes = [
+            {
+                icon: '🔺',
+                name: 'Üçgen',
+                info: '3 kenarı ve 3 köşesi vardır. Pizza dilimi gibi! 🍕',
+                speak: 'Üçgen. Üçgenin 3 kenarı ve 3 köşesi vardır. Pizza dilimi gibi!',
+                draw: drawTriangle
+            },
+            {
+                icon: '🟥',
+                name: 'Kare',
+                info: '4 eşit kenarı ve 4 köşesi vardır. Pencere gibi! 🪟',
+                speak: 'Kare. Karenin 4 eşit kenarı ve 4 köşesi vardır. Pencere gibi!',
+                draw: drawSquare
+            },
+            {
+                icon: '▬',
+                name: 'Dikdörtgen',
+                info: '4 kenarı vardır. Karşılıklı kenarları eşittir. Kapı gibi! 🚪',
+                speak: 'Dikdörtgen. Dikdörtgenin 4 kenarı vardır. Karşılıklı kenarları eşit uzunluktadır. Kapı gibi!',
+                draw: drawRectangle
+            },
+            {
+                icon: '⬠',
+                name: 'Beşgen',
+                info: '5 kenarı ve 5 köşesi vardır. Futbol topundaki desenler gibi! ⚽',
+                speak: 'Beşgen. Beşgenin 5 kenarı ve 5 köşesi vardır. Futbol topundaki desenler gibi!',
+                draw: drawPentagon
+            },
+            {
+                icon: '⬡',
+                name: 'Altıgen',
+                info: '6 kenarı ve 6 köşesi vardır. Arı peteği gibi! 🐝',
+                speak: 'Altıgen. Altıgenin 6 kenarı ve 6 köşesi vardır. Arı peteği gibi!',
+                draw: drawHexagon
+            },
+            {
+                icon: '⭕',
+                name: 'Çember',
+                info: 'Köşesi ve kenarı yoktur, yuvarlaktır. Tekerlek gibi! 🎡',
+                speak: 'Çember. Çemberin köşesi ve kenarı yoktur. Yuvarlaktır. Tekerlek gibi!',
+                draw: drawCircle
+            }
+        ];
+
+        function resizeCanvas() {
+            const rect = gameArea.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            drawCurrentShape();
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+
+        function setLineStyle() {
+            ctx.strokeStyle = LINE_COLOR;
+            ctx.lineWidth = LINE_WIDTH;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+        }
+
+        function drawStartPoint(x, y) {
+            ctx.fillStyle = '#FFD54F';
+            ctx.beginPath();
+            ctx.arc(x, y, 16, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.font = 'bold 16px Fredoka, Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('👆', x, y + 1);
+        }
+
+        // Düzgün çokgen çizen yardımcı fonksiyon
+        function drawPolygon(sides, rotation = -Math.PI / 2) {
+            setLineStyle();
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = Math.min(canvas.width, canvas.height) * 0.32;
+
+            const points = [];
+            for (let i = 0; i < sides; i++) {
+                const angle = rotation + (i * 2 * Math.PI / sides);
+                points.push({
+                    x: centerX + radius * Math.cos(angle),
+                    y: centerY + radius * Math.sin(angle)
+                });
+            }
+
+            ctx.beginPath();
+            ctx.moveTo(points[0].x, points[0].y);
+            for (let i = 1; i < points.length; i++) {
+                ctx.lineTo(points[i].x, points[i].y);
+            }
+            ctx.closePath();
+            ctx.stroke();
+
+            // Başlangıç: ilk nokta (üst)
+            drawStartPoint(points[0].x, points[0].y);
+        }
+
+        // ========== ŞEKİLLER ==========
+        function drawTriangle() {
+            drawPolygon(3);
+        }
+
+        function drawSquare() {
+            setLineStyle();
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const size = Math.min(canvas.width, canvas.height) * 0.5;
+            const half = size / 2;
+
+            ctx.beginPath();
+            ctx.rect(centerX - half, centerY - half, size, size);
+            ctx.stroke();
+
+            // Başlangıç: sol üst köşe
+            drawStartPoint(centerX - half, centerY - half);
+        }
+
+        function drawRectangle() {
+            setLineStyle();
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const w = Math.min(canvas.width * 0.65, 420);
+            const h = Math.min(canvas.height * 0.45, 200);
+
+            ctx.beginPath();
+            ctx.rect(centerX - w / 2, centerY - h / 2, w, h);
+            ctx.stroke();
+
+            // Başlangıç: sol üst köşe
+            drawStartPoint(centerX - w / 2, centerY - h / 2);
+        }
+
+        function drawPentagon() {
+            drawPolygon(5);
+        }
+
+        function drawHexagon() {
+            drawPolygon(6);
+        }
+
+        function drawCircle() {
+            setLineStyle();
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = Math.min(canvas.width, canvas.height) * 0.32;
+
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Başlangıç: üst nokta
+            drawStartPoint(centerX, centerY - radius);
+        }
+
+        // ========== BİLGİ VE SES ==========
+        function updateInfoCard() {
+            const shape = shapes[level];
+            document.getElementById('infoIcon').textContent = shape.icon;
+            document.getElementById('infoTitle').textContent = shape.name;
+            document.getElementById('infoText').textContent = shape.info;
+        }
+
+        function speakInfo() {
+            const shape = shapes[level];
+            speechSynthesis.cancel();
+            const utter = new SpeechSynthesisUtterance(shape.speak);
+            utter.lang = 'tr-TR';
+            utter.rate = 0.85;
+            speechSynthesis.speak(utter);
+        }
+
+        // ========== SEVİYE YÖNETİMİ ==========
+        function buildProgressDots() {
+            const container = document.getElementById('progressDots');
+            container.innerHTML = '';
+            for (let i = 0; i < shapes.length; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                if (i < level) dot.className += ' done';
+                if (i === level) dot.className += ' active';
+                dot.textContent = i < level ? '✓' : (i + 1);
+                container.appendChild(dot);
+            }
+        }
+
+        function drawCurrentShape() {
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            shapes[level].draw();
+            updateInfoCard();
+            buildProgressDots();
+        }
+
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            if (e.touches) {
+                return {
+                    x: e.touches[0].clientX - rect.left,
+                    y: e.touches[0].clientY - rect.top
+                };
+            }
+            return {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+        }
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('touchstart', startDrawing, { passive: false });
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('touchmove', draw, { passive: false });
+        canvas.addEventListener('mouseup', finishDrawing);
+        canvas.addEventListener('touchend', finishDrawing);
+
+        function startDrawing(e) {
+            e.preventDefault();
+            isDrawing = true;
+            coveredPixels.clear();
+            messageEl.textContent = '';
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            e.preventDefault();
+
+            const pos = getPos(e);
+
+            // Turuncu çizgi üzerinde miyiz kontrol et (#FB8C00)
+            const imageData = ctx.getImageData(
+                Math.max(0, pos.x - 10), Math.max(0, pos.y - 10), 20, 20
+            );
+            const data = imageData.data;
+
+            for (let i = 0; i < data.length; i += 4) {
+                if (data[i] > 200 && data[i + 1] > 100 && data[i + 1] < 180 && data[i + 2] < 80) {
+                    coveredPixels.add(`${Math.round(pos.x/6)},${Math.round(pos.y/6)}`);
+                    break;
+                }
+            }
+
+            // Takip izini çiz (mor)
+            ctx.fillStyle = 'rgba(103, 58, 183, 0.35)';
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y, 11, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function finishDrawing() {
+            if (!isDrawing) return;
+            isDrawing = false;
+            checkSuccess();
+        }
+
+        function checkSuccess() {
+            const required = 40;
+            const covered = coveredPixels.size;
+
+            if (covered >= required) {
+                showMessage('🌟 SÜPER! ' + shapes[level].name + ' çizdin!', 'success');
+                score += 100;
+                document.getElementById('score').textContent = score;
+                launchConfetti(15);
+                setTimeout(nextLevel, 1200);
+            } else if (covered >= required * 0.5) {
+                showMessage('👍 Az kaldı! Bir daha dene!', 'fail');
+            } else {
+                showMessage('💪 Şeklin üzerinden geçmeyi dene!', 'fail');
+            }
+        }
+
+        function showMessage(text, type) {
+            messageEl.textContent = text;
+            messageEl.className = 'message ' + type;
+        }
+
+        function launchConfetti(count) {
+            const colors = ['#f77f00', '#fda085', '#43e97b', '#FFD54F', '#4FC3F7'];
+            for (let i = 0; i < count; i++) {
+                const c = document.createElement('div');
+                c.className = 'confetti';
+                c.style.left = Math.random() * 100 + 'vw';
+                c.style.background = colors[Math.floor(Math.random() * colors.length)];
+                c.style.animationDuration = (1.2 + Math.random() * 1.3) + 's';
+                c.style.animationDelay = Math.random() * 0.3 + 's';
+                document.body.appendChild(c);
+                setTimeout(() => c.remove(), 3000);
+            }
+        }
+
+        function resetLevel() {
+            coveredPixels.clear();
+            messageEl.textContent = '';
+            drawCurrentShape();
+        }
+
+        function nextLevel() {
+            if (level < shapes.length - 1) {
+                level++;
+                document.getElementById('level').textContent = (level + 1) + '/' + shapes.length;
+                resetLevel();
+            } else {
+                launchConfetti(40);
+                setTimeout(() => {
+                    alert('🎉 OYUNU BİTİRDİN!\n\nToplam Puan: ' + score + ' 🏆\n\nTüm şekilleri öğrendin: Üçgen, Kare, Dikdörtgen, Beşgen, Altıgen, Çember!');
+                    location.reload();
+                }, 500);
+            }
+        }
+
+        // Başlat
+        resizeCanvas();
+        document.getElementById('level').textContent = '1/' + shapes.length;
+    </script>
+</body>
+</html>

@@ -158,13 +158,13 @@
                 <button class="play-button" onclick="playGame('waves')">Oyna!</button>
             </div>
 
-            <!-- Yakında: Şekil Çizme -->
-            <div class="game-card coming-soon">
+            <!-- Oyun 3: Şekil Çizme -->
+            <div class="game-card">
                 <div class="icon">🔷</div>
                 <h3>Şekil Çizme</h3>
-                <p>Kare, üçgen ve daire çizmeyi öğren</p>
-                <div class="difficulty">Yakında</div>
-                <button class="play-button">Yakında!</button>
+                <p>Üçgen, kare, beşgen... Şekilleri öğren ve çiz</p>
+                <div class="difficulty">Kolay</div>
+                <button class="play-button" onclick="playGame('shapes')">Oyna!</button>
             </div>
         </div>
 
@@ -177,7 +177,8 @@
         function playGame(game) {
             const games = {
                 'tracing': 'game-line-tracing.html',
-                'waves': 'game-wave-lines.html'
+                'waves': 'game-wave-lines.html',
+                'shapes': 'game-shape-drawing.html'
             };
             if (games[game]) {
                 window.location.href = games[game];
