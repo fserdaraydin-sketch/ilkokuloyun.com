@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Çizgi Takibi - İlkokulOyun.com</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 700px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #FF6B6B;
+            font-size: 32px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            color: #999;
+            font-size: 16px;
+        }
+
+        .story {
+            background: #FFE5E5;
+            border-left: 5px solid #FF6B6B;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 15px;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .instruction {
+            background: #FFF3E0;
+            border: 2px solid #FF9800;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #E65100;
+            font-size: 18px;
+        }
+
+        .game-area {
+            position: relative;
+            background: white;
+            border: 3px solid #FF6B6B;
+            border-radius: 15px;
+            width: 100%;
+            height: 400px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        #canvas {
+            display: block;
+            cursor: crosshair;
+            touch-action: none;
+            width: 100%;
+            height: 100%;
+        }
+
+        .info {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .info-box {
+            background: #F5F5F5;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: #999;
+            font-weight: bold;
+        }
+
+        .info-value {
+            font-size: 22px;
+            font-weight: bold;
+            color: #FF6B6B;
+            margin-top: 5px;
+        }
+
+        .message {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            min-height: 25px;
+        }
+
+        .message.success {
+            color: #2E7D32;
+        }
+
+        .message.fail {
+            color: #E65100;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .btn-reset {
+            background: #EFEFEF;
+            color: #333;
+        }
+
+        .btn-reset:hover {
+            background: #DDD;
+        }
+
+        .btn-next {
+            background: #FF6B6B;
+            color: white;
+        }
+
+        .btn-next:hover {
+            background: #FF5252;
+        }
+
+        .back-btn {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .back-btn:hover {
+            background: #5568d3;
+        }
+
+        @media (max-width: 600px) {
+            .game-area {
+                height: 300px;
+            }
+            
+            .header h1 {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Çizgi Takibi</h1>
+            <p>Çizgilerin üzerinden geçerek takip et</p>
+        </div>
+
+        <div class="story">
+            📖 <strong>Hikaye:</strong> Cıvata Rob çeşitli yollardan geçmeli! Çizgilerin üzerinden tam olarak geçmelisin. Ne kadar doğru geçersen, o kadar puan alırsın! 🚀
+        </div>
+
+        <div class="instruction">
+            👇 ÇİZGİNİN ÜZERİNDEN GEÇEREK TAKİP ET 👆
+        </div>
+
+        <div class="message" id="message"></div>
+
+        <div class="game-area" id="gameArea">
+            <canvas id="canvas"></canvas>
+        </div>
+
+        <div class="info">
+            <div class="info-box">
+                <div class="info-label">PUAN</div>
+                <div class="info-value" id="score">0</div>
+            </div>
+            <div class="info-box">
+                <div class="info-label">TAKİP</div>
+                <div class="info-value" id="coverage">0%</div>
+            </div>
+            <div class="info-box">
+                <div class="info-label">SEVIYE</div>
+                <div class="info-value" id="level">1/8</div>
+            </div>
+        </div>
+
+        <div class="buttons">
+            <button class="btn btn-reset" onclick="resetLevel()">🔄 Yeniden Çiz</button>
+            <button class="btn btn-next" onclick="nextLevel()">✓ Devam</button>
+        </div>
+
+        <button class="back-btn" onclick="history.back()">← Geri Dön</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const gameArea = document.getElementById('gameArea');
+        const messageEl = document.getElementById('message');
+
+        let score = 0;
+        let level = 0;
+        let isDrawing = false;
+        let coveredPixels = new Set();
+
+        const linePatterns = [
+            { name: '⬆️ Yukarı', draw: drawUpArrow },
+            { name: '⬇️ Aşağı', draw: drawDownArrow },
+            { name: '➡️ Sağa', draw: drawRightArrow },
+            { name: '⬅️ Sola', draw: drawLeftArrow },
+            { name: '↗️ Çapraz Sağa Yukarı', draw: drawDiagonalUpRight },
+            { name: '↙️ Çapraz Sola Aşağı', draw: drawDiagonalDownLeft },
+            { name: '↪️ Sağa Daire', draw: drawCircleRight },
+            { name: '↩️ Sola Daire', draw: drawCircleLeft }
+        ];
+
+        function resizeCanvas() {
+            const rect = gameArea.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            drawCurrentPattern();
+        }
+
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Çizgi desenleri
+        function drawUpArrow() {
+            ctx.strokeStyle = '#4CAF50';
+            ctx.lineWidth = 8;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            const x = canvas.width / 2;
+            const startY = canvas.height - 80;
+            const endY = 80;
+
+            // Ana çizgi
+            ctx.beginPath();
+            ctx.moveTo(x, startY);
+            ctx.lineTo(x, endY);
+            ctx.stroke();
+
+            // Ok başı
+            ctx.beginPath();
+            ctx.moveTo(x - 20, endY + 20);
+            ctx.lineTo(x, endY);
+            ctx.lineTo(x + 20, endY + 20);
+            ctx.stroke();
+        }
+
+        function drawDownArrow() {
+            ctx.strokeStyle = '#4CAF50';
+            ctx.lineWidth = 8;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            const x = canvas.width / 2;
+            const startY = 80;
+            const endY = canvas.height - 80;
+
+            ctx.beginPath();
+            ctx.moveTo(x, startY);
+            ctx.lineTo(x, endY);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(x - 20, endY - 20);
+            ctx.lineTo(x, endY);
+            ctx.lineTo(x + 20, endY - 20);
+            ctx.stroke();
+        }
+
+        function drawRightArrow() {
+            ctx.strokeStyle = '#4CAF50';
+            ctx.lineWidth = 8;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            const y = canvas.height / 2;
+            const startX = 80;
+            const endX = canvas.width - 80;
+
+            ctx.beginPath();
+            ctx.moveTo(startX, y);
+            ctx.lineTo(endX, y);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(endX - 20, y - 20);
+            ctx.lineTo(endX, y);
+            ctx.lineTo(endX - 20, y + 20);
+            ctx.stroke();
+        }
+
+        function drawLeftArrow() {
+            ctx.strokeStyle = '#4CAF50';
+            ctx.lineWidth = 8;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            const y = canvas.height / 2;
+            const startX = canvas.width - 80;
+            const endX = 80;
+
+            ctx.beginPath();
+            ctx.moveTo(startX, y);
+            ctx.lineTo(endX, y);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(endX + 20, y - 20);
+            ctx.lineTo(endX, y);
+            ctx.lineTo(endX + 20, y + 20);
+            ctx.stroke();
+        }
+
+        function drawDiagonalUpRight() {
+            ctx.strokeStyle = '#4CAF50';
+            ctx.lineWidth = 8;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            const startX = 80;
+            const startY = canvas.height - 80;
+            const endX = canvas.width - 80;
+            const endY = 80;
+
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(endX, endY);
+            ctx.stroke();
+
+            // Ok başı
+            ctx.beginPath();
+            ctx.moveTo(endX - 20, endY + 15);
+            ctx.lineTo(endX, endY);
+            ctx.lineTo(endX + 15, endY - 20);
+            ctx.stroke();
+        }
+
+        function drawDiagonalDownLeft() {
+            ctx.strokeStyle = '#4CAF50';
+            ctx.lineWidth = 8;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            const startX = canvas.width - 80;
+            const startY = 80;
+            const endX = 80;
+            const endY = canvas.height - 80;
+
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(endX, endY);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(endX + 20, endY - 15);
+            ctx.lineTo(endX, endY);
+            ctx.lineTo(endX - 15, endY + 20);
+            ctx.stroke();
+        }
+
+        function drawCircleRight() {
+            ctx.strokeStyle = '#4CAF50';
+            ctx.lineWidth = 8;
+            ctx.lineCap = 'round';
+
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = 80;
+
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2, false);
+            ctx.stroke();
+
+            // Ok başı (sağa doğru)
+            ctx.beginPath();
+            ctx.moveTo(centerX + radius + 15, centerY - 20);
+            ctx.lineTo(centerX + radius, centerY);
+            ctx.lineTo(centerX + radius + 15, centerY + 20);
+            ctx.stroke();
+        }
+
+        function drawCircleLeft() {
+            ctx.strokeStyle = '#4CAF50';
+            ctx.lineWidth = 8;
+            ctx.lineCap = 'round';
+
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = 80;
+
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2, true);
+            ctx.stroke();
+
+            // Ok başı (sola doğru)
+            ctx.beginPath();
+            ctx.moveTo(centerX - radius - 15, centerY - 20);
+            ctx.lineTo(centerX - radius, centerY);
+            ctx.lineTo(centerX - radius - 15, centerY + 20);
+            ctx.stroke();
+        }
+
+        function drawCurrentPattern() {
+            ctx.fillStyle = '#F5F5F5';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const pattern = linePatterns[level];
+            pattern.draw();
+
+            // Başlat yazısı
+            ctx.fillStyle = '#CCC';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('BAŞLA', canvas.width / 2, canvas.height - 20);
+        }
+
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            if (e.touches) {
+                return {
+                    x: e.touches[0].clientX - rect.left,
+                    y: e.touches[0].clientY - rect.top
+                };
+            }
+            return {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+        }
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('mouseup', finishDrawing);
+        canvas.addEventListener('touchend', finishDrawing);
+
+        function startDrawing(e) {
+            e.preventDefault();
+            isDrawing = true;
+            coveredPixels.clear();
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            e.preventDefault();
+
+            const pos = getPos(e);
+
+            // Pikseli kontrol et
+            const imageData = ctx.getImageData(pos.x - 8, pos.y - 8, 16, 16);
+            const data = imageData.data;
+
+            for (let i = 0; i < data.length; i += 4) {
+                if (data[i] > 200 && data[i + 1] < 150 && data[i + 2] < 150) {
+                    coveredPixels.add(`${Math.round(pos.x/4)},${Math.round(pos.y/4)}`);
+                }
+            }
+
+            updateCoverage();
+
+            // Takip çizgisini göster (kırmızı)
+            ctx.fillStyle = 'rgba(255, 107, 107, 0.4)';
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y, 10, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function updateCoverage() {
+            const coverage = Math.min(100, Math.floor((coveredPixels.size / 400) * 100));
+            document.getElementById('coverage').textContent = coverage + '%';
+        }
+
+        function finishDrawing() {
+            isDrawing = false;
+            checkSuccess();
+        }
+
+        function checkSuccess() {
+            const coverage = Math.min(100, Math.floor((coveredPixels.size / 400) * 100));
+
+            if (coverage >= 70) {
+                showMessage('✅ SÜPER! ' + coverage + '% takip!', 'success');
+                score += 100 + coverage;
+            } else if (coverage >= 50) {
+                showMessage('👍 İYİ! ' + coverage + '% takip!', 'success');
+                score += 50 + coverage;
+            } else {
+                showMessage('❌ Daha iyi takip et! (' + coverage + '%)', 'fail');
+                return;
+            }
+
+            document.getElementById('score').textContent = score;
+        }
+
+        function showMessage(text, type) {
+            messageEl.textContent = text;
+            messageEl.className = 'message ' + type;
+        }
+
+        function resetLevel() {
+            coveredPixels.clear();
+            messageEl.textContent = '';
+            document.getElementById('coverage').textContent = '0%';
+            drawCurrentPattern();
+        }
+
+        function nextLevel() {
+            if (level < linePatterns.length - 1) {
+                level++;
+                document.getElementById('level').textContent = (level + 1) + '/' + linePatterns.length;
+                resetLevel();
+            } else {
+                alert('🎉 OYUNU BİTİRDİN!\n\nToplam Puan: ' + score + ' 🏆\n\nTüm çizgi tiplerini başarıyla takip ettin!');
+                location.reload();
+            }
+        }
+
+        document.getElementById('level').textContent = (level + 1) + '/' + linePatterns.length;
+    </script>
+</body>
+</html>
