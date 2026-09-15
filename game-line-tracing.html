@@ -331,7 +331,7 @@
             </div>
             <div class="stat">
                 <div class="stat-label">SEVİYE</div>
-                <div class="stat-value" id="level">1/8</div>
+                <div class="stat-value" id="level">1/9</div>
             </div>
         </div>
 
@@ -364,6 +364,7 @@
             { name: '⬅️ Sola Doğru Çiz', draw: drawLeftArrow },
             { name: '↗️ Çapraz Yukarı Çiz', draw: drawDiagonalUpRight },
             { name: '↙️ Çapraz Aşağı Çiz', draw: drawDiagonalDownLeft },
+            { name: '⚡ Zikzak Çiz', draw: drawZigzag },
             { name: '🔃 Saat Yönünde Daire Çiz', draw: drawCircleRight },
             { name: '🔄 Saat Tersine Daire Çiz', draw: drawCircleLeft }
         ];
@@ -510,6 +511,37 @@
             drawStartPoint(startX, startY);
         }
 
+        // ZİKZAK - Soldan sağa keskin köşeli çizgi
+        function drawZigzag() {
+            setLineStyle();
+            const startX = 70;
+            const endX = canvas.width - 70;
+            const centerY = canvas.height / 2;
+            const height = 70;
+            const segments = 5;
+            const segWidth = (endX - startX) / segments;
+
+            ctx.beginPath();
+            ctx.moveTo(startX, centerY + height / 2);
+            
+            let lastX = startX, lastY = centerY + height / 2;
+            for (let i = 1; i <= segments; i++) {
+                const x = startX + i * segWidth;
+                const y = (i % 2 === 1) ? centerY - height / 2 : centerY + height / 2;
+                ctx.lineTo(x, y);
+                lastX = x;
+                lastY = y;
+            }
+            ctx.stroke();
+
+            // Son segmentin yönünde ok
+            const prevY = ((segments - 1) % 2 === 1) ? centerY - height / 2 : centerY + height / 2;
+            const angle = Math.atan2(lastY - prevY, segWidth);
+            drawArrowHead(lastX, lastY, angle);
+
+            drawStartPoint(startX, centerY + height / 2);
+        }
+
         // SAĞ DAİRE (Saat yönü) - Başlangıç üstte, ok SAĞ tarafta aşağı bakar
         function drawCircleRight() {
             setLineStyle();
@@ -638,7 +670,7 @@
 
         function checkSuccess() {
             // Desene göre gereken minimum takip noktası
-            const isCircle = level >= 6;
+            const isCircle = level >= 7;
             const required = isCircle ? 45 : 30;
             const covered = coveredPixels.size;
 
