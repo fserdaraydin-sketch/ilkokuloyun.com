@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>6. Ünite: Ölçme - 4. Sınıf Matematik</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade4-style.css">
+</head>
+<body>
+<div class="container">
+  <div class="header"><h1>📏 6. Ünite: Ölçme</h1><p>Kolaydan zora 5 aşama</p></div>
+  <div class="levels" id="levels"></div>
+  <div class="stats">
+    <div class="stat"><div class="stat-l">PUAN</div><div class="stat-v" id="score">0</div></div>
+    <div class="stat"><div class="stat-l">DOĞRU</div><div class="stat-v" id="correct">0</div></div>
+    <div class="stat"><div class="stat-l">SORU</div><div class="stat-v" id="total">0</div></div>
+  </div>
+  <div class="question-box">
+    <div class="q-text" id="qText">Yükleniyor...</div>
+    <div id="qVisual"></div>
+    <div class="options" id="options"></div>
+  </div>
+  <div class="feedback" id="feedback"></div>
+  <div class="explain" id="explain"></div>
+  <button class="btn btn-next" onclick="newQuestion()">Yeni Soru ➜</button>
+  <button class="btn btn-back" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade4-engine.js"></script>
+<script>
+// ===== GÖRSEL: BİRİMKARE IZGARASI =====
+function drawGrid(w,h,filled){
+  const{c,ctx,W,H}=newCanvas(1,.58,380);
+  const cs=Math.min((W-50)/w,(H-40)/h);
+  const x0=(W-w*cs)/2, y0=(H-h*cs)/2;
+  for(let r=0;r<h;r++)for(let col=0;col<w;col++){
+    const on=filled?filled.has(r+','+col):true;
+    ctx.fillStyle=on?'#4DB6AC':'#FAFAFA';
+    ctx.fillRect(x0+col*cs,y0+r*cs,cs,cs);
+    ctx.strokeStyle='#90A4AE';ctx.lineWidth=1.2;
+    ctx.strokeRect(x0+col*cs,y0+r*cs,cs,cs);
+  }
+  // Dış çerçeve
+  ctx.strokeStyle='#00695C';ctx.lineWidth=3;
+  ctx.strokeRect(x0,y0,w*cs,h*cs);
+  return c;
+}
+
+// ===== GÖRSEL: DİKDÖRTGEN (ölçülü) =====
+function drawRectDim(a,b,unit){
+  const{c,ctx,W,H}=newCanvas(1,.52,360);
+  const maxW=W*0.6, maxH=H*0.55;
+  const scale=Math.min(maxW/a,maxH/b);
+  const rw=a*scale, rh=b*scale;
+  const x0=(W-rw)/2, y0=(H-rh)/2;
+  ctx.fillStyle='#B2DFDB';ctx.fillRect(x0,y0,rw,rh);
+  ctx.strokeStyle='#00695C';ctx.lineWidth=4;ctx.strokeRect(x0,y0,rw,rh);
+  ctx.fillStyle='#004D40';ctx.font='700 15px Fredoka,Arial';ctx.textAlign='center';
+  ctx.fillText(a+' '+unit,x0+rw/2,y0-10);
+  ctx.save();ctx.translate(x0-14,y0+rh/2);ctx.rotate(-Math.PI/2);
+  ctx.fillText(b+' '+unit,0,0);ctx.restore();
+  return c;
+}
+
+// AŞAMA 1: Birim çevirme (uzunluk & kütle & sıvı)
+function genConvert(){
+  const sets=[
+    {from:'m',to:'cm',f:100,vals:[2,3,5,7,9,12]},
+    {from:'km',to:'m',f:1000,vals:[2,3,4,6,8]},
+    {from:'kg',to:'g',f:1000,vals:[2,3,5,7,9]},
+    {from:'t',to:'kg',f:1000,vals:[3,5,8,12]},
+    {from:'g',to:'mg',f:1000,vals:[4,6,9,15]},
+    {from:'L',to:'mL',f:1000,vals:[3,5,7,14,23]}
+  ];
+  const s=pick(sets);
+  const v=pick(s.vals);
+  const ans=v*s.f;
+  const w=distractors(ans,()=>v*pick([10,100,1000,10000]));
+  return{
+    text:`Aşağıdaki dönüşümü yapınız.`,
+    numberDisplay:`${v} ${s.from} = ? ${s.to}`,
+    answer:fmt(ans)+' '+s.to,
+    options:shuffle([fmt(ans)+' '+s.to,...w.map(x=>fmt(x)+' '+s.to)]),
+    explain:`1 ${s.from} = ${fmt(s.f)} ${s.to}\n${v} × ${fmt(s.f)} = ${fmt(ans)} ${s.to}\n\n💡 Büyük birimden küçüğe → ÇARP`
+  };
+}
+
+// AŞAMA 2: Çevre hesabı (GÖRSEL)
+function genPerimeter(){
+  const kind=rnd(0,1);
+  if(kind===0){ // Kare
+    const a=rnd(6,45);
+    const ans=a*4;
+    const w=distractors(ans,()=>pick([a*a,a*2,a*3,a*4+a,ans+10,ans-10]));
+    return{
+      text:'Bir kenarı verilen KARENİN çevre uzunluğu kaç cm\'dir?',
+      visual:()=>drawRectDim(a,a,'cm'),
+      answer:fmt(ans)+' cm',
+      options:shuffle([fmt(ans)+' cm',...w.map(x=>fmt(x)+' cm')]),
+      explain:`Kare çevresi = kenar × 4\n${a} × 4 = ${fmt(ans)} cm\n\n💡 Karenin 4 kenarı da eşittir.`
+    };
+  }
+  const a=rnd(8,40), b=rnd(4,a-2);
+  const ans=(a+b)*2;
+  const w=distractors(ans,()=>pick([a*b,a+b,ans+a,ans-b,ans+10]));
+  return{
+    text:'Aşağıdaki DİKDÖRTGENİN çevre uzunluğu kaç cm\'dir?',
+    visual:()=>drawRectDim(a,b,'cm'),
+    answer:fmt(ans)+' cm',
+    options:shuffle([fmt(ans)+' cm',...w.map(x=>fmt(x)+' cm')]),
+    explain:`Dikdörtgen çevresi = (uzun + kısa) × 2\n(${a} + ${b}) × 2 = ${a+b} × 2 = ${fmt(ans)} cm\n\n💡 Karşılıklı kenarlar eşittir.`
+  };
+}
+
+// AŞAMA 3: Alan - birimkare sayma (GÖRSEL)
+function genArea(){
+  const kind=rnd(0,1);
+  if(kind===0){ // Boyalı birimkare sayma
+    const w0=rnd(4,7), h0=rnd(3,5);
+    const filled=new Set();
+    const cnt=rnd(Math.floor(w0*h0*0.35),Math.floor(w0*h0*0.75));
+    while(filled.size<cnt) filled.add(rnd(0,h0-1)+','+rnd(0,w0-1));
+    const ans=filled.size;
+    const w=distractors(ans,()=>ans+pick([-3,-2,-1,1,2,3]));
+    return{
+      text:'Birimkarelere ayrılmış kâğıdın bir kısmı boyanmıştır.\n\nBoyalı kısmın alanı kaç birimkaredir?',
+      visual:()=>drawGrid(w0,h0,filled),
+      answer:String(ans),
+      options:shuffle([String(ans),...w.map(String)]),
+      explain:`Boyalı birimkareleri tek tek say: ${ans} birimkare\nKâğıdın tamamı: ${w0} × ${h0} = ${w0*h0} birimkare\n\n💡 Alan = kaplanan birimkare sayısı`
+    };
+  }
+  const a=rnd(3,9), b=rnd(3,7);
+  const ans=a*b;
+  const w=distractors(ans,()=>pick([(a+b)*2,a+b,ans+a,ans-b,ans+5]));
+  return{
+    text:'Aşağıdaki dikdörtgen kaç birimkareden oluşmaktadır?',
+    visual:()=>drawGrid(a,b,null),
+    answer:String(ans)+' birimkare',
+    options:shuffle([String(ans)+' birimkare',...w.map(x=>String(x)+' birimkare')]),
+    explain:`Alan = uzun kenar × kısa kenar\n${a} × ${b} = ${ans} birimkare\n\n💡 Satır sayısı × sütun sayısı`
+  };
+}
+
+// AŞAMA 4: Karışık birim (kg+g, L+mL)
+function genMixed(){
+  const sets=[
+    {big:'kg',small:'g',f:1000},
+    {big:'L',small:'mL',f:1000},
+    {big:'t',small:'kg',f:1000},
+    {big:'m',small:'cm',f:100}
+  ];
+  const s=pick(sets);
+  const B=rnd(2,19), S=rnd(1,s.f-1);
+  const total=B*s.f+S;
+  const kind=rnd(0,1);
+  if(kind===0){ // Karışık → tek birim
+    const w=distractors(total,()=>pick([B*s.f+S*10,(B+1)*s.f+S,B*s.f,B*100+S,total+s.f]));
+    return{
+      text:'Aşağıdaki ölçüyü tek birim cinsinden yazınız.',
+      numberDisplay:`${B} ${s.big} ${fmt(S)} ${s.small} = ? ${s.small}`,
+      answer:fmt(total)+' '+s.small,
+      options:shuffle([fmt(total)+' '+s.small,...w.map(x=>fmt(x)+' '+s.small)]),
+      explain:`${B} ${s.big} = ${fmt(B*s.f)} ${s.small}\n${fmt(B*s.f)} + ${fmt(S)} = ${fmt(total)} ${s.small}`
+    };
+  }
+  const ans=`${B} ${s.big} ${fmt(S)} ${s.small}`;
+  const w=distractors(ans,()=>{
+    const b2=rnd(1,20),s2=rnd(1,s.f-1);return `${b2} ${s.big} ${fmt(s2)} ${s.small}`;});
+  return{
+    text:'Aşağıdaki ölçüyü karışık birim cinsinden yazınız.',
+    numberDisplay:`${fmt(total)} ${s.small} = ?`,
+    answer:ans,
+    options:shuffle([ans,...w]),
+    explain:`${fmt(total)} ÷ ${fmt(s.f)} = ${B}, kalan ${fmt(S)}\n${fmt(total)} ${s.small} = ${B} ${s.big} ${fmt(S)} ${s.small}\n\n💡 Küçük birimden büyüğe → BÖL, kalan küçük birim olur.`
+  };
+}
+
+// AŞAMA 5: Ölçme problemi
+function genProblem(){
+  const scenarios=[
+    ()=>{const a=rnd(20,60),b=rnd(10,a-5);
+      return{t:`Kenar uzunlukları ${a} m ve ${b} m olan dikdörtgen şeklindeki bir bahçenin etrafı tel çitle çevrilecektir.\n\nKaç metre tel gerekir?`,
+      a:(a+b)*2,u:'m',e:`Çevre = (${a} + ${b}) × 2 = ${(a+b)*2} m`};},
+    ()=>{const gun=rnd(5,14),lt=rnd(2,6);
+      return{t:`Bir çiçek her gün ${lt} L su ile sulanıyor.\n\n${gun} günde kaç mL su kullanılır?`,
+      a:gun*lt*1000,u:'mL',e:`${gun} × ${lt} = ${gun*lt} L\n${gun*lt} × 1000 = ${fmt(gun*lt*1000)} mL`};},
+    ()=>{const kutu=rnd(12,40),agir=rnd(250,900);
+      return{t:`Her biri ${agir} g olan ${kutu} paket şeker bir kolide bulunmaktadır.\n\nKolinin toplam kütlesi kaç gramdır?`,
+      a:kutu*agir,u:'g',e:`${kutu} × ${agir} = ${fmt(kutu*agir)} g`};},
+    ()=>{const cevre=rnd(6,20)*4;
+      return{t:`Çevre uzunluğu ${cevre} cm olan bir karenin bir kenarı kaç cm'dir?`,
+      a:cevre/4,u:'cm',e:`Kenar = çevre ÷ 4\n${cevre} ÷ 4 = ${cevre/4} cm`};}
+  ];
+  const s=pick(scenarios)();
+  const w=distractors(s.a,()=>s.a+pick([-100,-20,-10,10,20,100]));
+  return{text:s.t,answer:fmt(s.a)+' '+s.u,
+    options:shuffle([fmt(s.a)+' '+s.u,...w.map(x=>fmt(x)+' '+s.u)]),
+    explain:s.e+'\n\n💡 Birimlere dikkat et! Cevap hangi birimde isteniyor?'};
+}
+
+initGame([
+  {name:'Birim Çevirme',gen:genConvert},
+  {name:'Çevre Hesabı',gen:genPerimeter},
+  {name:'Alan Hesabı',gen:genArea},
+  {name:'Karışık Birimler',gen:genMixed},
+  {name:'Ölçme Problemi',gen:genProblem}
+],{c1:'#0093E9',c2:'#80D0C7',shadow:'rgba(0,147,233,.35)',boxBg:'linear-gradient(135deg,#f0faff 0%,#eefcfa 100%)',boxBorder:'#b3e5fc'});
+</script>
+</body>
+</html>

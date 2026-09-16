@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3. Ünite: Çarpma - Bölme - 4. Sınıf Matematik</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade4-style.css">
+</head>
+<body>
+<div class="container">
+  <div class="header"><h1>✖️ 3. Ünite: Çarpma - Bölme</h1><p>Kolaydan zora 5 aşama</p></div>
+  <div class="levels" id="levels"></div>
+  <div class="stats">
+    <div class="stat"><div class="stat-l">PUAN</div><div class="stat-v" id="score">0</div></div>
+    <div class="stat"><div class="stat-l">DOĞRU</div><div class="stat-v" id="correct">0</div></div>
+    <div class="stat"><div class="stat-l">SORU</div><div class="stat-v" id="total">0</div></div>
+  </div>
+  <div class="question-box">
+    <div class="q-text" id="qText">Yükleniyor...</div>
+    <div id="qVisual"></div>
+    <div class="options" id="options"></div>
+  </div>
+  <div class="feedback" id="feedback"></div>
+  <div class="explain" id="explain"></div>
+  <button class="btn btn-next" onclick="newQuestion()">Yeni Soru ➜</button>
+  <button class="btn btn-back" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade4-engine.js"></script>
+<script>
+// AŞAMA 1: 10, 100, 1000 ile çarpma
+function genByTen(){
+  const n=rnd(12,99);
+  const m=pick([10,100,1000]);
+  const ans=n*m;
+  const w=distractors(ans,()=>n*pick([10,100,1000,10000]));
+  return{
+    text:`Aşağıdaki çarpma işleminin sonucu kaçtır?`,
+    numberDisplay:`${n} × ${fmt(m)}`,
+    answer:fmt(ans),
+    options:shuffle([fmt(ans),...w.map(fmt)]),
+    explain:`${n} × ${fmt(m)} = ${fmt(ans)}\n\n💡 Kısayol: ${m===10?'Sağa 1 sıfır ekle':m===100?'Sağa 2 sıfır ekle':'Sağa 3 sıfır ekle'}\n${n} → ${fmt(ans)}`
+  };
+}
+
+// AŞAMA 2: Çarpma (2 basamak × 2 basamak) - GÖRSEL ALAN MODELİ
+function genMultiply(){
+  const a=rnd(12,49), b=rnd(11,29);
+  const ans=a*b;
+  const w=distractors(ans,()=>{const d=pick([-10,10,-100,100,-a,a,-b,b]);return ans+d;});
+  return{
+    text:'Aşağıdaki çarpma işleminin sonucu kaçtır?',
+    visual:()=>drawAreaModel(a,b),
+    numberDisplay:`${a} × ${b}`,
+    answer:fmt(ans),
+    options:shuffle([fmt(ans),...w.map(fmt)]),
+    explain:`${a} × ${b} işlemini parçalayalım:\n${a} = ${Math.floor(a/10)*10} + ${a%10}\n${Math.floor(a/10)*10} × ${b} = ${fmt(Math.floor(a/10)*10*b)}\n${a%10} × ${b} = ${fmt((a%10)*b)}\nToplam: ${fmt(ans)}\n\n💡 Büyük çarpmayı küçük parçalara böl.`
+  };
+}
+
+function drawAreaModel(a,b){
+  const{c,ctx,W,H}=newCanvas(1,.52,420);
+  const pad=34, gw=W-pad*2, gh=H-pad*2;
+  const aTens=Math.floor(a/10)*10, aOnes=a%10;
+  const splitX=pad+gw*(aTens/a);
+
+  // Sol blok (onluklar)
+  ctx.fillStyle='#FFE0B2';ctx.fillRect(pad,pad,splitX-pad,gh);
+  // Sağ blok (birlikler)
+  ctx.fillStyle='#FFCC80';ctx.fillRect(splitX,pad,pad+gw-splitX,gh);
+  // Çerçeve
+  ctx.strokeStyle='#E65100';ctx.lineWidth=3;ctx.strokeRect(pad,pad,gw,gh);
+  ctx.beginPath();ctx.moveTo(splitX,pad);ctx.lineTo(splitX,pad+gh);ctx.stroke();
+
+  ctx.fillStyle='#BF360C';ctx.font='700 15px Fredoka,Arial';ctx.textAlign='center';
+  // Üst etiketler
+  ctx.fillText(String(aTens),(pad+splitX)/2,pad-12);
+  if(aOnes)ctx.fillText(String(aOnes),(splitX+pad+gw)/2,pad-12);
+  // Sol etiket
+  ctx.save();ctx.translate(pad-14,pad+gh/2);ctx.rotate(-Math.PI/2);ctx.fillText(String(b),0,0);ctx.restore();
+  // İç değerler
+  ctx.font='600 14px Fredoka,Arial';ctx.fillStyle='#6D4C41';
+  ctx.fillText(fmt(aTens*b),(pad+splitX)/2,pad+gh/2+5);
+  if(aOnes)ctx.fillText(fmt(aOnes*b),(splitX+pad+gw)/2,pad+gh/2+5);
+  return c;
+}
+
+// AŞAMA 3: Bölme (kalansız)
+function genDivide(){
+  const b=rnd(3,9), q=rnd(20,150);
+  const a=b*q;
+  const w=distractors(q,()=>q+pick([-10,-5,-1,1,5,10]));
+  return{
+    text:'Aşağıdaki bölme işleminin sonucu kaçtır?',
+    numberDisplay:`${fmt(a)} ÷ ${b}`,
+    answer:fmt(q),
+    options:shuffle([fmt(q),...w.map(fmt)]),
+    explain:`${fmt(a)} ÷ ${b} = ${fmt(q)}\n\nKontrol: ${fmt(q)} × ${b} = ${fmt(a)} ✓\n\n💡 Bölmeyi çarpma ile kontrol et.`
+  };
+}
+
+// AŞAMA 4: Kalanlı bölme
+function genDivideRem(){
+  const b=rnd(5,9), q=rnd(15,120), r=rnd(1,b-1);
+  const a=b*q+r;
+  const kind=rnd(0,1);
+  if(kind===0){
+    // Çeldiriciler: 0..b-1 aralığından r hariç (b>=5 olduğu için en az 4 seçenek var)
+    const pool=[];for(let i=0;i<b;i++) if(i!==r) pool.push(i);
+    const w=shuffle(pool).slice(0,3);
+    return{
+      text:`${fmt(a)} sayısı ${b}'e bölündüğünde KALAN kaç olur?`,
+      numberDisplay:`${fmt(a)} ÷ ${b}`,
+      answer:String(r),
+      options:shuffle([String(r),...w.map(String)]),
+      explain:`${fmt(a)} ÷ ${b} → Bölüm: ${fmt(q)}, Kalan: ${r}\nKontrol: ${fmt(q)} × ${b} + ${r} = ${fmt(a)} ✓\n\n💡 Kalan her zaman bölenden küçüktür (${r} < ${b}).`
+    };
+  }
+  const w=distractors(q,()=>q+pick([-10,-1,1,10]));
+  return{
+    text:`${fmt(a)} sayısı ${b}'e bölündüğünde BÖLÜM kaç olur?`,
+    numberDisplay:`${fmt(a)} ÷ ${b}`,
+    answer:fmt(q),
+    options:shuffle([fmt(q),...w.map(fmt)]),
+    explain:`${fmt(a)} ÷ ${b} → Bölüm: ${fmt(q)}, Kalan: ${r}\nKontrol: ${fmt(q)} × ${b} + ${r} = ${fmt(a)} ✓`
+  };
+}
+
+// AŞAMA 5: Problem (çarpma-bölme karışık)
+function genProblem(){
+  const scenarios=[
+    ()=>{const k=rnd(6,12),s=rnd(15,40);
+      return{t:`Bir sınıfta ${k} sıra var. Her sırada ${s} kitap duruyor.\n\nSınıfta toplam kaç kitap vardır?`,a:k*s,
+      e:`${k} × ${s} = ${fmt(k*s)} kitap`};},
+    ()=>{const t=rnd(4,9),ay=12,f=rnd(400,900);
+      return{t:`Bir ailenin aylık kirası ${fmt(f)} TL'dir. Kira ${ay} ay boyunca değişmemiştir.\n\nBu ailenin yıllık kira gideri kaç TL'dir?`,a:f*ay,
+      e:`${fmt(f)} × ${ay} = ${fmt(f*ay)} TL`};},
+    ()=>{const g=rnd(4,8),toplam=g*rnd(12,30);
+      return{t:`${fmt(toplam)} öğrenci ${g} eşit gruba ayrılıyor.\n\nHer grupta kaç öğrenci olur?`,a:toplam/g,
+      e:`${fmt(toplam)} ÷ ${g} = ${fmt(toplam/g)} öğrenci\nKontrol: ${fmt(toplam/g)} × ${g} = ${fmt(toplam)} ✓`};},
+    ()=>{const kutu=rnd(8,20),adet=rnd(6,12),satilan=rnd(2,5);
+      return{t:`Bir markette ${kutu} kutu kalem var. Her kutuda ${adet} kalem bulunuyor. Bunlardan ${satilan} kutu satıldı.\n\nGeriye kaç kalem kalmıştır?`,a:(kutu-satilan)*adet,
+      e:`Kalan kutu: ${kutu} − ${satilan} = ${kutu-satilan}\n${kutu-satilan} × ${adet} = ${fmt((kutu-satilan)*adet)} kalem`};}
+  ];
+  const s=pick(scenarios)();
+  const w=distractors(s.a,()=>s.a+pick([-100,-50,-10,10,50,100]));
+  return{text:s.t,answer:fmt(s.a),options:shuffle([fmt(s.a),...w.map(fmt)]),
+    explain:s.e+'\n\n💡 Önce ne soruluyor bul, sonra hangi işlem gerektiğini düşün.'};
+}
+
+initGame([
+  {name:'10 / 100 ile Çarpma',gen:genByTen},
+  {name:'Çarpma İşlemi',gen:genMultiply},
+  {name:'Bölme İşlemi',gen:genDivide},
+  {name:'Kalanlı Bölme',gen:genDivideRem},
+  {name:'Problem Çöz',gen:genProblem}
+],{c1:'#11998e',c2:'#38ef7d',shadow:'rgba(17,153,142,.35)',boxBg:'linear-gradient(135deg,#f0fdf9 0%,#ecfdf5 100%)',boxBorder:'#a7f3d0'});
+</script>
+</body>
+</html>

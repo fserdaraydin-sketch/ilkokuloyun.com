@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>4. Ünite: Kesirler ve Zaman - 4. Sınıf Matematik</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade4-style.css">
+</head>
+<body>
+<div class="container">
+  <div class="header"><h1>🍕 4. Ünite: Kesirler ve Zaman</h1><p>Kolaydan zora 5 aşama</p></div>
+  <div class="levels" id="levels"></div>
+  <div class="stats">
+    <div class="stat"><div class="stat-l">PUAN</div><div class="stat-v" id="score">0</div></div>
+    <div class="stat"><div class="stat-l">DOĞRU</div><div class="stat-v" id="correct">0</div></div>
+    <div class="stat"><div class="stat-l">SORU</div><div class="stat-v" id="total">0</div></div>
+  </div>
+  <div class="question-box">
+    <div class="q-text" id="qText">Yükleniyor...</div>
+    <div id="qVisual"></div>
+    <div class="options" id="options"></div>
+  </div>
+  <div class="feedback" id="feedback"></div>
+  <div class="explain" id="explain"></div>
+  <button class="btn btn-next" onclick="newQuestion()">Yeni Soru ➜</button>
+  <button class="btn btn-back" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade4-engine.js"></script>
+<script>
+const frac=(p,q)=>p+'/'+q;
+
+// ===== GÖRSEL: KESİR MODELİ =====
+function drawFraction(p,q,shape){
+  const{c,ctx,W,H}=newCanvas(1,.52,400);
+  const cx=W/2, cy=H/2;
+  if(shape==='circle'){
+    const r=Math.min(W,H)*0.36;
+    for(let i=0;i<q;i++){
+      const a0=-Math.PI/2+i*2*Math.PI/q, a1=a0+2*Math.PI/q;
+      ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a0,a1);ctx.closePath();
+      ctx.fillStyle=i<p?'#FF7043':'#FFF3E0';ctx.fill();
+      ctx.strokeStyle='#BF360C';ctx.lineWidth=2.5;ctx.stroke();
+    }
+  }else{ // rectangle
+    const bw=W*0.78, bh=H*0.42, x0=cx-bw/2, y0=cy-bh/2, cw=bw/q;
+    for(let i=0;i<q;i++){
+      ctx.fillStyle=i<p?'#FF7043':'#FFF3E0';
+      ctx.fillRect(x0+i*cw,y0,cw,bh);
+      ctx.strokeStyle='#BF360C';ctx.lineWidth=2.5;
+      ctx.strokeRect(x0+i*cw,y0,cw,bh);
+    }
+  }
+  return c;
+}
+
+// ===== GÖRSEL: ANALOG SAAT =====
+function drawClock(h,m){
+  const{c,ctx,W,H}=newCanvas(1,.72,300);
+  const cx=W/2, cy=H/2, r=Math.min(W,H)*0.42;
+  // Kadran
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+  ctx.fillStyle='#FFF8E1';ctx.fill();
+  ctx.strokeStyle='#6D4C41';ctx.lineWidth=5;ctx.stroke();
+  // Rakamlar ve çizgiler
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  for(let i=1;i<=12;i++){
+    const a=-Math.PI/2+i*Math.PI/6;
+    ctx.fillStyle='#4E342E';ctx.font='700 15px Fredoka,Arial';
+    ctx.fillText(String(i),cx+Math.cos(a)*r*0.81,cy+Math.sin(a)*r*0.81);
+  }
+  for(let i=0;i<60;i++){
+    const a=-Math.PI/2+i*Math.PI/30;
+    const inner=i%5===0?r*0.90:r*0.94;
+    ctx.beginPath();
+    ctx.moveTo(cx+Math.cos(a)*inner,cy+Math.sin(a)*inner);
+    ctx.lineTo(cx+Math.cos(a)*r*0.97,cy+Math.sin(a)*r*0.97);
+    ctx.strokeStyle='#8D6E63';ctx.lineWidth=i%5===0?2.5:1;ctx.stroke();
+  }
+  // Akrep (saat)
+  const ha=-Math.PI/2+((h%12)+m/60)*Math.PI/6;
+  ctx.beginPath();ctx.moveTo(cx,cy);
+  ctx.lineTo(cx+Math.cos(ha)*r*0.50,cy+Math.sin(ha)*r*0.50);
+  ctx.strokeStyle='#D84315';ctx.lineWidth=7;ctx.lineCap='round';ctx.stroke();
+  // Yelkovan (dakika)
+  const ma=-Math.PI/2+m*Math.PI/30;
+  ctx.beginPath();ctx.moveTo(cx,cy);
+  ctx.lineTo(cx+Math.cos(ma)*r*0.74,cy+Math.sin(ma)*r*0.74);
+  ctx.strokeStyle='#1565C0';ctx.lineWidth=4.5;ctx.stroke();
+  // Merkez
+  ctx.beginPath();ctx.arc(cx,cy,6,0,Math.PI*2);ctx.fillStyle='#3E2723';ctx.fill();
+  return c;
+}
+
+const pad2=n=>String(n).padStart(2,'0');
+
+// AŞAMA 1: Kesir modelleme (GÖRSEL)
+function genFracModel(){
+  const q=pick([2,3,4,5,6,8]), p=rnd(1,q-1);
+  const shape=pick(['circle','rect']);
+  const w=distractors(frac(p,q),()=>{
+    const q2=pick([2,3,4,5,6,8]);const p2=rnd(1,q2-1);return frac(p2,q2);});
+  return{
+    text:'Aşağıdaki şekilde boyalı kısmı gösteren kesir hangisidir?',
+    visual:()=>drawFraction(p,q,shape),
+    answer:frac(p,q),
+    options:shuffle([frac(p,q),...w]),
+    explain:`Şekil ${q} eş parçaya ayrılmış → PAYDA = ${q}\nBoyalı parça sayısı ${p} → PAY = ${p}\nKesir: ${p}/${q}\n\n💡 Payda = toplam parça | Pay = alınan parça`
+  };
+}
+
+// AŞAMA 2: Kesir çeşitleri ve karşılaştırma
+function genFracCompare(){
+  const kind=rnd(0,1);
+  if(kind===0){ // Yarımdan büyük/küçük
+    const q=pick([4,6,8,10,12]), p=rnd(1,q-1);
+    const half=q/2;
+    const ans=p<half?'Yarımdan küçük':p>half?'Yarımdan büyük':'Yarıma eşit';
+    return{
+      text:`${p}/${q} kesri için aşağıdakilerden hangisi doğrudur?`,
+      visual:()=>drawFraction(p,q,'circle'),
+      answer:ans,
+      options:shuffle(['Yarımdan küçük','Yarımdan büyük','Yarıma eşit','Bütünden büyük']),
+      explain:`Paydanın yarısı: ${q} ÷ 2 = ${half}\nPay: ${p}\n${p} ${p<half?'<':p>half?'>':'='} ${half} → ${ans}\n\n💡 Pay, paydanın yarısından küçükse kesir yarımdan küçüktür.`
+    };
+  }
+  // Basit/bileşik kesir
+  const isBasit=rnd(0,1)===0;
+  const q=rnd(3,9);
+  const p=isBasit?rnd(1,q-1):rnd(q+1,q+6);
+  return{
+    text:`${p}/${q} kesri hangi tür kesirdir?`,
+    numberDisplay:`${p}/${q}`,
+    answer:isBasit?'Basit kesir':'Bileşik kesir',
+    options:shuffle(['Basit kesir','Bileşik kesir','Tam sayılı kesir','Birim kesir']),
+    explain:`Pay: ${p}, Payda: ${q}\n${p} ${isBasit?'<':'>'} ${q} → ${isBasit?'BASİT':'BİLEŞİK'} kesir\n\n💡 Pay < Payda → basit kesir (bütünden küçük)\n💡 Pay > Payda → bileşik kesir (bütünden büyük)`
+  };
+}
+
+// AŞAMA 3: Saat okuma (GÖRSEL)
+function genClockRead(){
+  const h=rnd(1,12), m=pick([0,5,10,15,20,25,30,35,40,45,50,55]);
+  const ans=`${pad2(h)}.${pad2(m)}`;
+  const w=distractors(ans,()=>{
+    const h2=rnd(1,12),m2=pick([0,5,10,15,20,25,30,35,40,45,50,55]);
+    return `${pad2(h2)}.${pad2(m2)}`;});
+  return{
+    text:'Aşağıdaki saatte gösterilen zaman hangisidir?',
+    visual:()=>drawClock(h,m),
+    answer:ans,
+    options:shuffle([ans,...w]),
+    explain:`🔴 Kısa kol (akrep) = SAAT → ${h}\n🔵 Uzun kol (yelkovan) = DAKİKA → ${m}\nSaat: ${ans}\n\n💡 Yelkovan her rakam arası 5 dakikadır.`
+  };
+}
+
+// AŞAMA 4: Süre hesabı
+function genDuration(){
+  const h1=rnd(0,21), m1=pick([0,10,15,20,30,40,45,50]);
+  const dh=rnd(1,6), dm=pick([0,15,20,30,45]);
+  let m2=m1+dm, h2=h1+dh;
+  if(m2>=60){m2-=60;h2++;}
+  h2%=24;
+  const start=`${pad2(h1)}.${pad2(m1)}`, end=`${pad2(h2)}.${pad2(m2)}`;
+  const ans=dm===0?`${dh} saat`:`${dh} saat ${dm} dakika`;
+  const w=distractors(ans,()=>{
+    const a=rnd(1,7),b=pick([0,15,20,30,45]);
+    return b===0?`${a} saat`:`${a} saat ${b} dakika`;});
+  return{
+    text:`Bir etkinlik saat ${start}'te başlayıp saat ${end}'te bitmiştir.\n\nBu etkinlik ne kadar sürmüştür?`,
+    readDisplay:`Başlangıç: ${start}\nBitiş: ${end}`,
+    answer:ans,
+    options:shuffle([ans,...w]),
+    explain:`${start} → ${end}\nSaat farkı: ${dh} saat\nDakika farkı: ${dm} dakika\nToplam süre: ${ans}\n\n💡 Önce saatleri, sonra dakikaları çıkar.`
+  };
+}
+
+// AŞAMA 5: Kesir problemi
+function genFracProblem(){
+  const scenarios=[
+    ()=>{const q=pick([4,5,6,8]),total=q*rnd(4,15),p=rnd(1,q-1);
+      return{t:`Bir manavda ${fmt(total)} elma vardır. Bu elmaların ${p}/${q}'i satılmıştır.\n\nKaç elma satılmıştır?`,
+      a:total/q*p,e:`Bütünün ${q}'de biri: ${fmt(total)} ÷ ${q} = ${fmt(total/q)}\n${q}'de ${p}'i: ${fmt(total/q)} × ${p} = ${fmt(total/q*p)} elma`};},
+    ()=>{const q=pick([3,4,5,6]),total=q*rnd(5,20),p=rnd(1,q-1);
+      return{t:`${fmt(total)} sayfalık bir kitabın ${p}/${q}'i okunmuştur.\n\nGeriye kaç sayfa kalmıştır?`,
+      a:total-total/q*p,e:`Okunan: ${fmt(total)} ÷ ${q} × ${p} = ${fmt(total/q*p)} sayfa\nKalan: ${fmt(total)} − ${fmt(total/q*p)} = ${fmt(total-total/q*p)} sayfa`};},
+    ()=>{const q=pick([4,6,8]),total=q*rnd(3,12);
+      return{t:`Bir pasta ${q} eş dilime bölünmüştür. Toplam ${fmt(total)} gram olan bu pastanın 3 dilimi yenmiştir.\n\nYenen kısım kaç gramdır?`,
+      a:total/q*3,e:`Bir dilim: ${fmt(total)} ÷ ${q} = ${fmt(total/q)} g\n3 dilim: ${fmt(total/q)} × 3 = ${fmt(total/q*3)} g`};}
+  ];
+  const s=pick(scenarios)();
+  const w=distractors(s.a,()=>s.a+pick([-50,-20,-10,10,20,50]));
+  return{text:s.t,answer:fmt(s.a),options:shuffle([fmt(s.a),...w.map(fmt)]),
+    explain:s.e+'\n\n💡 Önce bütünü paydaya böl (1 parça bul), sonra pay ile çarp.'};
+}
+
+initGame([
+  {name:'Kesir Modeli',gen:genFracModel},
+  {name:'Kesir Çeşitleri',gen:genFracCompare},
+  {name:'Saat Okuma',gen:genClockRead},
+  {name:'Süre Hesabı',gen:genDuration},
+  {name:'Kesir Problemi',gen:genFracProblem}
+],{c1:'#f77f00',c2:'#fcbf49',shadow:'rgba(247,127,0,.35)',boxBg:'linear-gradient(135deg,#fffbf0 0%,#fff8e7 100%)',boxBorder:'#fcd9a0'});
+</script>
+</body>
+</html>

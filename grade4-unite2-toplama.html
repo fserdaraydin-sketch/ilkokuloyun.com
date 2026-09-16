@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2. Ünite: Toplama - Çıkarma - 4. Sınıf Matematik</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade4-style.css">
+</head>
+<body>
+<div class="container">
+  <div class="header"><h1>➕ 2. Ünite: Toplama - Çıkarma</h1><p>Kolaydan zora 5 aşama</p></div>
+  <div class="levels" id="levels"></div>
+  <div class="stats">
+    <div class="stat"><div class="stat-l">PUAN</div><div class="stat-v" id="score">0</div></div>
+    <div class="stat"><div class="stat-l">DOĞRU</div><div class="stat-v" id="correct">0</div></div>
+    <div class="stat"><div class="stat-l">SORU</div><div class="stat-v" id="total">0</div></div>
+  </div>
+  <div class="question-box">
+    <div class="q-text" id="qText">Yükleniyor...</div>
+    <div id="qVisual"></div>
+    <div class="options" id="options"></div>
+  </div>
+  <div class="feedback" id="feedback"></div>
+  <div class="explain" id="explain"></div>
+  <button class="btn btn-next" onclick="newQuestion()">Yeni Soru ➜</button>
+  <button class="btn btn-back" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade4-engine.js"></script>
+<script>
+// AŞAMA 1: Basit toplama/çıkarma (4 basamak)
+function genBasic(){
+  const isAdd=rnd(0,1)===0;
+  const a=rnd(1000,9999), b=rnd(1000,9999);
+  const big=Math.max(a,b), small=Math.min(a,b);
+  const ans=isAdd?a+b:big-small;
+  const w=distractors(ans,()=>ans+pick([-1000,-100,-10,10,100,1000,-1,1]));
+  return{
+    text:isAdd?'Aşağıdaki toplama işleminin sonucu kaçtır?':'Aşağıdaki çıkarma işleminin sonucu kaçtır?',
+    numberDisplay:isAdd?`${fmt(a)} + ${fmt(b)}`:`${fmt(big)} − ${fmt(small)}`,
+    answer:fmt(ans),
+    options:shuffle([fmt(ans),...w.map(fmt)]),
+    explain:isAdd?`${fmt(a)} + ${fmt(b)} = ${fmt(ans)}\n\n💡 Birler basamağından başla, elde varsa bir üst basamağa ekle.`
+      :`${fmt(big)} − ${fmt(small)} = ${fmt(ans)}\n\n💡 Birler basamağından başla, yetmezse üst basamaktan onluk al.`
+  };
+}
+
+// AŞAMA 2: Zihinden işlem (10/100/1000 ekleme-çıkarma)
+function genMental(){
+  const n=rnd(1000,9999);
+  const step=pick([10,100,1000]);
+  const times=rnd(1,5);
+  const isAdd=rnd(0,1)===0;
+  const ans=isAdd?n+step*times:n-step*times;
+  const w=distractors(ans,()=>ans+pick([-step*2,-step,step,step*2,-step*10,step*10]));
+  return{
+    text:`${fmt(n)} sayısına ${times} kez ${fmt(step)} ${isAdd?'eklersek':'çıkarırsak'} sonuç kaç olur?`,
+    numberDisplay:`${fmt(n)} ${isAdd?'+':'−'} ${times}×${fmt(step)}`,
+    answer:fmt(ans),
+    options:shuffle([fmt(ans),...w.map(fmt)]),
+    explain:`${times} × ${fmt(step)} = ${fmt(step*times)}\n${fmt(n)} ${isAdd?'+':'−'} ${fmt(step*times)} = ${fmt(ans)}\n\n💡 ${fmt(step)} eklerken sadece ilgili basamak değişir.`
+  };
+}
+
+// AŞAMA 3: Tahmin (yuvarlayarak)
+function genEstimate(){
+  const a=rnd(1200,8900), b=rnd(1200,8900);
+  const ra=Math.round(a/100)*100, rb=Math.round(b/100)*100;
+  const est=ra+rb, real=a+b;
+  const w=distractors(est,()=>est+pick([-200,-100,100,200,-1000,1000]));
+  return{
+    text:'Aşağıdaki sayıları EN YAKIN YÜZLÜĞE yuvarlayarak toplamı tahmin ediniz.',
+    numberDisplay:`${fmt(a)} + ${fmt(b)}`,
+    answer:fmt(est),
+    options:shuffle([fmt(est),...w.map(fmt)]),
+    explain:`${fmt(a)} → ${fmt(ra)}\n${fmt(b)} → ${fmt(rb)}\nTahmin: ${fmt(ra)} + ${fmt(rb)} = ${fmt(est)}\nGerçek sonuç: ${fmt(real)}\n\n💡 Tahmin, gerçek sonuca yakın olmalı.`
+  };
+}
+
+// AŞAMA 4: Eksik sayı bulma
+function genMissing(){
+  const a=rnd(1000,8000), ans=rnd(500,1999);
+  const total=a+ans;
+  const isAdd=rnd(0,1)===0;
+  const w=distractors(ans,()=>ans+pick([-100,-10,10,100,-1000,1000]));
+  return{
+    text:'Aşağıdaki işlemde "?" yerine hangi sayı gelmelidir?',
+    numberDisplay:isAdd?`${fmt(a)} + ? = ${fmt(total)}`:`${fmt(total)} − ? = ${fmt(a)}`,
+    answer:fmt(ans),
+    options:shuffle([fmt(ans),...w.map(fmt)]),
+    explain:isAdd?`${fmt(total)} − ${fmt(a)} = ${fmt(ans)}\n\n💡 Toplamda eksik parça: toplam − bilinen`
+      :`${fmt(total)} − ${fmt(a)} = ${fmt(ans)}\n\n💡 Çıkarılan sayı: baştaki − sonuç`
+  };
+}
+
+// AŞAMA 5: Problem (çok adımlı)
+function genProblem(){
+  const scenarios=[
+    ()=>{const b=rnd(2000,5000),h=rnd(800,1900),g=rnd(500,1400);
+      return{t:`Bir kütüphanede ${fmt(b)} kitap vardı. ${fmt(h)} kitap daha alındı, ${fmt(g)} kitap başka okula gönderildi.\n\nBuna göre kütüphanede kaç kitap kalmıştır?`,a:b+h-g,
+      e:`${fmt(b)} + ${fmt(h)} = ${fmt(b+h)}\n${fmt(b+h)} − ${fmt(g)} = ${fmt(b+h-g)}`};},
+    ()=>{const p=rnd(3000,7000),h1=rnd(900,1800),h2=rnd(900,1800);
+      return{t:`Bir çiftlikte ${fmt(p)} kg buğday vardı. İlk gün ${fmt(h1)} kg, ikinci gün ${fmt(h2)} kg satıldı.\n\nGeriye kaç kg buğday kalmıştır?`,a:p-h1-h2,
+      e:`${fmt(h1)} + ${fmt(h2)} = ${fmt(h1+h2)} kg satıldı\n${fmt(p)} − ${fmt(h1+h2)} = ${fmt(p-h1-h2)} kg`};},
+    ()=>{const a1=rnd(1500,4000),f=rnd(300,900);
+      return{t:`Ali'nin ${fmt(a1)} TL parası var. Kardeşinin parası Ali'den ${fmt(f)} TL fazladır.\n\nİkisinin toplam parası kaç TL'dir?`,a:a1+(a1+f),
+      e:`Kardeşi: ${fmt(a1)} + ${fmt(f)} = ${fmt(a1+f)} TL\nToplam: ${fmt(a1)} + ${fmt(a1+f)} = ${fmt(a1+a1+f)} TL`};}
+  ];
+  const s=pick(scenarios)();
+  const w=distractors(s.a,()=>s.a+pick([-1000,-500,-100,100,500,1000]));
+  return{text:s.t,answer:fmt(s.a),options:shuffle([fmt(s.a),...w.map(fmt)]),
+    explain:s.e+'\n\n💡 Problemi adım adım çöz, her adımı yaz.'};
+}
+
+initGame([
+  {name:'Toplama & Çıkarma',gen:genBasic},
+  {name:'Zihinden İşlem',gen:genMental},
+  {name:'Tahmin Etme',gen:genEstimate},
+  {name:'Eksik Sayıyı Bul',gen:genMissing},
+  {name:'Problem Çöz',gen:genProblem}
+],{c1:'#f5576c',c2:'#f093fb',shadow:'rgba(245,87,108,.35)',boxBg:'linear-gradient(135deg,#fff5f7 0%,#fff0f6 100%)',boxBorder:'#fbcfe8'});
+</script>
+</body>
+</html>
