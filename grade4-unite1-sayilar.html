@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1. Ünite: Doğal Sayılar - 4. Sınıf Matematik</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Fredoka',Arial,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:12px}
+.container{background:rgba(255,255,255,.96);border-radius:28px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.15);max-width:760px;width:100%}
+.header{text-align:center;margin-bottom:14px}
+.header h1{font-size:26px;font-weight:700;background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.header p{color:#9E9E9E;font-size:14px;font-weight:500}
+
+/* SEVİYE SEÇİMİ */
+.levels{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:18px}
+.level-btn{padding:14px 10px;border:none;border-radius:16px;background:#F1F3F5;color:#555;font-family:inherit;font-weight:600;font-size:13px;cursor:pointer;transition:all .2s;text-align:center;line-height:1.35}
+.level-btn .num{display:block;font-size:11px;color:#aaa;margin-bottom:3px;letter-spacing:1px}
+.level-btn:hover{background:#E4E7EB}
+.level-btn.active{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;box-shadow:0 4px 14px rgba(102,126,234,.35)}
+.level-btn.active .num{color:rgba(255,255,255,.75)}
+
+/* SORU ALANI */
+.question-box{background:linear-gradient(135deg,#f8f9ff 0%,#f3f0ff 100%);border-radius:18px;padding:18px;margin-bottom:14px;border:2px solid #ddd6fe}
+.q-text{font-size:17px;font-weight:600;color:#3d3d5c;line-height:1.55;margin-bottom:14px}
+.visual{display:flex;justify-content:center;margin:14px 0}
+canvas{max-width:100%;border-radius:12px}
+.number-display{text-align:center;font-size:44px;font-weight:700;color:#5b4bc4;letter-spacing:3px;padding:14px;background:#fff;border-radius:14px;margin:12px 0;border:2px dashed #c4b5fd}
+.read-display{text-align:center;font-size:21px;font-weight:600;color:#5b4bc4;padding:16px;background:#fff;border-radius:14px;margin:12px 0;border:2px dashed #c4b5fd;line-height:1.5}
+
+/* ŞIKLAR */
+.options{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{padding:16px;border:2px solid #E6E1F5;border-radius:14px;background:#fff;font-family:inherit;font-size:17px;font-weight:600;color:#444;cursor:pointer;transition:all .15s;text-align:center}
+.opt:hover:not(:disabled){border-color:#a78bfa;transform:translateY(-2px)}
+.opt.correct{background:#d1fae5;border-color:#10b981;color:#065f46}
+.opt.wrong{background:#fee2e2;border-color:#ef4444;color:#991b1b}
+.opt:disabled{cursor:default}
+
+.feedback{text-align:center;font-size:18px;font-weight:600;min-height:30px;margin:14px 0;transition:all .3s}
+.feedback.ok{color:#10b981;animation:pop .4s ease}
+.feedback.no{color:#f97316;animation:shake .4s ease}
+@keyframes pop{0%{transform:scale(.5);opacity:0}70%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+.explain{background:#fffbeb;border:2px solid #fcd34d;border-radius:14px;padding:14px;margin-bottom:14px;font-size:14px;color:#78350f;line-height:1.6;display:none}
+.explain.show{display:block}
+
+.stats{display:flex;justify-content:center;gap:10px;margin-bottom:14px}
+.stat{background:#F5F7FA;border-radius:14px;padding:9px 20px;text-align:center}
+.stat-l{font-size:10px;color:#999;font-weight:600;letter-spacing:1px}
+.stat-v{font-size:20px;font-weight:700;color:#667eea}
+
+.btn{width:100%;padding:15px;border:none;border-radius:16px;font-family:inherit;font-weight:600;font-size:16px;cursor:pointer;transition:all .2s;margin-bottom:10px}
+.btn-next{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;box-shadow:0 4px 14px rgba(102,126,234,.35)}
+.btn-next:hover{transform:translateY(-2px)}
+.btn-back{background:transparent;color:#999;border:2px solid #E0E0E0}
+.btn-back:hover{border-color:#667eea;color:#667eea}
+
+.confetti{position:fixed;width:12px;height:12px;top:-20px;z-index:999;animation:fall linear forwards;border-radius:3px}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:.3}}
+
+@media(max-width:600px){
+.container{padding:16px}
+.header h1{font-size:21px}
+.options{grid-template-columns:1fr}
+.number-display{font-size:32px;letter-spacing:2px}
+.q-text{font-size:15px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🔢 1. Ünite: Doğal Sayılar</h1>
+    <p>Kolaydan zora 5 aşama</p>
+  </div>
+
+  <div class="levels" id="levels"></div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-l">PUAN</div><div class="stat-v" id="score">0</div></div>
+    <div class="stat"><div class="stat-l">DOĞRU</div><div class="stat-v" id="correct">0</div></div>
+    <div class="stat"><div class="stat-l">SORU</div><div class="stat-v" id="total">0</div></div>
+  </div>
+
+  <div class="question-box">
+    <div class="q-text" id="qText">Yükleniyor...</div>
+    <div id="qVisual"></div>
+    <div class="options" id="options"></div>
+  </div>
+
+  <div class="feedback" id="feedback"></div>
+  <div class="explain" id="explain"></div>
+
+  <button class="btn btn-next" onclick="newQuestion()">Yeni Soru ➜</button>
+  <button class="btn btn-back" onclick="history.back()">← Geri Dön</button>
+</div>
+
+<script>
+// ===== YARDIMCILAR =====
+const rnd = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
+const shuffle = a => a.sort(()=>Math.random()-.5);
+const fmt = n => n.toLocaleString('tr-TR').replace(/\./g,' ');
+
+const ONES=['','bir','iki','üç','dört','beş','altı','yedi','sekiz','dokuz'];
+const TENS=['','on','yirmi','otuz','kırk','elli','altmış','yetmiş','seksen','doksan'];
+
+function read3(n){ // 0-999 okunuşu
+  if(n===0) return '';
+  let s='';
+  const y=Math.floor(n/100), o=Math.floor((n%100)/10), b=n%10;
+  if(y===1) s+='yüz '; else if(y>1) s+=ONES[y]+' yüz ';
+  if(o) s+=TENS[o]+' ';
+  if(b) s+=ONES[b]+' ';
+  return s;
+}
+function readNum(n){
+  if(n===0) return 'sıfır';
+  const bin=Math.floor(n/1000), kalan=n%1000;
+  let s='';
+  if(bin===1) s='bin ';
+  else if(bin>1) s=read3(bin)+'bin ';
+  s+=read3(kalan);
+  return s.trim();
+}
+
+// ===== SEVİYELER =====
+const levels = [
+  {num:'AŞAMA 1', name:'Abaküs Okuma', gen:genAbacus},
+  {num:'AŞAMA 2', name:'Basamak Değeri', gen:genPlaceValue},
+  {num:'AŞAMA 3', name:'Okunuş ↔ Rakam', gen:genReading},
+  {num:'AŞAMA 4', name:'Yuvarlama', gen:genRound},
+  {num:'AŞAMA 5', name:'Sıralama & Bulmaca', gen:genOrder}
+];
+
+let level=0, score=0, correctCount=0, totalCount=0, answered=false, currentAnswer=null;
+
+// ===== AŞAMA 1: ABAKÜS (GÖRSEL) =====
+function genAbacus(){
+  const digits=[rnd(1,9),rnd(0,9),rnd(0,9),rnd(0,9)];
+  const value=digits[0]*1000+digits[1]*100+digits[2]*10+digits[3];
+  const labels=['Binlik','Yüzlük','Onluk','Birlik'];
+
+  const wrong=new Set();
+  while(wrong.size<3){
+    const d=[...digits];
+    const i=rnd(0,3); d[i]=(d[i]+rnd(1,8))%10;
+    if(i===0&&d[0]===0) d[0]=rnd(1,9);
+    const v=d[0]*1000+d[1]*100+d[2]*10+d[3];
+    if(v!==value) wrong.add(v);
+  }
+
+  return {
+    text:'Aşağıdaki abaküste gösterilen doğal sayı kaçtır?',
+    visual:()=>drawAbacus(digits,labels),
+    answer:fmt(value),
+    options:shuffle([fmt(value),...[...wrong].map(fmt)]),
+    explain:`Binlik: ${digits[0]} → ${digits[0]*1000}\nYüzlük: ${digits[1]} → ${digits[1]*100}\nOnluk: ${digits[2]} → ${digits[2]*10}\nBirlik: ${digits[3]} → ${digits[3]}\nToplam: ${fmt(value)}`
+  };
+}
+
+function drawAbacus(digits,labels){
+  const c=document.createElement('canvas');
+  const W=Math.min(460,window.innerWidth-90), H=W*0.62;
+  c.width=W; c.height=H;
+  const ctx=c.getContext('2d');
+  ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H);
+
+  const baseY=H-34, rodTop=18, spacing=W/5;
+  // Taban
+  ctx.fillStyle='#C68642';
+  ctx.beginPath(); ctx.roundRect(spacing*0.4,baseY,spacing*4.2,26,6); ctx.fill();
+
+  digits.forEach((d,i)=>{
+    const x=spacing*(i+0.9);
+    // Çubuk
+    ctx.strokeStyle='#E8A54B'; ctx.lineWidth=5; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(x,rodTop); ctx.lineTo(x,baseY); ctx.stroke();
+    // Boncuklar (alttan yukarı)
+    const bh=(baseY-rodTop-10)/10;
+    for(let k=0;k<d;k++){
+      const by=baseY-8-k*bh-bh/2;
+      ctx.fillStyle='#4DD0E1'; ctx.strokeStyle='#00838F'; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.ellipse(x,by,spacing*0.3,bh*0.42,0,0,Math.PI*2);
+      ctx.fill(); ctx.stroke();
+    }
+    // Etiket
+    ctx.fillStyle='#5D4037'; ctx.font='600 12px Fredoka,Arial'; ctx.textAlign='center';
+    ctx.fillText(labels[i],x,baseY+18);
+  });
+  return c;
+}
+
+// ===== AŞAMA 2: BASAMAK DEĞERİ =====
+function genPlaceValue(){
+  const n=rnd(10000,99999);
+  const s=String(n);
+  const names=['on binler','binler','yüzler','onlar','birler'];
+  const mult=[10000,1000,100,10,1];
+  let i=rnd(0,4);
+  while(s[i]==='0') i=rnd(0,4);
+  const digit=+s[i], value=digit*mult[i];
+
+  const kind=rnd(0,1); // 0: basamak değeri, 1: sayı değeri
+  if(kind===0){
+    const wrong=new Set();
+    mult.forEach(m=>{ if(digit*m!==value) wrong.add(digit*m); });
+    const w=shuffle([...wrong]).slice(0,3);
+    return {
+      text:`${fmt(n)} doğal sayısında ${names[i]} basamağındaki rakamın BASAMAK DEĞERİ kaçtır?`,
+      numberDisplay:fmt(n),
+      answer:fmt(value),
+      options:shuffle([fmt(value),...w.map(fmt)]),
+      explain:`${names[i]} basamağındaki rakam: ${digit}\nBu basamağın değeri: ${digit} × ${fmt(mult[i])} = ${fmt(value)}\n\n💡 Sayı değeri = rakamın kendisi (${digit})\n💡 Basamak değeri = rakam × basamağın büyüklüğü`
+    };
+  } else {
+    const wrong=new Set();
+    while(wrong.size<3){ const x=rnd(0,9); if(x!==digit) wrong.add(x); }
+    return {
+      text:`${fmt(n)} doğal sayısında ${names[i]} basamağındaki rakamın SAYI DEĞERİ kaçtır?`,
+      numberDisplay:fmt(n),
+      answer:String(digit),
+      options:shuffle([String(digit),...[...wrong].map(String)]),
+      explain:`Sayı değeri, rakamın kendisidir.\n${names[i]} basamağındaki rakam: ${digit}\n\n💡 Basamak değeri olsaydı: ${digit} × ${fmt(mult[i])} = ${fmt(value)}`
+    };
+  }
+}
+
+// ===== AŞAMA 3: OKUNUŞ ↔ RAKAM =====
+function genReading(){
+  const n=rnd(10000,999999);
+  const kind=rnd(0,1);
+
+  if(kind===0){ // Okunuş verilir, rakam sorulur
+    const wrong=new Set();
+    while(wrong.size<3){
+      const s=String(n).split('');
+      const i=rnd(0,s.length-1);
+      s[i]=String((+s[i]+rnd(1,8))%10);
+      if(s[0]==='0') s[0]=String(rnd(1,9));
+      const v=+s.join('');
+      if(v!==n) wrong.add(v);
+    }
+    return {
+      text:'Okunuşu aşağıda verilen doğal sayı hangisidir?',
+      readDisplay:readNum(n),
+      answer:fmt(n),
+      options:shuffle([fmt(n),...[...wrong].map(fmt)]),
+      explain:`"${readNum(n)}" = ${fmt(n)}\n\n💡 Binler bölüğünü önce oku, sonra "bin" de, sonra birler bölüğünü oku.`
+    };
+  } else { // Rakam verilir, okunuş sorulur
+    const wrong=new Set();
+    while(wrong.size<3){
+      const s=String(n).split('');
+      const i=rnd(0,s.length-1);
+      s[i]=String((+s[i]+rnd(1,8))%10);
+      if(s[0]==='0') s[0]=String(rnd(1,9));
+      const v=+s.join('');
+      if(v!==n) wrong.add(readNum(v));
+    }
+    return {
+      text:'Aşağıdaki doğal sayının okunuşu hangisidir?',
+      numberDisplay:fmt(n),
+      answer:readNum(n),
+      options:shuffle([readNum(n),...[...wrong]]),
+      explain:`${fmt(n)} = "${readNum(n)}"\n\n💡 Sayıyı bölüklere ayır: ${fmt(n)} → binler bölüğü + birler bölüğü`
+    };
+  }
+}
+
+// ===== AŞAMA 4: YUVARLAMA =====
+function genRound(){
+  const n=rnd(1000,99999);
+  const types=[{d:10,name:'en yakın ONLUĞA'},{d:100,name:'en yakın YÜZLÜĞE'},{d:1000,name:'en yakın BİNLİĞE'}];
+  const t=types[rnd(0,2)];
+  const answer=Math.round(n/t.d)*t.d;
+  const down=Math.floor(n/t.d)*t.d, up=down+t.d;
+
+  const wrong=new Set([down,up,Math.round(n/(t.d*10))*(t.d*10),down-t.d,up+t.d]);
+  wrong.delete(answer);
+  const w=shuffle([...wrong]).slice(0,3);
+
+  const key=Math.floor((n%(t.d*10))/t.d*10)%10;
+  const checkDigit=Math.floor((n%t.d)/(t.d/10));
+
+  return {
+    text:`${fmt(n)} doğal sayısını ${t.name} yuvarlayınız.`,
+    numberDisplay:fmt(n),
+    answer:fmt(answer),
+    options:shuffle([fmt(answer),...w.map(fmt)]),
+    explain:`Bakılacak rakam: ${checkDigit}\n${checkDigit<5?`${checkDigit} < 5 olduğu için AŞAĞI yuvarlanır.`:`${checkDigit} ≥ 5 olduğu için YUKARI yuvarlanır.`}\n${fmt(n)} → ${fmt(answer)}\n\n💡 Kural: 0,1,2,3,4 → aşağı | 5,6,7,8,9 → yukarı`
+  };
+}
+
+// ===== AŞAMA 5: SIRALAMA & BULMACA =====
+function genOrder(){
+  const kind=rnd(0,1);
+
+  if(kind===0){ // Sıralama
+    const nums=[];
+    while(nums.length<4){ const v=rnd(100000,999999); if(!nums.includes(v)) nums.push(v); }
+    const asc=rnd(0,1)===0;
+    const sorted=[...nums].sort((a,b)=>asc?a-b:b-a);
+    const sym=asc?'<':'>';
+    const correct=sorted.map(fmt).join(' '+sym+' ');
+
+    const opts=new Set([correct]);
+    while(opts.size<4){
+      const sh=shuffle([...nums]);
+      opts.add(sh.map(fmt).join(' '+sym+' '));
+    }
+    return {
+      text:`Aşağıdaki doğal sayıları ${asc?'KÜÇÜKTEN BÜYÜĞE':'BÜYÜKTEN KÜÇÜĞE'} doğru sıralayınız.`,
+      readDisplay:nums.map(fmt).join('  —  '),
+      answer:correct,
+      options:shuffle([...opts]),
+      explain:`Doğru sıralama:\n${correct}\n\n💡 Önce basamak sayısına bak. Eşitse en soldaki basamaktan başlayarak karşılaştır.`
+    };
+  } else { // İpuçlu bulmaca
+    const d=[rnd(1,9),rnd(0,9),rnd(0,9),rnd(0,9),rnd(0,9),rnd(0,9)];
+    const n=+d.join('');
+    const toplam=d.reduce((a,b)=>a+b,0);
+    const yuzler=d[3];
+
+    const wrong=new Set();
+    while(wrong.size<3){
+      const x=[...d]; const i=rnd(0,5);
+      x[i]=(x[i]+rnd(1,8))%10;
+      if(x[0]===0) x[0]=rnd(1,9);
+      const v=+x.join('');
+      if(v!==n) wrong.add(v);
+    }
+    return {
+      text:'Aşağıdaki ipuçlarına uyan altı basamaklı doğal sayı hangisidir?',
+      readDisplay:`● Yüzler basamağındaki rakamın basamak değeri ${fmt(yuzler*100)}\n● Rakamlarının sayı değerleri toplamı ${toplam}\n● Yüz binler basamağındaki rakam ${d[0]}`,
+      answer:fmt(n),
+      options:shuffle([fmt(n),...[...wrong].map(fmt)]),
+      explain:`Doğru sayı: ${fmt(n)}\nYüzler basamağı: ${yuzler} → basamak değeri ${fmt(yuzler*100)}\nRakamlar toplamı: ${d.join(' + ')} = ${toplam}\n\n💡 Her ipucunu tek tek şıklarda kontrol et, uymayanı ele.`
+    };
+  }
+}
+
+// ===== OYUN AKIŞI =====
+function buildLevels(){
+  const box=document.getElementById('levels');
+  box.innerHTML='';
+  levels.forEach((l,i)=>{
+    const b=document.createElement('button');
+    b.className='level-btn'+(i===level?' active':'');
+    b.innerHTML=`<span class="num">${l.num}</span>${l.name}`;
+    b.onclick=()=>{ level=i; buildLevels(); newQuestion(); };
+    box.appendChild(b);
+  });
+}
+
+function newQuestion(){
+  answered=false;
+  document.getElementById('feedback').textContent='';
+  document.getElementById('feedback').className='feedback';
+  document.getElementById('explain').className='explain';
+
+  const q=levels[level].gen();
+  currentAnswer=q.answer;
+
+  document.getElementById('qText').textContent=q.text;
+
+  const vis=document.getElementById('qVisual');
+  vis.innerHTML='';
+  if(q.visual){
+    const d=document.createElement('div'); d.className='visual';
+    d.appendChild(q.visual()); vis.appendChild(d);
+  }
+  if(q.numberDisplay){
+    const d=document.createElement('div'); d.className='number-display';
+    d.textContent=q.numberDisplay; vis.appendChild(d);
+  }
+  if(q.readDisplay){
+    const d=document.createElement('div'); d.className='read-display';
+    d.style.whiteSpace='pre-line';
+    d.textContent=q.readDisplay; vis.appendChild(d);
+  }
+
+  const optBox=document.getElementById('options');
+  optBox.innerHTML='';
+  q.options.forEach(o=>{
+    const b=document.createElement('button');
+    b.className='opt'; b.textContent=o;
+    b.onclick=()=>checkAnswer(b,o,q.explain);
+    optBox.appendChild(b);
+  });
+}
+
+function checkAnswer(btn,choice,explain){
+  if(answered) return;
+  answered=true;
+  totalCount++;
+
+  const all=document.querySelectorAll('.opt');
+  all.forEach(b=>{
+    b.disabled=true;
+    if(b.textContent===currentAnswer) b.classList.add('correct');
+  });
+
+  const fb=document.getElementById('feedback');
+  if(choice===currentAnswer){
+    correctCount++;
+    score+=100;
+    fb.textContent='🌟 Doğru! Harikasın!';
+    fb.className='feedback ok';
+    confetti(14);
+  } else {
+    btn.classList.add('wrong');
+    fb.textContent='💪 Olmadı, doğrusu işaretli.';
+    fb.className='feedback no';
+  }
+
+  const ex=document.getElementById('explain');
+  ex.textContent='📖 Çözüm:\n'+explain;
+  ex.style.whiteSpace='pre-line';
+  ex.className='explain show';
+
+  document.getElementById('score').textContent=score;
+  document.getElementById('correct').textContent=correctCount;
+  document.getElementById('total').textContent=totalCount;
+}
+
+function confetti(n){
+  const cols=['#667eea','#764ba2','#43e97b','#FFD54F','#4FC3F7'];
+  for(let i=0;i<n;i++){
+    const c=document.createElement('div');
+    c.className='confetti';
+    c.style.left=Math.random()*100+'vw';
+    c.style.background=cols[Math.floor(Math.random()*cols.length)];
+    c.style.animationDuration=(1.2+Math.random()*1.3)+'s';
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),3000);
+  }
+}
+
+buildLevels();
+newQuestion();
+</script>
+</body>
+</html>
