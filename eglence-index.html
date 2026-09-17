@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eğlence - İlkokulOyun.com</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.game-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-top:40px}
+.game-card{background:white;border-radius:15px;padding:25px;cursor:pointer;transition:all .3s ease;box-shadow:0 5px 15px rgba(0,0,0,.1);text-align:center;border-left:5px solid #8E2DE2}
+.game-card:hover{transform:translateY(-5px);box-shadow:0 10px 25px rgba(142,45,226,.3)}
+.game-card .icon{font-size:50px;margin-bottom:15px}
+.game-card h3{color:#8E2DE2;font-size:20px;margin:10px 0}
+.game-card p{color:#666;font-size:14px;margin:10px 0}
+.difficulty{display:inline-block;margin-top:10px;padding:5px 12px;background:#F3E8FF;color:#8E2DE2;border-radius:15px;font-size:12px;font-weight:bold}
+.play-button{display:inline-block;margin-top:15px;padding:10px 20px;background:#8E2DE2;color:white;border-radius:15px;text-decoration:none;cursor:pointer;border:none;font-weight:bold;transition:all .3s ease}
+.play-button:hover{background:#7B1FA2;transform:scale(1.05)}
+.header-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;gap:10px}
+.back-button{padding:12px 25px;background:#667eea;color:white;border-radius:25px;text-decoration:none;cursor:pointer;border:none;transition:all .3s ease}
+.back-button:hover{transform:translateY(-2px);background:#5568d3}
+.coming-soon{opacity:.6}
+.coming-soon .play-button{background:#BBB;cursor:not-allowed}
+@media(max-width:768px){.game-list{grid-template-columns:1fr}.header-nav{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="bg-animation">
+  <div class="butterfly">🦋</div>
+  <div class="kite">🪁</div>
+  <div class="flower">🌸</div>
+</div>
+
+<div class="container">
+  <div class="header-nav">
+    <button class="back-button" onclick="location.href='index.html'">← Ana Sayfa</button>
+    <div></div>
+  </div>
+
+  <header>
+    <h1>🎪 Eğlence 🎪</h1>
+    <p class="subtitle">Keşfet, dene, oyna! Her sınıf için eğlenceli deneyler</p>
+  </header>
+
+  <div class="game-list">
+    <div class="game-card">
+      <div class="icon">🪞</div>
+      <h3>Sihirli Simetri Aynası</h3>
+      <p>3 boyutlu cisimleri ayna karşısında hareket ettir ve döndür, yansımasını izle</p>
+      <div class="difficulty">İnteraktif 3B</div>
+      <button class="play-button" onclick="go('grade4-eglence-ayna.html')">Keşfet!</button>
+    </div>
+
+    <div class="game-card coming-soon">
+      <div class="icon">🧩</div>
+      <h3>Tangram</h3>
+      <p>Yedi parçayı birleştirerek şekiller oluştur</p>
+      <div class="difficulty">Yakında</div>
+      <button class="play-button">Yakında!</button>
+    </div>
+
+    <div class="game-card coming-soon">
+      <div class="icon">🎨</div>
+      <h3>Örüntü Stüdyosu</h3>
+      <p>Renk ve şekillerle kendi örüntünü tasarla</p>
+      <div class="difficulty">Yakında</div>
+      <button class="play-button">Yakında!</button>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>✨ Eğlenerek öğren, öğrenerek eğlen! ✨</p>
+  </div>
+</div>
+
+<script>
+function go(url){ window.location.href = url; }
+</script>
+</body>
+</html>

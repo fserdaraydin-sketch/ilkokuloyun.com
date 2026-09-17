@@ -46,6 +46,10 @@
             background: linear-gradient(135deg, #BB8FCE 0%, #9B59B6 100%);
         }
 
+        .grade-card.fun {
+            background: linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%);
+        }
+
         .grade-card .icon {
             font-size: 80px;
             margin-bottom: 20px;
@@ -134,6 +138,14 @@
                 <p>Zorlayıcı oyunlar, gelişmiş beceriler</p>
                 <div class="subject-count">4 Ders</div>
             </div>
+
+            <!-- Eğlence -->
+            <div class="grade-card fun" onclick="goToFun()">
+                <div class="icon">🎪</div>
+                <h2>Eğlence</h2>
+                <p>Keşfet, dene, oyna! Her sınıf için</p>
+                <div class="subject-count">İnteraktif</div>
+            </div>
         </div>
 
         <div class="footer">
@@ -144,6 +156,10 @@
     <script>
         function goToGrade(grade) {
             window.location.href = `grade-${grade}-index.html`;
+        }
+
+        function goToFun() {
+            window.location.href = 'eglence-index.html';
         }
 
         // Kart tıklama animasyonu
