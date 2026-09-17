@@ -314,7 +314,147 @@ function etkArasinda(){
   };
 }
 
-initEtkinlik([etkKonum,etkTers,etkYakinUzak,etkArasinda],
+// ==================== SIRA / RAF / ODA SAHNELERİ ====================
+
+// Seçenek kartı: tek nesne, büyük
+function nesneKarti(ch){
+  const{c,ctx,W,H}=sahne(148,98);
+  emoji(ctx,ch,W/2,H/2,48);
+  return c;
+}
+
+// ---- SIRA: nesneler yan yana ----
+function cizSira(liste){
+  const{c,ctx,W,H}=sahne(280,120);
+  cizZemin(ctx,W,H);
+  const zemin=H*0.66;
+  const adim=(W-52)/liste.length;
+  liste.forEach((ch,i)=>{
+    const x=26+adim*i+adim/2;
+    golge(ctx,x,zemin,38); emoji(ctx,ch,x,zemin,38);
+  });
+  // Yön okları
+  ctx.save(); ctx.fillStyle='#8D6E63'; ctx.font='600 12px Fredoka,Arial';
+  ctx.textAlign='left';  ctx.fillText('◀ sol',6,H-9);
+  ctx.textAlign='right'; ctx.fillText('sağ ▶',W-6,H-9);
+  ctx.restore();
+  return c;
+}
+function etkSira(){
+  const n=4;
+  const secilen=shuffle([...NESNELER]).slice(0,n);
+  const liste=secilen.map(o=>o.n);
+  const sorular=[
+    {s:'En sağda ne var?',    i:n-1, ip:'Sağ taraf, resmin sağ kenarıdır.'},
+    {s:'En solda ne var?',    i:0,   ip:'Sol taraf, resmin sol kenarıdır.'},
+    {s:'Soldan ikinci sırada ne var?', i:1, ip:'Soldan başlayıp say: bir, iki.'},
+    {s:'Sağdan ikinci sırada ne var?', i:n-2, ip:'Sağdan başlayıp say: bir, iki.'}
+  ];
+  const q=pick(sorular);
+  const dogru=liste[q.i];
+  const buyuk=cizSira(liste);
+  buyuk.style.width='260px'; buyuk.style.height='112px';
+  return{
+    yonerge:q.s+' Doğru olanı seç.',
+    secenek:shuffle([...liste]).slice(0,3).includes(dogru)
+      ? shuffle([dogru,...shuffle(liste.filter(x=>x!==dogru)).slice(0,2)])
+      : shuffle([dogru,...shuffle(liste.filter(x=>x!==dogru)).slice(0,2)]),
+    dogru, ustGorsel:buyuk, ciz:nesneKarti, ipucu:q.ip
+  };
+}
+
+// ---- RAF: üç katlı, yukarıda/aşağıda ----
+function cizRaf(liste){
+  const{c,ctx,W,H}=sahne(220,160);
+  const solX=26, sagX=W-26, kat=[34,78,122];
+  // Yan destekler
+  ctx.fillStyle='#B98B55';
+  ctx.fillRect(solX-10,22,9,120); ctx.fillRect(sagX+1,22,9,120);
+  ctx.strokeStyle='#7A4B1C'; ctx.lineWidth=2;
+  ctx.strokeRect(solX-10,22,9,120); ctx.strokeRect(sagX+1,22,9,120);
+  // Raflar + nesneler
+  kat.forEach((y,i)=>{
+    ctx.fillStyle='#D9A05B';
+    ctx.fillRect(solX-10,y+18,sagX-solX+20,7);
+    ctx.strokeRect(solX-10,y+18,sagX-solX+20,7);
+    if(liste[i]) emoji(ctx,liste[i],W/2,y+2,34);
+  });
+  return c;
+}
+function etkRaf(){
+  const secilen=shuffle([...NESNELER]).slice(0,3);
+  const liste=secilen.map(o=>o.n);
+  const sorular=[
+    {s:'Hangisi en yukarıda?', i:0, ip:'Yukarı, rafın en üst katıdır.'},
+    {s:'Hangisi en aşağıda?',  i:2, ip:'Aşağı, rafın en alt katıdır.'},
+    {s:'Hangisi ortada?',      i:1, ip:'Orta kat, üst ile alt arasındadır.'}
+  ];
+  const q=pick(sorular);
+  const buyuk=cizRaf(liste);
+  buyuk.style.width='196px'; buyuk.style.height='142px';
+  return{
+    yonerge:q.s+' Doğru olanı seç.',
+    secenek:shuffle([...liste]), dogru:liste[q.i],
+    ustGorsel:buyuk, ciz:nesneKarti, ipucu:q.ip
+  };
+}
+
+// ---- ODA: kapıya / pencereye yakınlık ----
+function cizOda(liste,kapiSolda){
+  const{c,ctx,W,H}=sahne(280,140);
+  // Duvar ve zemin
+  ctx.fillStyle='#FBF4E6'; ctx.fillRect(0,0,W,H*0.52);
+  ctx.fillStyle='#EFE3CC'; ctx.fillRect(0,H*0.52,W,H*0.48);
+  ctx.strokeStyle='#DCCFB4'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(0,H*0.52); ctx.lineTo(W,H*0.52); ctx.stroke();
+
+  // Kapı
+  const kx=kapiSolda?16:W-52;
+  ctx.fillStyle='#A1663A';
+  ctx.fillRect(kx,H*0.18,36,H*0.48);
+  ctx.strokeStyle='#6E4423'; ctx.lineWidth=2.5;
+  ctx.strokeRect(kx,H*0.18,36,H*0.48);
+  ctx.fillStyle='#FFD54F';
+  ctx.beginPath(); ctx.arc(kx+(kapiSolda?29:7),H*0.42,3.5,0,Math.PI*2); ctx.fill();
+  ctx.save(); ctx.fillStyle='#6E4423'; ctx.font='600 11px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.fillText('kapı',kx+18,H*0.18-6); ctx.restore();
+
+  // Pencere (karşı taraf)
+  const px=kapiSolda?W-60:24;
+  ctx.fillStyle='#BFE3F5';
+  ctx.fillRect(px,H*0.16,40,30);
+  ctx.strokeStyle='#5A8FA8'; ctx.lineWidth=2.5;
+  ctx.strokeRect(px,H*0.16,40,30);
+  ctx.beginPath(); ctx.moveTo(px+20,H*0.16); ctx.lineTo(px+20,H*0.16+30); ctx.stroke();
+  ctx.save(); ctx.fillStyle='#41707F'; ctx.font='600 11px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.fillText('pencere',px+20,H*0.16-6); ctx.restore();
+
+  // Nesneler zeminde, kapıdan uzaklaşan sırayla
+  const zemin=H*0.80;
+  const xler = kapiSolda ? [74,132,190] : [W-74,W-132,W-190];
+  liste.forEach((ch,i)=>{ golge(ctx,xler[i],zemin,36); emoji(ctx,ch,xler[i],zemin,36); });
+  return c;
+}
+function etkOda(){
+  const secilen=shuffle([...NESNELER]).slice(0,3);
+  const liste=secilen.map(o=>o.n);
+  const kapiSolda=rnd(0,1)===0;
+  const sorular=[
+    {s:'Kapıya en yakın ne var?',   i:0, ip:'Kapıya en yakın olan, kapının hemen yanındakidir.'},
+    {s:'Kapıdan en uzak ne var?',   i:2, ip:'Kapıdan en uzak olan, kapıya en çok mesafesi olandır.'},
+    {s:'Pencereye en yakın ne var?',i:2, ip:'Pencere kapının karşı tarafındadır.'}
+  ];
+  const q=pick(sorular);
+  const buyuk=cizOda(liste,kapiSolda);
+  buyuk.style.width='266px'; buyuk.style.height='133px';
+  return{
+    yonerge:q.s+' Doğru olanı seç.',
+    secenek:shuffle([...liste]), dogru:liste[q.i],
+    ustGorsel:buyuk, ciz:nesneKarti, ipucu:q.ip
+  };
+}
+
+initEtkinlik([etkKonum,etkTers,etkYakinUzak,etkArasinda,etkSira,etkRaf,etkOda],
   {ad:'Uzamsal İlişkiler',c1:'#a8edea',c2:'#fed6e3',koyu:'#00796B',orta:'#4DB6AC',acik:'#E0F2F1'});
 </script>
 </body>
