@@ -35,9 +35,14 @@ function sahne(W,H){
   return {c,ctx,W,H};
 }
 function emoji(ctx,ch,x,y,boyut){
+  // save/restore: önceki fillStyle (ör. gölge saydamlığı) emojiye sızmasın
+  ctx.save();
+  ctx.globalAlpha=1;
+  ctx.fillStyle='#2E2E2E';
   ctx.font=boyut+'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",serif';
   ctx.textAlign='center'; ctx.textBaseline='middle';
   ctx.fillText(ch,x,y);
+  ctx.restore();
 }
 
 // ---- DURUM ----
