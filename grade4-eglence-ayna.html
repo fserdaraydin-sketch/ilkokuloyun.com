@@ -131,11 +131,11 @@ let obj=null,objMirror=null;
 
 let posX=-2.3,posZ=0;
 let rotX=0,rotY=25*Math.PI/180;
-let camYaw=0,camPitch=20*Math.PI/180,camDist=11.5;
+let camYaw=0,camPitch=20*Math.PI/180,camDist=13.6;
 let spinning=false;
 
 const MIRROR_X=0;
-const LIMIT_X=-0.8, MIN_X=-5.4, MAX_Z=2.6, MIN_Z=-2.6;
+const LIMIT_X=-0.8, MIN_X=-5.0, MAX_Z=2.6, MIN_Z=-2.6;
 
 const SHAPES=[
   {id:'cube',  icon:'🟥', name:'Renkli küp'},
@@ -232,20 +232,22 @@ function init(){
   const d1=new THREE.DirectionalLight(0xffffff,.58);d1.position.set(-5,8,7);scene.add(d1);
   const d2=new THREE.DirectionalLight(0xffffff,.26);d2.position.set(6,4,-5);scene.add(d2);
 
-  const grid=new THREE.GridHelper(18,18,0xcfc3ec,0xe6dff7);
+  const grid=new THREE.GridHelper(22,22,0xcfc3ec,0xe6dff7);
   grid.position.y=-1.45;scene.add(grid);
 
   // AYNA
   const mg=new THREE.Group();
+  const MW=8.6, MH=5.9, MY=1.45;          // genişlik(z), yükseklik, merkez yüksekliği
   const glass=new THREE.Mesh(
-    new THREE.PlaneGeometry(5.6,4.6),
-    new THREE.MeshBasicMaterial({color:0x81D4FA,transparent:true,opacity:.22,side:THREE.DoubleSide}));
-  glass.rotation.y=Math.PI/2;glass.position.y=.6;
+    new THREE.PlaneGeometry(MW,MH),
+    new THREE.MeshBasicMaterial({color:0x81D4FA,transparent:true,opacity:.2,side:THREE.DoubleSide}));
+  glass.rotation.y=Math.PI/2;glass.position.y=MY;
   mg.add(glass);
 
   const frameMat=new THREE.MeshLambertMaterial({color:0x5E35B1});
-  [[0,2.95,0,.16,.3,5.9],[0,-1.75,0,.16,.3,5.9],
-   [0,.6,2.95,.16,4.9,.3],[0,.6,-2.95,.16,4.9,.3]].forEach(f=>{
+  const top=MY+MH/2, bot=MY-MH/2, half=MW/2, t=.32;
+  [[0,top,0,.18,t,MW+t],[0,bot,0,.18,t,MW+t],
+   [0,MY,half,.18,MH+t,t],[0,MY,-half,.18,MH+t,t]].forEach(f=>{
     const b=new THREE.Mesh(new THREE.BoxGeometry(f[3],f[4],f[5]),frameMat);
     b.position.set(f[0],f[1],f[2]);mg.add(b);
   });
@@ -270,13 +272,6 @@ function setShape(kind){
   if(obj){realGroup.remove(obj);mirrorGroup.remove(objMirror);}
   obj=buildMesh(kind);
   objMirror=buildMesh(kind);
-  objMirror.traverse(o=>{
-    if(o.isMesh){
-      const tint=m=>{const n=m.clone();n.transparent=true;n.opacity=.8;
-        if(n.color)n.color.lerp(new THREE.Color(0x4FC3F7),.26);return n;};
-      o.material=Array.isArray(o.material)?o.material.map(tint):tint(o.material);
-    }
-  });
   realGroup.add(obj);mirrorGroup.add(objMirror);
   document.querySelectorAll('.sh').forEach(b=>b.classList.toggle('on',b.dataset.id===kind));
   updateTransform();
@@ -348,9 +343,9 @@ function zeroAxis(ax){
 }
 
 function setView(v){
-  if(v==='front'){camYaw=0;camPitch=20*Math.PI/180;camDist=11.5;}
-  else if(v==='side'){camYaw=-0.35;camPitch=15*Math.PI/180;camDist=12;}
-  else{camYaw=0;camPitch=62*Math.PI/180;camDist=12.5;}
+  if(v==='front'){camYaw=0;camPitch=18*Math.PI/180;camDist=13.6;}
+  else if(v==='side'){camYaw=-0.35;camPitch=14*Math.PI/180;camDist=14.2;}
+  else{camYaw=0;camPitch=60*Math.PI/180;camDist=18.5;}
 }
 
 const TIPS=[
@@ -371,7 +366,7 @@ function hint(){
 
 function resetAll(){
   posX=-2.3;posZ=0;rotX=0;rotY=25*Math.PI/180;
-  camYaw=0;camPitch=20*Math.PI/180;camDist=11.5;
+  camYaw=0;camPitch=18*Math.PI/180;camDist=13.6;
   spinning=false;
   document.getElementById('rotX').value=0;
   document.getElementById('rotY').value=25;
@@ -395,10 +390,13 @@ function animate(){
   // Kamera: cismin tarafında, aynayı karşıdan ve hafif yukarıdan görür
   const cp=Math.cos(camPitch), sp=Math.sin(camPitch);
   const yaw=camYaw+0.72;   // aynaya ~54° — hem yüzeyi görürüz hem cisim/yansıma ayrışır
+  // Dar ekranda (telefon/dikey tablet) kamerayı geriye çek ki ayna taşmasın
+  const fit=Math.min(1.25,Math.max(1,1.35/camera.aspect));
+  const D=camDist*fit;
   camera.position.set(
-    -camDist*cp*Math.sin(yaw),
-     camDist*sp+0.4,
-     camDist*cp*Math.cos(yaw));
+    -D*cp*Math.sin(yaw),
+     D*sp+0.4,
+     D*cp*Math.cos(yaw));
   camera.lookAt(-0.5,0.1,0);
   renderer.render(scene,camera);
 }
