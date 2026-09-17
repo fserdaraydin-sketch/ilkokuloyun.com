@@ -11,7 +11,7 @@
 </head>
 <body>
 <div class="container">
-  <div class="header"><h1>🌍 1. Ünite: Yer Kabuğu ve Dünyamız</h1><p>Kolaydan zora 5 aşama</p></div>
+  <div class="header"><h1>🌍 1. Ünite: Yer Kabuğu ve Dünyamız</h1><p>Kolaydan zora 6 aşama</p></div>
   <div class="levels" id="levels"></div>
   <div class="stats">
     <div class="stat"><div class="stat-l">PUAN</div><div class="stat-v" id="score">0</div></div>
@@ -30,146 +30,332 @@
 </div>
 <script src="grade4-engine.js"></script>
 <script>
-// A1: Dünya'nın katmanları
-const KATMAN=[
- {ad:'Yer kabuğu',s:'En dıştaki, en ince katman. Üzerinde yaşadığımız yer.',sira:1},
- {ad:'Manto',s:'Yer kabuğunun altındaki kalın katman. Sıcak ve akışkan magma içerir.',sira:2},
- {ad:'Çekirdek',s:'Dünya’nın en iç ve en sıcak katmanı.',sira:3}
+/* ==========================================================
+   AŞAMA 1 — YER KABUĞU, KATMANLAR VE MİNERALLER
+   ========================================================== */
+const KATMAN_S=[
+ {s:'Dünya’nın dıştan içe doğru katmanları hangi sırayla dizilir?',
+  c:'Yer kabuğu – Manto – Çekirdek',y:['Çekirdek – Manto – Yer kabuğu','Manto – Yer kabuğu – Çekirdek','Yer kabuğu – Çekirdek – Manto'],
+  e:'Dünya dıştan içe: 1) Yer kabuğu (en ince), 2) Manto (en kalın), 3) Çekirdek (en sıcak).'},
+ {s:'Üzerinde yaşadığımız, Dünya’nın en dış ve en ince katmanı hangisidir?',
+  c:'Yer kabuğu',y:['Manto','Çekirdek','Atmosfer'],
+  e:'Yer kabuğu, üzerinde yaşadığımız en dış katmandır. Kara ve denizlerin altında yer alır.'},
+ {s:'Yer kabuğu neyden oluşur?',
+  c:'Kayaçlardan',y:['Sadece topraktan','Sadece sudan','Sadece madenlerden'],
+  e:'Yer kabuğu kayaçlardan oluşur. Kayaçlar ise minerallerden meydana gelir.'},
+ {s:'Kayaçları oluşturan yapı taşlarına ne ad verilir?',
+  c:'Mineral',y:['Fosil','Toprak','Maden'],
+  e:'Bir veya birden fazla mineralin bir araya gelmesiyle kayaç oluşur.'},
+ {s:'Minerallerle ilgili aşağıdakilerden hangisi YANLIŞTIR?',
+  c:'Mineraller yalnızca kayaçların içinde bulunur',y:['Kayaçların rengini belirler','Kayaçların sertlik derecesini belirler','Her kayaçta farklı miktarda bulunabilir'],
+  e:'Mineraller sadece kayaçlarda değil, toprakta, suda ve canlıların vücudunda da bulunur. Diğer seçenekler doğrudur.'},
+ {s:'Bir kayacın sert ya da yumuşak olmasını belirleyen nedir?',
+  c:'İçindeki mineraller',y:['Rengi','Büyüklüğü','Bulunduğu yer'],
+  e:'Kayacın sertliğini ve rengini içindeki mineraller belirler.'},
+ {s:'Aşağıdakilerden hangisi kayaçların parçalanmasına neden olan etkenlerden DEĞİLDİR?',
+  c:'Mineraller',y:['Rüzgâr','Yağmur','Sıcaklık farkı'],
+  e:'Kayaçlar rüzgâr, akarsu, yağmur ve gece-gündüz sıcaklık farkıyla parçalanır. Mineraller kayacın yapısındadır, onu parçalamaz.'},
+ {s:'Aşağıdakilerden hangisinin ham maddesi kayaç DEĞİLDİR?',
+  c:'Tahta kaşık',y:['Porselen tabak','Cam bardak','Çelik tencere'],
+  e:'Porselen kil, cam kum, çelik demir madeninden yapılır; hepsi kayaç kökenlidir. Tahta ise ağaçtan elde edilir.'}
 ];
 function genKatman(){
-  const kind=rnd(0,1);
-  if(kind===0){
-    const it=pick(KATMAN);
-    const w=distractors(it.ad,()=>pick(KATMAN).ad).concat(['Atmosfer']).slice(0,3);
-    return{
-      text:'Aşağıda özelliği verilen Dünya katmanı hangisidir?',
-      readDisplay:it.s,
-      answer:it.ad,
-      options:shuffle([it.ad,...w]),
-      explain:`${it.ad}: ${it.s}\n\n💡 Dünya dıştan içe doğru: 1) Yer kabuğu  2) Manto  3) Çekirdek`
-    };
-  }
-  const n=rnd(1,3);
-  const dogru=KATMAN.find(k=>k.sira===n).ad;
-  return{
-    text:`Dünya'nın dıştan içe doğru ${n}. katmanı hangisidir?`,
-    answer:dogru,
-    options:shuffle(['Yer kabuğu','Manto','Çekirdek','Atmosfer']),
-    explain:`Dıştan içe sıralama:\n1) Yer kabuğu (en ince)\n2) Manto (en kalın)\n3) Çekirdek (en sıcak)\n\n💡 Atmosfer bir katman değil, Dünya'yı saran hava tabakasıdır.`
-  };
+  const it=pick(KATMAN_S);
+  return{text:it.s,answer:it.c,options:shuffle([it.c,...it.y]),
+    explain:`${it.e}\n\n💡 Yer kabuğu → kayaçlardan, kayaçlar → minerallerden oluşur.`};
 }
 
-// A2: Dönme ve dolanma
+/* ==========================================================
+   AŞAMA 2 — DÖNME VE DOLANMA
+   ========================================================== */
 const HAREKET=[
- {s:'Dünya kendi ekseni etrafında bir tam dönüşünü kaç sürede tamamlar?',c:'24 saat',y:['365 gün','12 saat','30 gün'],
-  e:'Dünya kendi ekseni etrafındaki DÖNME hareketini 24 saatte (1 günde) tamamlar. Bu hareket gece ve gündüzü oluşturur.'},
- {s:"Dünya'nın Güneş etrafındaki dolanımı kaç sürer?",c:'365 gün 6 saat',y:['24 saat','30 gün','100 gün'],
-  e:"Dünya, Güneş etrafındaki DOLANMA hareketini 365 gün 6 saatte tamamlar. Bu hareket mevsimleri oluşturur."},
- {s:'Gece ve gündüzün oluşmasının sebebi nedir?',c:'Dünya’nın kendi ekseni etrafında dönmesi',y:['Dünya’nın Güneş etrafında dolanması','Ay’ın Dünya etrafında dönmesi','Güneş’in sönmesi'],
-  e:'Dünya dönerken bir yüzü Güneş’i görür (gündüz), diğer yüzü karanlıkta kalır (gece).'},
- {s:'Mevsimlerin oluşmasının sebebi nedir?',c:'Dünya’nın Güneş etrafında dolanması',y:['Dünya’nın kendi ekseni etrafında dönmesi','Güneş’in hareket etmesi','Ay’ın evreleri'],
-  e:'Dünya eksen eğikliğiyle Güneş etrafında dolandığı için mevsimler oluşur.'},
- {s:'Dünya hangi yönde döner?',c:'Batıdan doğuya',y:['Doğudan batıya','Kuzeyden güneye','Güneyden kuzeye'],
+ {s:'Dünya kendi ekseni etrafındaki bir tam dönüşünü ne kadar sürede tamamlar?',
+  c:'24 saat (1 gün)',y:['365 gün 6 saat','12 saat','30 gün'],
+  e:'Dünya kendi ekseni etrafındaki DÖNME hareketini 24 saatte tamamlar. Bu süre 1 gün olarak kabul edilir.'},
+ {s:'Dünya’nın Güneş etrafındaki bir tam dolanımı ne kadar sürer?',
+  c:'365 gün 6 saat (1 yıl)',y:['24 saat','30 gün','100 gün'],
+  e:'Dünya, Güneş etrafındaki DOLANMA hareketini 365 gün 6 saatte tamamlar. Bu süre 1 yıl olarak kabul edilir.'},
+ {s:'Dünya, Güneş’in etrafında 1 defa dolandığında kendi ekseni etrafında kaç tam dönüş yapar?',
+  c:'365',y:['24','52','30'],
+  e:'1 dolanım = 365 gün. Her gün 1 tam dönüş yapıldığına göre 365 dönüş yapar.'},
+ {s:'Gece ve gündüzün oluşmasının sebebi nedir?',
+  c:'Dünya’nın kendi ekseni etrafında dönmesi',y:['Dünya’nın Güneş etrafında dolanması','Ay’ın Dünya etrafında dönmesi','Güneş’in hareket etmesi'],
+  e:'Dünya dönerken Güneş’i gören yüzünde gündüz, diğer yüzünde gece yaşanır.'},
+ {s:'Mevsimlerin oluşmasının sebebi nedir?',
+  c:'Dünya’nın Güneş etrafında dolanması',y:['Dünya’nın kendi ekseni etrafında dönmesi','Güneş’e uzaklığın sürekli değişmesi','Ay’ın evreleri'],
+  e:'Eksen eğikliğiyle birlikte Güneş etrafındaki dolanma mevsimleri oluşturur.'},
+ {s:'Dünya hangi yönde döner?',
+  c:'Batıdan doğuya',y:['Doğudan batıya','Kuzeyden güneye','Güneyden kuzeye'],
   e:'Dünya batıdan doğuya döner. Bu yüzden Güneş bize doğudan doğuyor, batıdan batıyor gibi görünür.'},
- {s:'Dünya dönmeyi bıraksaydı ne olurdu?',c:'Bir yüzü sürekli gündüz, diğer yüzü sürekli gece olurdu',y:['Mevsimler değişmezdi','Dünya soğurdu','Hiçbir şey değişmezdi'],
-  e:'Dönme hareketi gece-gündüzü oluşturur. Dönme dursa Güneş’e bakan yüz hep gündüz, diğer yüz hep gece kalırdı.'}
+ {s:'Dünya kendi ekseni etrafında DÖNMESEYDİ aşağıdakilerden hangisi olurdu?',
+  c:'Bir yüzü sürekli gündüz, diğer yüzü sürekli gece olurdu',y:['Mevsimler oluşmazdı','Bir yıl kısalırdı','Hiçbir şey değişmezdi'],
+  e:'Gece-gündüz dönme hareketiyle oluşur. Dönme dursaydı Güneş’i gören yüz hep aydınlık, diğer yüz hep karanlık kalırdı. (Mevsimler dolanmayla oluştuğu için devam ederdi.)'},
+ {s:'Aşağıdaki olaylardan hangisi Dünya’nın KENDİ ETRAFINDA dönmesi sonucu oluşMAZ?',
+  c:'Mevsimlerin oluşması',y:['Bir günün 24 saat sürmesi','Gece ve gündüzün oluşması','Güneş’in doğup batıyor gibi görünmesi'],
+  e:'Mevsimler DOLANMA hareketiyle oluşur. Diğerleri dönme hareketinin sonucudur.'},
+ {s:'Dünya’nın hareketleriyle ilgili hangisi YANLIŞTIR?',
+  c:'Dünya’nın kendi etrafındaki dönme hareketi sonucu 1 yıl oluşur',y:['Kendi çevresindeki dönüşüyle gece-gündüz oluşur','Güneş çevresindeki dolanımı 365 gün 6 saat sürer','Güneş etrafındaki dolanma sonucu mevsimler oluşur'],
+  e:'Kendi etrafındaki dönme 1 GÜNÜ oluşturur. 1 yıl, Güneş etrafındaki dolanmayla oluşur.'}
 ];
 function genHareket(){
   const it=pick(HAREKET);
-  return{
-    text:it.s,
-    answer:it.c,
-    options:shuffle([it.c,...it.y]),
-    explain:`${it.e}\n\n💡 DÖNME = kendi ekseni etrafında, 24 saat, gece-gündüz\n💡 DOLANMA = Güneş etrafında, 365 gün, mevsimler`
-  };
+  return{text:it.s,answer:it.c,options:shuffle([it.c,...it.y]),
+    explain:`${it.e}\n\n💡 DÖNME → kendi ekseni, 24 saat, gece-gündüz\n💡 DOLANMA → Güneş etrafı, 365 gün 6 saat, mevsimler`};
 }
 
-// A3: Kayaçlar
-const KAYAC=[
- {ad:'Granit',tip:'Magmatik (katılaşım)',ozellik:'Sert, taneli yapıda. Mutfak tezgâhı ve bina cephelerinde kullanılır.'},
- {ad:'Bazalt',tip:'Magmatik (katılaşım)',ozellik:'Koyu renkli, volkanik. Kaldırım taşı yapımında kullanılır.'},
- {ad:'Kireç taşı',tip:'Tortul',ozellik:'Deniz canlılarının kabuklarından oluşur. İçinde fosil bulunabilir.'},
- {ad:'Kum taşı',tip:'Tortul',ozellik:'Kum tanelerinin sıkışmasıyla oluşur.'},
- {ad:'Mermer',tip:'Başkalaşım',ozellik:'Kireç taşının ısı ve basınçla değişmesiyle oluşur. Heykel ve zeminde kullanılır.'},
- {ad:'Elmas',tip:'Maden',ozellik:'Doğadaki en sert madde. Takı ve kesici uçlarda kullanılır.'},
- {ad:'Kömür',tip:'Maden',ozellik:'Bitki kalıntılarının milyonlarca yılda değişmesiyle oluşur. Yakıt olarak kullanılır.'}
+/* ==========================================================
+   AŞAMA 3 — GÖLGE VE GÜNEŞ'İN KONUMU  (GÖRSEL)
+   ========================================================== */
+function drawGolge(vakit){
+  const{c,ctx,W,H}=newCanvas(1,.6,400);
+  const zemin=H-34;
+  // gökyüzü
+  ctx.fillStyle='#E3F2FD';ctx.fillRect(0,0,W,zemin);
+  ctx.fillStyle='#C8E6C9';ctx.fillRect(0,zemin,W,H-zemin);
+
+  // Güneş konumu: sabah solda alçak, öğle tepede, akşam sağda alçak
+  const pos={sabah:{x:W*0.16,y:zemin-60},ogle:{x:W*0.5,y:44},aksam:{x:W*0.84,y:zemin-60}}[vakit];
+  ctx.fillStyle='#FDD835';ctx.beginPath();ctx.arc(pos.x,pos.y,22,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#F9A825';ctx.lineWidth=2.5;
+  for(let i=0;i<8;i++){const a=i*Math.PI/4;
+    ctx.beginPath();
+    ctx.moveTo(pos.x+Math.cos(a)*27,pos.y+Math.sin(a)*27);
+    ctx.lineTo(pos.x+Math.cos(a)*35,pos.y+Math.sin(a)*35);ctx.stroke();}
+
+  // Çubuk (cisim)
+  const cx=W*0.5, boy=78;
+  ctx.strokeStyle='#5D4037';ctx.lineWidth=9;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(cx,zemin);ctx.lineTo(cx,zemin-boy);ctx.stroke();
+
+  // Gölge: Güneş'in ters yönünde, yüksekliğe göre uzunluk
+  const dx=cx-pos.x, dy=zemin-pos.y;
+  const uzunluk=boy*(dx===0?0.22:Math.abs(dx)/dy)*1.15;
+  const yon=dx===0?1:Math.sign(dx);
+  ctx.strokeStyle='rgba(70,70,70,.55)';ctx.lineWidth=13;
+  ctx.beginPath();ctx.moveTo(cx,zemin);ctx.lineTo(cx+yon*uzunluk,zemin);ctx.stroke();
+
+  ctx.fillStyle='#37474F';ctx.font='700 13px Fredoka,Arial';ctx.textAlign='center';
+  ctx.fillText({sabah:'SABAH',ogle:'ÖĞLE',aksam:'AKŞAM'}[vakit],W/2,H-10);
+  return c;
+}
+const GOLGE_S=[
+ {s:'Aşağıdaki görselde gölge boyu nasıldır?',gorsel:'ogle',
+  c:'En kısa',y:['En uzun','Orta uzunlukta','Gölge yoktur'],
+  e:'Öğle vakti Güneş en tepededir. Işınlar dik geldiği için gölge EN KISA olur.'},
+ {s:'Aşağıdaki görselde gölge boyu nasıldır?',gorsel:'sabah',
+  c:'Uzun',y:['En kısa','Gölge yoktur','Hep aynı'],
+  e:'Sabah Güneş alçaktadır, ışınlar eğik gelir, gölge UZUN olur.'},
+ {s:'Aşağıdaki görselde gölge hangi yöne düşmüştür?',gorsel:'aksam',
+  c:'Güneş’in ters yönüne, yani sola',y:['Güneş’e doğru, yani sağa','Yukarı doğru','Her yöne'],
+  e:'Gölge her zaman ışık kaynağının TERS yönüne düşer. Akşam Güneş batıda (sağda) olduğu için gölge sola uzanır.'}
 ];
-function genKayac(){
-  const kind=rnd(0,1);
-  const it=pick(KAYAC);
-  if(kind===0){
-    const w=distractors(it.ad,()=>pick(KAYAC).ad);
+const GOLGE_METIN=[
+ {s:'Gün içinde cisimlerin gölge boyu neden değişir?',
+  c:'Dünya’nın kendi ekseni etrafında dönmesiyle Güneş ışınlarının geliş açısı değiştiği için',
+  y:['Hava sıcaklığı değiştiği için','Cisimlerin boyu değiştiği için','Güneş büyüyüp küçüldüğü için'],
+  e:'Dünya döndükçe Güneş gökyüzünde farklı yüksekliklerde görünür. Işınların açısı değişince gölge boyu da değişir.'},
+ {s:'Gölge boyu gün içinde nasıl değişir?',
+  c:'Sabah uzun, öğle en kısa, akşam yine uzun',y:['Hep aynı kalır','Sabah en kısa, öğle en uzun','Sürekli uzar'],
+  e:'Güneş yükseldikçe gölge kısalır, alçaldıkça uzar. En kısa gölge öğle vaktindedir.'},
+ {s:'Türkiye’de aşağıdaki şehirlerin hangisinde Güneş diğerlerinden ÖNCE doğar?',
+  c:'Hakkâri',y:['İstanbul','Ankara','İzmir'],
+  e:'Dünya batıdan doğuya döndüğü için Güneş önce DOĞUDAKİ şehirlerde doğar. Hakkâri en doğudadır.'},
+ {s:'Sakarya’da Güneş yeni doğarken Van’da çoktan doğmuş olması neyi gösterir?',
+  c:'Dünya’nın batıdan doğuya doğru döndüğünü',y:['Dünya’nın Güneş etrafında dolandığını','Bir günün 24 saat olduğunu','Mevsimlerin oluştuğunu'],
+  e:'Van, Sakarya’nın doğusundadır. Dünya batıdan doğuya döndüğü için doğudaki yerler Güneş’i önce görür.'},
+ {s:'Güneş’in tam tepede göründüğü vakit hangisidir?',
+  c:'Öğle',y:['Sabah','Akşam','Gece yarısı'],
+  e:'Güneş öğle vaktinde en yüksek konumdadır. Bu yüzden gölgeler en kısadır.'},
+ {s:'Hava kararmaya başladığında Güneş hangi yöndedir?',
+  c:'Batıda',y:['Doğuda','Tam tepede','Kuzeyde'],
+  e:'Güneş doğudan doğar, batıdan batar. Hava kararırken Güneş batı yönündedir.'}
+];
+function genGolge(){
+  if(rnd(0,1)===0){
+    const it=pick(GOLGE_S);
+    return{text:it.s,visual:()=>drawGolge(it.gorsel),answer:it.c,options:shuffle([it.c,...it.y]),
+      explain:`${it.e}\n\n💡 Güneş yükseldikçe gölge KISALIR, alçaldıkça UZAR.\n💡 Gölge her zaman ışığın ters yönüne düşer.`};
+  }
+  const it=pick(GOLGE_METIN);
+  return{text:it.s,answer:it.c,options:shuffle([it.c,...it.y]),
+    explain:`${it.e}\n\n💡 Dünya batıdan doğuya döner → Güneş önce doğudaki şehirlerde doğar.`};
+}
+
+/* ==========================================================
+   AŞAMA 4 — KAYAÇLAR, MADENLER VE KULLANIM ALANLARI
+   ========================================================== */
+const MADEN=[
+ {ad:'Bor',ozellik:'Ülkemizde dünyadaki en büyük rezerv bulunur. Isıya dayanıklı cam, hava yastığı ve hidrolik fren yapımında kullanılır.'},
+ {ad:'Bakır',ozellik:'Elektriği çok iyi ilettiği için elektrik kabloları ve elektrikli aletlerde, ayrıca süs eşyası yapımında kullanılır.'},
+ {ad:'Altın',ozellik:'Kolye, küpe gibi takı ve süs eşyası yapımında kullanılır. Ekonomik değeri yüksektir.'},
+ {ad:'Demir',ozellik:'Çelik üretiminin temelidir. Bina, araç ve mutfak eşyası yapımında kullanılır.'},
+ {ad:'Kömür',ozellik:'Bitki kalıntılarının milyonlarca yılda değişmesiyle oluşur. Isınma ve enerji üretiminde yakıt olarak kullanılır.'},
+ {ad:'Mermer',ozellik:'Heykel, zemin kaplaması ve mutfak tezgâhı yapımında kullanılır. Kireç taşının başkalaşmasıyla oluşur.'},
+ {ad:'Kil',ozellik:'Çanak, çömlek, tuğla ve porselen yapımında kullanılır.'},
+ {ad:'Kum',ozellik:'Cam üretiminde ve bina yapımında (beton) kullanılır.'}
+];
+const MADEN_S=[
+ {s:'Dünya’da en fazla Türkiye’de bulunan, ısıya dayanıklı cam ve hava yastığı yapımında kullanılan maden hangisidir?',
+  c:'Bor',y:['Bakır','Altın','Kömür'],
+  e:'Bor madeninin dünyadaki en büyük rezervi Türkiye’dedir. Isıya dayanıklı cam, hava yastığı, hidrolik fren ve temizlik ürünlerinde kullanılır.'},
+ {s:'Bor madeniyle ilgili hangisi YANLIŞTIR?',
+  c:'Evlerde ısınma amaçlı yakıt olarak kullanılır',y:['Isıya dayanıklı cam üretiminde kullanılır','Ülkemizde en çok bulunan madenlerden biridir','Hava yastığı ve hidrolik fren yapımında kullanılır'],
+  e:'Isınma amaçlı yakıt olarak KÖMÜR kullanılır, bor değil. Diğer bilgiler doğrudur.'},
+ {s:'Elektrik kablolarında hangi maden kullanılır?',
+  c:'Bakır',y:['Altın','Bor','Mermer'],
+  e:'Bakır elektriği çok iyi ilettiği için kablolarda kullanılır. Ayrıca süs eşyası yapımında da kullanılır.'},
+ {s:'Yer kabuğundaki kayaçlardan MADEN olanların en temel özelliği nedir?',
+  c:'Ekonomik değerinin olması',y:['Çok sert olması','Çok yaygın olması','İşlenememesi'],
+  e:'Madenler, ekonomik değeri olan ve işlenerek kullanılabilen minerallerdir.'},
+ {s:'Heykel yapımında en çok hangi kayaç kullanılır?',
+  c:'Mermer',y:['Kömür','Kum','Kil'],
+  e:'Mermer işlenmeye elverişli ve güzel görünümlü olduğu için heykel ve zemin kaplamasında kullanılır.'},
+ {s:'Cam üretiminin ham maddesi nedir?',
+  c:'Kum',y:['Kil','Mermer','Kömür'],
+  e:'Cam, kumun yüksek sıcaklıkta eritilmesiyle üretilir.'},
+ {s:'Tuğla ve porselen yapımında kullanılan kayaç hangisidir?',
+  c:'Kil',y:['Kum','Mermer','Granit'],
+  e:'Kil şekillendirilip pişirilerek tuğla, çanak, çömlek ve porselen yapılır.'}
+];
+function genMaden(){
+  if(rnd(0,1)===0){
+    const it=pick(MADEN);
+    const w=distractors(it.ad,()=>pick(MADEN).ad);
     return{
       text:'Aşağıda özelliği verilen kayaç/maden hangisidir?',
       readDisplay:it.ozellik,
       answer:it.ad,
       options:shuffle([it.ad,...w]),
-      explain:`${it.ad} → ${it.tip}\n${it.ozellik}\n\n💡 Kayaçlar oluşumuna göre üç gruba ayrılır:\n• Magmatik: magmanın soğuyup katılaşmasıyla\n• Tortul: tortuların üst üste birikip sıkışmasıyla\n• Başkalaşım: ısı ve basınçla değişerek`
+      explain:`${it.ad}: ${it.ozellik}\n\n💡 Madenler ekonomik değeri olan minerallerdir.`
     };
   }
-  return{
-    text:`"${it.ad}" hangi kayaç/maden türündendir?`,
-    numberDisplay:it.ad,
-    answer:it.tip,
-    options:shuffle(['Magmatik (katılaşım)','Tortul','Başkalaşım','Maden']),
-    explain:`${it.ad} → ${it.tip}\n${it.ozellik}`
-  };
+  const it=pick(MADEN_S);
+  return{text:it.s,answer:it.c,options:shuffle([it.c,...it.y]),explain:it.e};
 }
 
-// A4: Fosiller
-const FOSIL=[
- {s:'Fosil nedir?',c:'Geçmişte yaşamış canlıların taşlaşmış kalıntıları',y:['Yeni oluşmuş kayaçlar','Yanardağ külü','Deniz kumu'],
-  e:'Fosil, çok eskiden yaşamış canlıların kalıntılarının ya da izlerinin taşlaşmış hâlidir.'},
- {s:'Fosiller en çok hangi kayaç türünde bulunur?',c:'Tortul kayaçlarda',y:['Magmatik kayaçlarda','Başkalaşım kayaçlarında','Hiçbirinde'],
-  e:'Tortul kayaçlar tabaka tabaka birikerek oluşur ve canlı kalıntılarını arasında korur. Magmatik kayaçlar çok sıcak magmadan oluştuğu için fosil barındırmaz.'},
- {s:'Fosiller bize ne hakkında bilgi verir?',c:'Geçmişte yaşamış canlılar ve o dönemin iklimi hakkında',y:['Gelecekteki hava durumu','Dünya’nın yaşı dışında hiçbir şey','Uzaydaki canlılar'],
-  e:'Bilim insanları fosillere bakarak hangi canlıların yaşadığını, nasıl bir ortamda yaşadıklarını öğrenir.'},
- {s:'Bir dağın tepesinde deniz canlısı fosili bulunması ne anlama gelir?',c:'O bölge geçmişte deniz altındaydı',y:['Deniz canlısı dağa tırmanmıştır','Fosil rüzgârla taşınmıştır','Bir hata yapılmıştır'],
-  e:'Yer kabuğu hareketleriyle deniz tabanı yükselip kara hâline gelebilir. Bu yüzden dağlarda deniz canlısı fosili bulunur.'},
- {s:'Fosiller nasıl oluşur?',c:'Canlı kalıntısının tortular altında kalıp uzun sürede taşlaşmasıyla',y:['Bir gecede aniden','Canlının dondurulmasıyla','Kayaların kırılmasıyla'],
-  e:'Ölen canlının üzeri tortularla örtülür, milyonlarca yıl boyunca basınç altında taşlaşır.'}
+/* ==========================================================
+   AŞAMA 5 — FOSİLLER VE PALEONTOLOJİ
+   ========================================================== */
+const FOSIL_S=[
+ {s:'Geçmişte yaşamış canlıların günümüze ulaşan sertleşmiş kalıntılarına ne denir?',
+  c:'Fosil',y:['Maden','Mineral','Kayaç'],
+  e:'Fosil, milyonlarca yıl önce yaşamış canlıların taşlaşmış kalıntıları ya da izleridir.'},
+ {s:'Fosilleri inceleyen bilim dalı hangisidir?',
+  c:'Paleontoloji',y:['Arkeoloji','Biyoloji','Astronomi'],
+  e:'Fosilleri PALEONTOLOJİ inceler. Arkeoloji ise insanların geçmişte bıraktığı eserleri inceler. Bu ikisi sık karıştırılır.'},
+ {s:'Fosillerle ilgilenen bilim insanlarına ne ad verilir?',
+  c:'Paleontolog',y:['Arkeolog','Biyolog','Jeolog'],
+  e:'Fosil bilimiyle uğraşan kişiye paleontolog denir.'},
+ {s:'Fosilleşmenin gerçekleşmesi için kalıntının hava ile teması hemen kesilmelidir.\n\nBuna göre hangi ortamda fosilleşme GERÇEKLEŞMEZ?',
+  c:'Toprak yüzeyi',y:['Buzul ortam','Bitki reçinesi','Kireç taşı'],
+  e:'Toprak yüzeyinde kalıntı havayla temas eder ve çürür. Buzul, reçine ve tortu altında hava teması kesildiği için fosilleşme olur.'},
+ {s:'Bir canlının hangi kısımları daha kolay fosilleşir?',
+  c:'Diş, kemik ve boynuz gibi sert kısımlar',y:['Sadece derisi','Sadece kanı','Yumuşak organları'],
+  e:'Sert kısımlar (diş, kemik, boynuz, kabuk) çürümeye dayanıklı olduğu için fosilleşir. Yumuşak kısımlar çabuk bozulur.'},
+ {s:'Fosiller en çok hangi kayaç türünde bulunur?',
+  c:'Tortul kayaçlarda',y:['Magmatik kayaçlarda','Başkalaşım kayaçlarında','Hiçbirinde'],
+  e:'Tortul kayaçlar tabaka tabaka birikerek oluşur ve kalıntıları arasında korur. Magmatik kayaçlar çok sıcak magmadan oluştuğu için fosil barındıramaz.'},
+ {s:'Fosiller ne kadar sürede oluşur?',
+  c:'Milyonlarca yılda',y:['Birkaç günde','Birkaç yılda','Bir gecede'],
+  e:'Fosilleşme çok uzun bir süreçtir, milyonlarca yıl alır.'},
+ {s:'Bilim insanları fosillere bakarak hangi bilgiye ULAŞAMAZ?',
+  c:'Aynı dönemde yaşamış tüm canlıların özelliklerine',y:['Canlının kaç yaşında olduğuna','Canlıların geçirdiği gelişim dönemlerine','O dönemin iklim özelliklerine'],
+  e:'Fosiller sadece fosilleşebilmiş canlılar hakkında bilgi verir. O dönemde yaşayıp fosilleşmemiş canlılar hakkında bilgi edinilemez.'},
+ {s:'Bir dağın tepesinde deniz canlısına ait fosil bulunması neyi gösterir?',
+  c:'O bölgenin geçmişte deniz altında olduğunu',y:['Deniz canlısının dağa tırmandığını','Fosilin rüzgârla taşındığını','Ölçümün yanlış olduğunu'],
+  e:'Yer kabuğu hareketleriyle deniz tabanı zamanla yükselerek kara hâline gelmiş olabilir.'},
+ {s:'Fosillerle ilgili hangisi YANLIŞTIR?',
+  c:'Fosilleşme yalnızca kayaçlarda gerçekleşir',y:['Milyonlarca yıl öncesinden gelen kalıntılardır','Dünya’nın geçmişi hakkında bilgi verir','Kayaç tabakalarının içinde oluşur'],
+  e:'Fosilleşme buzul içinde ve bitki reçinesinde (amber) de gerçekleşebilir, sadece kayaçlarda değil.'}
+];
+const FOSIL_SIRA=[
+ 'Canlı ölür ve kalıntısı suya/toprağa gömülür',
+ 'Üzeri tortu tabakalarıyla örtülür, hava teması kesilir',
+ 'Tortular sıkışır, kalıntı milyonlarca yılda taşlaşır',
+ 'Kayaçlar kıvrılıp aşınır ve fosil yeryüzüne çıkar'
 ];
 function genFosil(){
-  const it=pick(FOSIL);
-  return{
-    text:it.s,
-    answer:it.c,
-    options:shuffle([it.c,...it.y]),
-    explain:`${it.e}\n\n💡 Fosiller tortul kayaçlarda bulunur ve Dünya'nın geçmişine açılan bir penceredir.`
-  };
+  if(rnd(0,3)===0){
+    // Fosilleşme aşamalarını sırala
+    const dogru=FOSIL_SIRA.map((x,i)=>(i+1)+'. '+x).join('\n');
+    const opts=new Set([FOSIL_SIRA.join(' → ')]);
+    let g=0;
+    while(opts.size<4&&g++<60) opts.add(shuffle([...FOSIL_SIRA]).join(' → '));
+    return{
+      text:'Fosilleşmenin aşamaları karışık olarak verilmiştir.\n\nDoğru sıralama hangisidir?',
+      answer:FOSIL_SIRA.join(' → '),
+      options:shuffle([...opts]),
+      explain:`Doğru sıra:\n${dogru}\n\n💡 Önce gömülme, sonra üzerinin örtülmesi, sonra taşlaşma, en son yeryüzüne çıkma.`
+    };
+  }
+  const it=pick(FOSIL_S);
+  return{text:it.s,answer:it.c,options:shuffle([it.c,...it.y]),
+    explain:`${it.e}\n\n💡 Fosil bilimi = PALEONTOLOJİ (arkeoloji değil!)`};
 }
 
-// A5: Karışık / yorum (en zor)
-function genYorum(){
-  const senaryolar=[
- {s:'Bir öğrenci elindeki küreyi masa lambasının etrafında yavaşça dolaştırıyor ve aynı anda kürenin kendi etrafında da dönmesini sağlıyor.\n\nBu deney neyi göstermektedir?',
-  c:'Dünya’nın hem dönme hem dolanma hareketini',y:['Sadece gece ve gündüzü','Ay’ın evrelerini','Depremlerin oluşumunu'],
-  e:'Lamba Güneş’i, küre Dünya’yı temsil eder. Kendi etrafında dönmesi gece-gündüzü, lamba etrafında dolanması mevsimleri gösterir.'},
- {s:'Kesilen bir kayaç tabaka tabaka görünüyor ve aralarında deniz kabuğu izleri var.\n\nBu kayaç hakkında ne söylenebilir?',
-  c:'Tortul bir kayaçtır ve fosil içermektedir',y:['Magmatik bir kayaçtır','Yeni oluşmuş bir kayaçtır','Başkalaşım kayacıdır'],
-  e:'Tabakalı yapı tortul kayacın işaretidir. İçindeki deniz kabuğu izleri fosildir.'},
- {s:'Türkiye’de saat 12.00 iken, Dünya’nın diğer tarafındaki bir ülkede gece yarısıdır.\n\nBunun sebebi nedir?',
-  c:'Dünya kendi ekseni etrafında döndüğü için her yer aynı anda Güneş’i göremez',y:['O ülke Güneş’ten çok uzaktır','O ülkede Güneş hiç doğmaz','Dünya Güneş etrafında dolandığı için'],
-  e:'Dönme hareketi sırasında Dünya’nın sadece bir yüzü Güneş’i görür. Diğer yüz aynı anda karanlıktadır.'},
- {s:'Bir bölgede kireç taşı, uzun süre yüksek ısı ve basınca maruz kalmıştır.\n\nBu kayaç neye dönüşür?',
-  c:'Mermere',y:['Granite','Kömüre','Kum taşına'],
-  e:'Kireç taşı (tortul), ısı ve basınç altında başkalaşıma uğrayarak MERMER olur.'}
-  ];
-  const it=pick(senaryolar);
+/* ==========================================================
+   AŞAMA 6 — ÇOKLU BİLGİ DEĞERLENDİRME (en zor)
+   ========================================================== */
+const COKLU=[
+ {konu:'Dünya’nın hareketleri',bilgiler:[
+   {t:'Dünya batıdan doğuya doğru döner.',d:true,n:'Bu yüzden Güneş doğudan doğuyor gibi görünür.'},
+   {t:'En uzun gölge boyu öğle saatlerinde olur.',d:false,n:'Öğlede gölge EN KISA olur, çünkü Güneş tepededir.'},
+   {t:'Dünya’nın kendi ekseni etrafında dönmesiyle mevsimler oluşur.',d:false,n:'Mevsimler DOLANMA hareketiyle oluşur, dönmeyle değil.'},
+   {t:'Güneş’in doğup batıyor gibi görünmesinin nedeni Dünya’nın hareketidir.',d:true,n:'Güneş sabittir, hareket eden Dünya’dır.'}
+ ]},
+ {konu:'Fosiller',bilgiler:[
+   {t:'Milyonlarca yıl öncesinden gelen canlı kalıntılarıdır.',d:true,n:'Fosilleşme çok uzun sürer.'},
+   {t:'Fosilleşme yalnızca kayaçlarda gerçekleşir.',d:false,n:'Buzul içinde ve bitki reçinesinde de fosilleşme olur.'},
+   {t:'Fosillerle ilgilenen bilim insanları arkeologlardır.',d:false,n:'Fosillerle PALEONTOLOGLAR ilgilenir. Arkeologlar insan eserlerini inceler.'},
+   {t:'Üst üste biriken tortular içinde oluşur.',d:true,n:'Tortul kayaçlar fosilleri korur.'}
+ ]},
+ {konu:'Bakır madeni',bilgiler:[
+   {t:'Elektrikli alet yapımında kullanılır.',d:true,n:'Bakır elektriği çok iyi iletir.'},
+   {t:'Bir madendir.',d:true,n:'Ekonomik değeri olan bir mineraldir.'},
+   {t:'Süs eşyası yapımında kullanılır.',d:true,n:'Görünümü nedeniyle süs eşyasında da kullanılır.'},
+   {t:'Doğada hiç bulunmaz, insan yapımıdır.',d:false,n:'Bakır doğal bir madendir, yer altından çıkarılır.'}
+ ]},
+ {konu:'Fosilleşme şartları',bilgiler:[
+   {t:'Kalıntının hava ile teması kesilmelidir.',d:true,n:'Hava ile temas eden kalıntı çürür.'},
+   {t:'Canlının sert kısımları bulunmalıdır.',d:true,n:'Diş, kemik, boynuz gibi sert kısımlar fosilleşir.'},
+   {t:'Fosilleşme birkaç yılda tamamlanır.',d:false,n:'Fosilleşme milyonlarca yıl sürer.'},
+   {t:'Kalıntı tortu tabakaları altında kalmalıdır.',d:true,n:'Tortular kalıntıyı örter ve korur.'}
+ ]},
+ {konu:'Yer kabuğu',bilgiler:[
+   {t:'Kayaçlardan oluşur.',d:true,n:'Kayaçlar da minerallerden oluşur.'},
+   {t:'Dünya’nın en kalın katmanıdır.',d:false,n:'En KALIN katman mantodur; yer kabuğu en İNCE katmandır.'},
+   {t:'Ekonomik değeri olan minerallere maden denir.',d:true,n:'Bor, bakır, altın birer madendir.'},
+   {t:'Üzerinde yaşadığımız katmandır.',d:true,n:'Kara ve denizler yer kabuğu üzerindedir.'}
+ ]}
+];
+const ROMAN=['I','II','III','IV'];
+function genCoklu(){
+  const it=pick(COKLU);
+  const secim=shuffle([...it.bilgiler]).slice(0,3);
+  const dogruIdx=secim.map((b,i)=>b.d?ROMAN[i]:null).filter(Boolean);
+  const cevap=dogruIdx.length===0?'Hiçbiri':
+              dogruIdx.length===3?'I, II ve III':
+              dogruIdx.length===1?'Yalnız '+dogruIdx[0]:
+              dogruIdx.join(' ve ');
+  const tumSecenekler=['Yalnız I','Yalnız II','Yalnız III','I ve II','I ve III','II ve III','I, II ve III','Hiçbiri'];
+  const w=shuffle(tumSecenekler.filter(x=>x!==cevap)).slice(0,3);
   return{
-    text:it.s,
-    answer:it.c,
-    options:shuffle([it.c,...it.y]),
-    explain:`${it.e}\n\n💡 Fen sorularında önce olayı anla, sonra hangi konuyla ilgili olduğunu bul.`
+    text:`${it.konu} ile ilgili bazı bilgiler verilmiştir.\n\nVerilen bilgilerden hangileri DOĞRUDUR?`,
+    readDisplay:secim.map((b,i)=>ROMAN[i]+'. '+b.t).join('\n'),
+    answer:cevap,
+    options:shuffle([cevap,...w]),
+    explain:secim.map((b,i)=>`${ROMAN[i]}. ${b.d?'✓ DOĞRU':'✗ YANLIŞ'} — ${b.n}`).join('\n')+
+      `\n\nCevap: ${cevap}\n\n💡 Bu soru tipinde her bilgiyi TEK TEK değerlendir, sonra doğru olanları birleştir.`
   };
 }
 
 initGame([
-  {name:'Dünya’nın Katmanları',gen:genKatman},
+  {name:'Yer Kabuğu ve Mineraller',gen:genKatman},
   {name:'Dönme ve Dolanma',gen:genHareket},
-  {name:'Kayaçlar',gen:genKayac},
+  {name:'Gölge ve Güneş',gen:genGolge},
+  {name:'Kayaçlar ve Madenler',gen:genMaden},
   {name:'Fosiller',gen:genFosil},
-  {name:'Yorum Soruları',gen:genYorum}
+  {name:'Çoklu Değerlendirme',gen:genCoklu}
 ],{c1:'#1565C0',c2:'#42A5F5',shadow:'rgba(21,101,192,.35)',boxBg:'linear-gradient(135deg,#f0f7ff 0%,#e8f3fe 100%)',boxBorder:'#bbdefb'});
 </script>
 </body>
