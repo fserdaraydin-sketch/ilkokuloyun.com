@@ -124,22 +124,112 @@ function genCubeCount(){
   };
 }
 
-// AŞAMA 3: Simetri - İNTERAKTİF (çocuk tıklayarak simetriği oluşturur)
+// AŞAMA 3: Simetri - 2 SORU TİPİ
+//  Tip A: Çocuk simetriği kendi oluşturur (interaktif)
+//  Tip B: Verilen simetrik mi? (doğrulama)
 function genSymmetry(){
-  const N=4;
+  return rnd(0,1)===0 ? genSymBuild() : genSymCheck();
+}
+
+// Rastgele şekil + dikey eksene göre simetriği
+function makeSymPair(N){
   const cells=new Set();
   const cnt=rnd(4,7);
   while(cells.size<cnt) cells.add(rnd(0,N-1)+','+rnd(0,N-1));
+  const mirror=new Set();
+  cells.forEach(k=>{const[r,c]=k.split(',').map(Number);mirror.add(r+','+(N-1-c));});
+  return {cells,mirror};
+}
 
-  // Doğru simetrik cevap (dikey eksene göre yatay yansıma)
-  const target=new Set();
-  cells.forEach(k=>{const[r,c]=k.split(',').map(Number);target.add(r+','+(N-1-c));});
-
+// ---- TİP A: İNTERAKTİF OLUŞTURMA ----
+function genSymBuild(){
+  const N=4;
+  const {cells,mirror}=makeSymPair(N);
   return{
     interactive:true,
     text:'Soldaki şeklin kırmızı çizgiye göre SİMETRİĞİNİ oluştur.\n\nSağdaki boş karelere tıklayarak boya. Hazır olduğunda "Kontrol Et" düğmesine bas.',
-    mount:(box,api)=>mountSymmetry(box,api,cells,target,N)
+    mount:(box,api)=>mountSymmetry(box,api,cells,mirror,N)
   };
+}
+
+// ---- TİP B: DOĞRULAMA ----
+function genSymCheck(){
+  const N=4;
+  const {cells,mirror}=makeSymPair(N);
+  const isCorrect=rnd(0,1)===0;
+
+  let shown=new Set(mirror), hataTipi='';
+  if(!isCorrect){
+    // Şekli boz; kazara simetrik kalırsa tekrar dene
+    const isSameAsMirror=set=>set.size===mirror.size&&[...mirror].every(k=>set.has(k));
+    let guard=0;
+    do{
+      shown=new Set(mirror);
+      const kind=rnd(0,2);
+      if(kind===0){
+        // Bir kareyi yanlış yere taşı (yeni yer eskisinden farklı olmalı)
+        const drop=pick([...shown]);
+        shown.delete(drop);
+        const bos=[];
+        for(let r=0;r<N;r++)for(let c=0;c<N;c++){
+          const k=r+','+c;
+          if(!shown.has(k)&&k!==drop) bos.push(k);
+        }
+        if(bos.length){ shown.add(pick(bos)); hataTipi='Bir kare yanlış yerde.'; }
+      }else if(kind===1){
+        // Eksik kare
+        shown.delete(pick([...shown]));
+        hataTipi='Bir kare eksik.';
+      }else{
+        // Yansıtmak yerine aynen kopyalanmış
+        shown=new Set(cells);
+        hataTipi='Şekil yansıtılmamış, aynen kopyalanmış.';
+      }
+    }while(isSameAsMirror(shown)&&guard++<40);
+
+    // Son güvence: hâlâ simetrikse bir kare sil
+    if(isSameAsMirror(shown)){
+      shown.delete(pick([...shown]));
+      hataTipi='Bir kare eksik.';
+    }
+  }
+
+  const dogru=[...mirror].filter(k=>shown.has(k)).length;
+  return{
+    text:'Sağdaki şekil, soldaki şeklin kırmızı çizgiye göre simetriği midir?',
+    visual:()=>drawSymPair(cells,shown,N),
+    answer:isCorrect?'Evet, simetriktir':'Hayır, simetrik değildir',
+    options:shuffle(['Evet, simetriktir','Hayır, simetrik değildir']),
+    explain:isCorrect
+      ? `✓ Doğru simetri.\nSoldaki boyalı kare: ${cells.size}\nSağdaki boyalı kare: ${shown.size}\nHer kare eksenin karşı tarafında AYNI uzaklıkta.\n\n💡 Simetride satır (yükseklik) değişmez, sadece sağ-sol yer değiştirir.`
+      : `✗ Simetrik değil. ${hataTipi}\nOlması gereken boyalı kare: ${mirror.size}\nGösterilen: ${shown.size} (bunun ${dogru} tanesi doğru yerde)\n\n💡 Her kareyi tek tek kontrol et: eksene 1 kare uzaktaysa, karşıda da 1 kare uzakta olmalı.`
+  };
+}
+
+function drawSymPair(left,right,N){
+  const W=Math.min(400,window.innerWidth-90);
+  const cs=Math.floor(Math.min((W-30)/(N*2+0.7),52));
+  const c=document.createElement('canvas');
+  c.width=cs*(N*2)+cs*0.7+20; c.height=cs*N+20;
+  const ctx=c.getContext('2d');
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);
+  const x0=10,y0=10,gap=cs*0.7,x1=x0+cs*N+gap;
+
+  function grid(ox,set){
+    for(let r=0;r<N;r++)for(let col=0;col<N;col++){
+      ctx.fillStyle=set.has(r+','+col)?'#42A5F5':'#F5F5F5';
+      ctx.fillRect(ox+col*cs,y0+r*cs,cs,cs);
+      ctx.strokeStyle='#BDBDBD';ctx.lineWidth=1.5;
+      ctx.strokeRect(ox+col*cs,y0+r*cs,cs,cs);
+    }
+  }
+  grid(x0,left); grid(x1,right);
+
+  const mx=x0+cs*N+gap/2;
+  ctx.strokeStyle='#E53935';ctx.lineWidth=3;ctx.setLineDash([7,5]);
+  ctx.beginPath();ctx.moveTo(mx,y0-6);ctx.lineTo(mx,y0+cs*N+6);ctx.stroke();
+  ctx.setLineDash([]);
+  return c;
 }
 
 function mountSymmetry(box,api,cells,target,N){
