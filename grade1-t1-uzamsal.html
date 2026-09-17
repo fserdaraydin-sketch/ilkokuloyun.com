@@ -36,14 +36,14 @@
 <script>
 // Nesne çiftleri: (hareketli nesne, sabit referans)
 const CIFTLER=[
-  {n:'🐱',ad:'kedi',   r:'🧺',rad:'sepet'},
-  {n:'🐶',ad:'köpek',  r:'🏠',rad:'kulübe'},
-  {n:'🐦',ad:'kuş',    r:'🌳',rad:'ağaç'},
-  {n:'⚽',ad:'top',    r:'📦',rad:'kutu'},
-  {n:'🦋',ad:'kelebek',r:'🌷',rad:'çiçek'},
-  {n:'🐟',ad:'balık',  r:'🪨',rad:'taş'},
-  {n:'🐰',ad:'tavşan', r:'🥕',rad:'havuç'},
-  {n:'🚗',ad:'araba',  r:'🏫',rad:'okul'}
+  {n:'🐱',ad:'Kedi',   r:'🧺',rad:'sepet',  nin:'sepetin',   e:'sepete',   den:'sepetten'},
+  {n:'🐶',ad:'Köpek',  r:'🏠',rad:'kulübe', nin:'kulübenin', e:'kulübeye', den:'kulübeden'},
+  {n:'🐦',ad:'Kuş',    r:'🌳',rad:'ağaç',   nin:'ağacın',    e:'ağaca',    den:'ağaçtan'},
+  {n:'⚽',ad:'Top',    r:'📦',rad:'kutu',   nin:'kutunun',   e:'kutuya',   den:'kutudan'},
+  {n:'🦋',ad:'Kelebek',r:'🌷',rad:'çiçek',  nin:'çiçeğin',   e:'çiçeğe',   den:'çiçekten'},
+  {n:'🐟',ad:'Balık',  r:'🪨',rad:'taş',    nin:'taşın',     e:'taşa',     den:'taştan'},
+  {n:'🐰',ad:'Tavşan', r:'🥕',rad:'havuç',  nin:'havucun',   e:'havuca',   den:'havuçtan'},
+  {n:'🚗',ad:'Araba',  r:'🏫',rad:'okul',   nin:'okulun',    e:'okula',    den:'okuldan'}
 ];
 
 // Konum tanımları: nesnenin referansa göre yerleşimi
@@ -82,7 +82,7 @@ function etkKonum(){
   const digerler=shuffle(tumu.filter(x=>x!==dogru)).slice(0,2);
   const secenek=[dogru,...digerler];
   return{
-    yonerge:`${cift.ad.charAt(0).toLocaleUpperCase('tr')+cift.ad.slice(1)} ${cift.rad}in ${dogru}. Doğru resmi bul.`,
+    yonerge:`${cift.ad} ${cift.nin} ${dogru}. Doğru resmi bul.`,
     secenek, dogru,
     ciz:s=>cizSahne(cift,s),
     ipucu:KONUMLAR[dogru].ip
@@ -98,7 +98,7 @@ function etkTers(){
   const c=cizSahne(cift,dogru);
   c.style.width='190px';c.style.height='170px';
   return{
-    yonerge:`${cift.ad.charAt(0).toLocaleUpperCase('tr')+cift.ad.slice(1)} nerede? Resme bak ve doğru sözcüğü seç.`,
+    yonerge:`${cift.ad} nerede? Resme bak ve doğru sözcüğü seç.`,
     secenek:[dogru,...digerler], dogru,
     ciz:s=>{
       const{c:k,ctx,W,H}=sahne(148,132);
@@ -128,7 +128,7 @@ function etkYakinUzak(){
     return c;
   }
   return{
-    yonerge:`${cift.ad.charAt(0).toLocaleUpperCase('tr')+cift.ad.slice(1)} ${cift.rad}e ${soru}. Doğru resmi bul.`,
+    yonerge:`${cift.ad} ${soru==='yakın'?cift.e:cift.den} ${soru}. Doğru resmi bul.`,
     secenek:['yakın','uzak'], dogru:soru,
     ciz,
     ipucu:soru==='yakın'?'Yakın olan, hemen yanı başındadır.':'Uzak olan, aralarında çok mesafe vardır.'
@@ -152,7 +152,7 @@ function etkArasinda(){
     return c;
   }
   return{
-    yonerge:`${orta.ad.charAt(0).toLocaleUpperCase('tr')+orta.ad.slice(1)} iki ${a.rad}in arasında. Doğru resmi bul.`,
+    yonerge:`${orta.ad} iki ${a.nin} arasında. Doğru resmi bul.`,
     secenek:['0','1','2'], dogru:'1',
     ciz,
     ipucu:'Arasında olan, tam ortadadır.'
