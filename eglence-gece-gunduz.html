@@ -52,7 +52,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
 @media(max-width:600px){
 .container{padding:15px}
 .header h1{font-size:21px}
-#stage{height:280px}
+#stage{height:300px}
 .city-saat{font-size:25px}
 .sl-lab{width:74px;font-size:11.5px}
 }
@@ -116,7 +116,8 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 const stage=document.getElementById('stage');
-let scene,camera,renderer,dunya,gunesMesh,terminator;
+let scene,camera,renderer,dunya,gunesMesh,gunesHale,terminator;
+let GX=-15;
 let aci=0;            // Dünya'nın dönüş açısı (radyan)
 let oynuyor=false;
 let hiz=4;
@@ -183,9 +184,8 @@ function init(){
   scene.background=new THREE.Color(0x060c16);
 
   const w=stage.clientWidth,h=stage.clientHeight;
-  camera=new THREE.PerspectiveCamera(42,w/h,.1,200);
-  camera.position.set(2,6,20);
-  camera.lookAt(3,0,0);
+  camera=new THREE.PerspectiveCamera(42,w/h,.1,300);
+  kamerayiYerlestir();
 
   renderer=new THREE.WebGLRenderer({antialias:true});
   renderer.setPixelRatio(Math.min(devicePixelRatio,2));
@@ -203,20 +203,17 @@ function init(){
   yg.setAttribute('position',new THREE.Float32BufferAttribute(yp,3));
   scene.add(new THREE.Points(yg,new THREE.PointsMaterial({color:0xffffff,size:.5})));
 
-  // GÜNEŞ (solda, sabit)
-  const GX=-15;
+  // GÜNEŞ (solda, sabit) — uzaklığı ekran oranına göre ayarlanır
   gunesMesh=new THREE.Mesh(new THREE.SphereGeometry(3,28,28),
     new THREE.MeshBasicMaterial({color:0xFFD54F}));
-  gunesMesh.position.set(GX,0,0);
   scene.add(gunesMesh);
-  const hale=new THREE.Mesh(new THREE.SphereGeometry(4.1,24,24),
+  gunesHale=new THREE.Mesh(new THREE.SphereGeometry(4.1,24,24),
     new THREE.MeshBasicMaterial({color:0xFFB300,transparent:true,opacity:.2}));
-  hale.position.set(GX,0,0);
-  scene.add(hale);
+  scene.add(gunesHale);
 
-  // Işık: Güneş'ten Dünya'ya
+  // Işık yönü hep -X, mesafe ışığı etkilemez
   const isik=new THREE.DirectionalLight(0xffffff,1.25);
-  isik.position.set(GX,0,0);
+  isik.position.set(-30,0,0);
   scene.add(isik);
   scene.add(new THREE.AmbientLight(0xffffff,.1));
 
@@ -262,6 +259,24 @@ function init(){
   animate();
 }
 
+// Dar ekranda Güneş'i Dünya'ya yaklaştır: sahne kompaktlaşır, Dünya büyük kalır
+function kamerayiYerlestir(){
+  GX = camera.aspect<1.45 ? -10.5 : -15;
+  if(gunesMesh){ gunesMesh.position.set(GX,0,0); gunesHale.position.set(GX,0,0); }
+
+  const solKenar=GX-4.2, sagKenar=9.5;          // Güneş halesi ... Dünya + iğne
+  const merkez=(solKenar+sagKenar)/2;
+  const yariGenislik=(sagKenar-solKenar)/2;
+  const yariYukseklik=5.6;
+
+  const fovY=camera.fov*Math.PI/180;
+  const yatayYari=Math.atan(Math.tan(fovY/2)*camera.aspect);
+  const d=Math.max(yariGenislik/Math.tan(yatayYari), yariYukseklik/Math.tan(fovY/2))*1.09;
+
+  camera.position.set(merkez+d*0.10, d*0.26, d*0.96);
+  camera.lookAt(merkez,0,0);
+}
+
 function bagla(){
   document.getElementById('saat').addEventListener('input',e=>{
     if(oynuyor) oynatDurdur();
@@ -271,7 +286,9 @@ function bagla(){
   document.getElementById('hiz').addEventListener('input',e=>{hiz=+e.target.value;});
   window.addEventListener('resize',()=>{
     const w=stage.clientWidth,h=stage.clientHeight;
-    camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);
+    camera.aspect=w/h;camera.updateProjectionMatrix();
+    kamerayiYerlestir();
+    renderer.setSize(w,h);
   });
 }
 
