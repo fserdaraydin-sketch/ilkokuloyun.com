@@ -38,7 +38,7 @@
 const NESNELER=[
   {n:'⚽',ad:'Top'},{n:'🐱',ad:'Kedi'},{n:'🍎',ad:'Elma'},
   {n:'🧸',ad:'Ayı'},{n:'🐦',ad:'Kuş'},{n:'🎈',ad:'Balon'},
-  {n:'🐰',ad:'Tavşan'},{n:'⭐',ad:'Yıldız'}
+  {n:'🐰',ad:'Tavşan'},{n:'🐟',ad:'Balık'}
 ];
 
 // Referans nesneler CANVAS ile çizilir — emoji üst üste binince
@@ -46,66 +46,124 @@ const NESNELER=[
 const MASA={rad:'masa',nin:'masanın',e:'masaya',den:'masadan'};
 const KUTU={rad:'kutu',nin:'kutunun',e:'kutuya',den:'kutudan'};
 
-// Perspektifli zemin — derinlik hissi verir, önünde/arkasında ayrımını sağlar
+// ===== HACİMLİ (İZOMETRİK) ÇİZİM =====
+// Emoji yığını yerine hacimli kaplar: içi görünen kutu, cam fanus,
+// izometrik masa. Böylece "içinde" gerçekten içeride görünüyor.
+
 function cizZemin(ctx,W,H){
-  ctx.fillStyle='#F3EDE0';
+  ctx.fillStyle='#F4EEE2';
   ctx.beginPath();
-  ctx.moveTo(W*0.26,H*0.42); ctx.lineTo(W*0.74,H*0.42);
-  ctx.lineTo(W-4,H-8);       ctx.lineTo(4,H-8);
+  ctx.moveTo(W*0.22,H*0.40); ctx.lineTo(W*0.78,H*0.40);
+  ctx.lineTo(W-3,H-6);       ctx.lineTo(3,H-6);
   ctx.closePath(); ctx.fill();
-  ctx.strokeStyle='#E0D5C0'; ctx.lineWidth=2; ctx.stroke();
+  ctx.strokeStyle='#E3D8C4'; ctx.lineWidth=2; ctx.stroke();
 }
-// Gölge nesnenin TAM ALTINA çizilir (emojiyle çakışmaz)
 function golge(ctx,x,yMerkez,boyut){
-  ctx.fillStyle='rgba(120,100,70,.13)';
+  ctx.save();
+  ctx.fillStyle='rgba(120,100,70,.14)';
   ctx.beginPath();
-  ctx.ellipse(x,yMerkez+boyut*0.44,boyut*0.38,boyut*0.12,0,0,Math.PI*2);
-  ctx.fill();
+  ctx.ellipse(x,yMerkez+boyut*0.44,boyut*0.40,boyut*0.13,0,0,Math.PI*2);
+  ctx.fill(); ctx.restore();
 }
 
-// Masa: perspektifli tabla + iki ayak
+// ---- İZOMETRİK MASA ----
 function cizMasa(ctx,mx,my,gen){
-  const yari=gen/2, derin=gen*0.22, kalin=8;
-  // Tabla üst yüzü (paralelkenar)
-  ctx.fillStyle='#D9A05B';
+  const y2=gen/2, d=gen*0.26, kal=8;
+  // Üst yüz
+  ctx.fillStyle='#E0AC69';
   ctx.beginPath();
-  ctx.moveTo(mx-yari+derin,my-derin); ctx.lineTo(mx+yari+derin,my-derin);
-  ctx.lineTo(mx+yari,my);             ctx.lineTo(mx-yari,my);
+  ctx.moveTo(mx-y2+d,my-d); ctx.lineTo(mx+y2+d,my-d);
+  ctx.lineTo(mx+y2,my);     ctx.lineTo(mx-y2,my);
   ctx.closePath(); ctx.fill();
   ctx.strokeStyle='#7A4B1C'; ctx.lineWidth=2; ctx.stroke();
-  // Tabla ön kenarı
+  // Ön kalınlık
   ctx.fillStyle='#C68642';
-  ctx.fillRect(mx-yari,my,gen,kalin);
-  ctx.strokeRect(mx-yari,my,gen,kalin);
-  // Ayaklar
-  ctx.fillStyle='#A66A2E';
-  ctx.fillRect(mx-yari+6,my+kalin,8,34);
-  ctx.fillRect(mx+yari-14,my+kalin,8,34);
-  ctx.strokeRect(mx-yari+6,my+kalin,8,34);
-  ctx.strokeRect(mx+yari-14,my+kalin,8,34);
+  ctx.fillRect(mx-y2,my,gen,kal); ctx.strokeRect(mx-y2,my,gen,kal);
+  // Sağ yan kalınlık
+  ctx.fillStyle='#A86A30';
+  ctx.beginPath();
+  ctx.moveTo(mx+y2,my); ctx.lineTo(mx+y2+d,my-d);
+  ctx.lineTo(mx+y2+d,my-d+kal); ctx.lineTo(mx+y2,my+kal);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  // Ayaklar (ön iki + arka bir)
+  ctx.fillStyle='#8D5524';
+  ctx.fillRect(mx-y2+5,my+kal,8,32);  ctx.strokeRect(mx-y2+5,my+kal,8,32);
+  ctx.fillRect(mx+y2-13,my+kal,8,32); ctx.strokeRect(mx+y2-13,my+kal,8,32);
+  ctx.fillStyle='#7A4B1C';
+  ctx.fillRect(mx+y2+d-11,my-d+kal,6,26); ctx.strokeRect(mx+y2+d-11,my-d+kal,6,26);
 }
 
-// Kutu: açık üstlü, ön duvar ayrı
-function cizKutuArka(ctx,mx,my,gen){
-  const yari=gen/2, yuk=gen*0.72;
-  ctx.fillStyle='#E8D3B0';
-  ctx.fillRect(mx-yari,my-yuk/2,gen,yuk);
-  ctx.strokeStyle='#8D5524';ctx.lineWidth=3;
-  ctx.strokeRect(mx-yari,my-yuk/2,gen,yuk);
-}
-function cizKutuOn(ctx,mx,my,gen){
-  const yari=gen/2, yuk=gen*0.72;
-  ctx.fillStyle='#C68642';
-  ctx.fillRect(mx-yari,my+yuk/2-24,gen,24);
-  ctx.strokeStyle='#8D5524';ctx.lineWidth=3;
-  ctx.strokeRect(mx-yari,my+yuk/2-24,gen,24);
+// ---- AĞZI AÇIK KUTU (içi görünür) ----
+function cizKutuIc(ctx,mx,my,gen){
+  const y2=gen/2, d=gen*0.30, yuk=gen*0.62;
+  // Arka iç duvar
+  ctx.fillStyle='#D9C4A0';
   ctx.beginPath();
-  ctx.moveTo(mx-yari-7,my-yuk/2);ctx.lineTo(mx-yari,my-yuk/2);
-  ctx.moveTo(mx+yari,my-yuk/2);ctx.lineTo(mx+yari+7,my-yuk/2);
+  ctx.moveTo(mx-y2+d,my-yuk/2-d); ctx.lineTo(mx+y2+d,my-yuk/2-d);
+  ctx.lineTo(mx+y2+d,my+yuk/2-d); ctx.lineTo(mx-y2+d,my+yuk/2-d);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle='#8D5524'; ctx.lineWidth=2; ctx.stroke();
+  // İç taban
+  ctx.fillStyle='#C9B38C';
+  ctx.beginPath();
+  ctx.moveTo(mx-y2,my+yuk/2);       ctx.lineTo(mx+y2,my+yuk/2);
+  ctx.lineTo(mx+y2+d,my+yuk/2-d);   ctx.lineTo(mx-y2+d,my+yuk/2-d);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  // Sol iç duvar
+  ctx.fillStyle='#CDB694';
+  ctx.beginPath();
+  ctx.moveTo(mx-y2,my-yuk/2);     ctx.lineTo(mx-y2+d,my-yuk/2-d);
+  ctx.lineTo(mx-y2+d,my+yuk/2-d); ctx.lineTo(mx-y2,my+yuk/2);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+}
+function cizKutuOnDuvar(ctx,mx,my,gen){
+  const y2=gen/2, d=gen*0.30, yuk=gen*0.62;
+  // Ön duvar — içerideki nesnenin ÖNÜNE gelir
+  ctx.fillStyle='#C68642';
+  ctx.beginPath();
+  ctx.moveTo(mx-y2,my+yuk/2-26); ctx.lineTo(mx+y2,my+yuk/2-26);
+  ctx.lineTo(mx+y2,my+yuk/2);    ctx.lineTo(mx-y2,my+yuk/2);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle='#8D5524'; ctx.lineWidth=2; ctx.stroke();
+  // Sağ dış yan
+  ctx.fillStyle='#A86A30';
+  ctx.beginPath();
+  ctx.moveTo(mx+y2,my+yuk/2-26);   ctx.lineTo(mx+y2+d,my+yuk/2-26-d);
+  ctx.lineTo(mx+y2+d,my+yuk/2-d);  ctx.lineTo(mx+y2,my+yuk/2);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  // Açık ağız kenarı
+  ctx.strokeStyle='#8D5524'; ctx.lineWidth=2.5;
+  ctx.beginPath();
+  ctx.moveTo(mx-y2,my-yuk/2);     ctx.lineTo(mx-y2+d,my-yuk/2-d);
+  ctx.lineTo(mx+y2+d,my-yuk/2-d); ctx.lineTo(mx+y2,my-yuk/2);
   ctx.stroke();
 }
 
-// MASA sahnesi
+// ---- CAM FANUS (balık için) ----
+function cizFanusArka(ctx,mx,my,r){
+  // Su
+  ctx.fillStyle='rgba(120,200,235,.45)';
+  ctx.beginPath(); ctx.arc(mx,my,r,0,Math.PI*2); ctx.fill();
+  // Kum
+  ctx.fillStyle='#E8D9A8';
+  ctx.beginPath(); ctx.ellipse(mx,my+r*0.72,r*0.66,r*0.2,0,0,Math.PI*2); ctx.fill();
+}
+function cizFanusOn(ctx,mx,my,r){
+  // Cam kenarı
+  ctx.strokeStyle='#8FCEE8'; ctx.lineWidth=4;
+  ctx.beginPath(); ctx.arc(mx,my,r,0,Math.PI*2); ctx.stroke();
+  // Parlama
+  ctx.strokeStyle='rgba(255,255,255,.75)'; ctx.lineWidth=5;
+  ctx.beginPath(); ctx.arc(mx,my,r*0.8,Math.PI*1.12,Math.PI*1.42); ctx.stroke();
+  // Ağız
+  ctx.strokeStyle='#8FCEE8'; ctx.lineWidth=4;
+  ctx.beginPath(); ctx.ellipse(mx,my-r*0.92,r*0.42,r*0.14,0,0,Math.PI*2); ctx.stroke();
+  // Altlık
+  ctx.fillStyle='#B0BEC5';
+  ctx.beginPath(); ctx.ellipse(mx,my+r*0.98,r*0.5,r*0.14,0,0,Math.PI*2); ctx.fill();
+}
+
+// ---- KONUM TANIMLARI ----
 const MASA_KONUM={
   'üstünde':  {ip:'Üstünde olan, masanın tam üzerine konmuştur.'},
   'altında':  {ip:'Altında olan, masanın aşağısında, ayakların arasındadır.'},
@@ -117,52 +175,51 @@ const MASA_KONUM={
 function cizMasaSahne(nesne,konum){
   const{c,ctx,W,H}=sahne(148,136);
   cizZemin(ctx,W,H);
-  const mx=W/2, my=H*0.56, gen=76;
+  const mx=W/2-6, my=H*0.56, gen=72;
 
   if(konum==='arkasında'){
-    // Uzakta: küçük, yukarıda, zeminin derin kısmında — masa onu ÖRTER
-    emoji(ctx,nesne,mx+2,my-24,28);
+    emoji(ctx,nesne,mx+14,my-30,26);
     cizMasa(ctx,mx,my,gen);
   }else if(konum==='önünde'){
     cizMasa(ctx,mx,my,gen);
-    // Yakında: EN BÜYÜK, kartın alt kenarına yakın, ayakları örter
-    golge(ctx,mx-2,H-26,52);
-    emoji(ctx,nesne,mx-2,H-26,52);
+    golge(ctx,mx-2,H-26,50); emoji(ctx,nesne,mx-2,H-26,50);
   }else if(konum==='altında'){
     cizMasa(ctx,mx,my,gen);
-    // Tablanın hemen ALTINDA, iki ayağın arasında, küçük
-    emoji(ctx,nesne,mx,my+24,26);
+    emoji(ctx,nesne,mx,my+25,26);
   }else if(konum==='üstünde'){
     cizMasa(ctx,mx,my,gen);
-    // Tablaya TEMAS ederek üstünde
-    emoji(ctx,nesne,mx+5,my-25,34);
+    emoji(ctx,nesne,mx+8,my-26,34);
   }else{
     cizMasa(ctx,mx,my,gen);
-    const x=konum==='solunda'?mx-56:mx+56;
-    golge(ctx,x,my+20,34);
-    emoji(ctx,nesne,x,my+20,34);
+    const x=konum==='solunda'?mx-54:mx+58;
+    golge(ctx,x,my+22,32); emoji(ctx,nesne,x,my+22,32);
   }
   return c;
 }
 
-// KUTU sahnesi: içinde, dışında
+// ---- KUTU / FANUS SAHNESİ ----
 const KUTU_KONUM={
-  'içinde': {ip:'İçinde olan, kutunun içine girmiştir.'},
-  'dışında':{ip:'Dışında olan, kutunun dışında kalmıştır.'}
+  'içinde': {ip:'İçinde olan, kabın içine girmiştir.'},
+  'dışında':{ip:'Dışında olan, kabın dışında kalmıştır.'}
 };
 function cizKutuSahne(nesne,konum){
   const{c,ctx,W,H}=sahne(148,136);
   cizZemin(ctx,W,H);
-  const mx=W/2-8, my=H*0.54, gen=72;
+  const mx=W/2-8, my=H*0.54;
+  const fanus = (nesne==='🐟');       // balık ise cam fanus
 
-  cizKutuArka(ctx,mx,my,gen);
-  if(konum==='içinde'){
-    emoji(ctx,nesne,mx,my-2,36);         // kutunun içinde
-    cizKutuOn(ctx,mx,my,gen);            // ön duvar nesnenin ÖNÜNE gelir
+  if(fanus){
+    const r=34;
+    cizFanusArka(ctx,mx,my,r);
+    if(konum==='içinde') emoji(ctx,nesne,mx,my-2,32);
+    cizFanusOn(ctx,mx,my,r);
+    if(konum==='dışında'){ golge(ctx,mx+62,my+22,30); emoji(ctx,nesne,mx+62,my+22,30); }
   }else{
-    cizKutuOn(ctx,mx,my,gen);
-    golge(ctx,mx+58,my+24,34);
-    emoji(ctx,nesne,mx+58,my+24,34);     // kutunun dışında, yanda
+    const gen=66;
+    cizKutuIc(ctx,mx,my,gen);
+    if(konum==='içinde') emoji(ctx,nesne,mx+7,my+3,34);
+    cizKutuOnDuvar(ctx,mx,my,gen);
+    if(konum==='dışında'){ golge(ctx,mx+60,my+24,32); emoji(ctx,nesne,mx+60,my+24,32); }
   }
   return c;
 }
