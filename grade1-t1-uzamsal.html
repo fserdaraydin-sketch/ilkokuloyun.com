@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nerede? - 1. Sınıf Matematik</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade1-style.css">
+<script defer src="analytics.js"></script>
+</head>
+<body>
+<div class="kutu">
+  <div class="baslik">
+    <h1>🧭 Nerede?</h1>
+    <p>1. Tema · Uzamsal İlişkiler</p>
+  </div>
+
+  <div class="ilerleme"><div class="ilerleme-dolu" id="ilerlemeDolu"></div></div>
+  <div class="yildizlar" id="yildizlar"></div>
+
+  <div class="yonerge">
+    <span class="yonerge-metin" id="yonergeMetin">Hazırlanıyor...</span>
+    <button class="btn-ses" id="sesBtn" onclick="sesDegistir()" aria-label="Sesi aç kapat">🔊</button>
+  </div>
+
+  <div class="soru-gorsel" id="soruGorsel"></div>
+  <div class="secenekler" id="secenekler"></div>
+  <div class="geri" id="geri"></div>
+
+  <button class="btn-devam" id="devamBtn" onclick="tekrarDinle()">🔊 Tekrar Dinle</button>
+  <button class="btn-geri" onclick="history.back()">← Geri Dön</button>
+</div>
+
+<script src="grade1-engine.js"></script>
+<script>
+// Nesne çiftleri: (hareketli nesne, sabit referans)
+const CIFTLER=[
+  {n:'🐱',ad:'kedi',   r:'🧺',rad:'sepet'},
+  {n:'🐶',ad:'köpek',  r:'🏠',rad:'kulübe'},
+  {n:'🐦',ad:'kuş',    r:'🌳',rad:'ağaç'},
+  {n:'⚽',ad:'top',    r:'📦',rad:'kutu'},
+  {n:'🦋',ad:'kelebek',r:'🌷',rad:'çiçek'},
+  {n:'🐟',ad:'balık',  r:'🪨',rad:'taş'},
+  {n:'🐰',ad:'tavşan', r:'🥕',rad:'havuç'},
+  {n:'🚗',ad:'araba',  r:'🏫',rad:'okul'}
+];
+
+// Konum tanımları: nesnenin referansa göre yerleşimi
+const KONUMLAR={
+  'üstünde':  {dx:0,   dy:-58, ip:'Üst, yukarı taraftır.'},
+  'altında':  {dx:0,   dy: 58, ip:'Alt, aşağı taraftır.'},
+  'solunda':  {dx:-62, dy: 0,  ip:'Sol taraf, kalp tarafındır.'},
+  'sağında':  {dx: 62, dy: 0,  ip:'Sağ taraf, kalem tuttuğun taraftır.'},
+  'önünde':   {dx:-30, dy: 30, ip:'Ön, bize yakın olan taraftır.'},
+  'arkasında':{dx: 26, dy:-30, ip:'Arka, uzakta kalan taraftır.'},
+  'içinde':   {dx:0,   dy: 6,  ic:true, ip:'İçinde olan, onun içine girmiştir.'},
+  'yanında':  {dx: 60, dy: 4,  ip:'Yan yana duruyorlar demektir.'}
+};
+
+function cizSahne(cift,konum,vurgu){
+  const{c,ctx,W,H}=sahne(148,132);
+  const mx=W/2, my=H/2+6;
+  const k=KONUMLAR[konum];
+
+  // Zemin çizgisi
+  ctx.strokeStyle='#E8E0D0';ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(12,H-16);ctx.lineTo(W-12,H-16);ctx.stroke();
+
+  const nx=mx+k.dx, ny=my+k.dy;
+  if(konum==='arkasında'){ emoji(ctx,cift.n,nx,ny,40); emoji(ctx,cift.r,mx,my,58); }
+  else if(konum==='içinde'){ emoji(ctx,cift.r,mx,my,62); emoji(ctx,cift.n,nx,ny+4,30); }
+  else { emoji(ctx,cift.r,mx,my,58); emoji(ctx,cift.n,nx,ny,42); }
+  return c;
+}
+
+// ETKİNLİK 1: Konum kavramı — doğru görseli bul
+function etkKonum(){
+  const cift=pick(CIFTLER);
+  const tumu=Object.keys(KONUMLAR);
+  const dogru=pick(tumu);
+  const digerler=shuffle(tumu.filter(x=>x!==dogru)).slice(0,2);
+  const secenek=[dogru,...digerler];
+  return{
+    yonerge:`${cift.ad.charAt(0).toLocaleUpperCase('tr')+cift.ad.slice(1)} ${cift.rad}in ${dogru}. Doğru resmi bul.`,
+    secenek, dogru,
+    ciz:s=>cizSahne(cift,s),
+    ipucu:KONUMLAR[dogru].ip
+  };
+}
+
+// ETKİNLİK 2: Tersten — resimde nerede?
+function etkTers(){
+  const cift=pick(CIFTLER);
+  const tumu=Object.keys(KONUMLAR);
+  const dogru=pick(tumu);
+  const digerler=shuffle(tumu.filter(x=>x!==dogru)).slice(0,2);
+  const c=cizSahne(cift,dogru);
+  c.style.width='190px';c.style.height='170px';
+  return{
+    yonerge:`${cift.ad.charAt(0).toLocaleUpperCase('tr')+cift.ad.slice(1)} nerede? Resme bak ve doğru sözcüğü seç.`,
+    secenek:[dogru,...digerler], dogru,
+    ciz:s=>{
+      const{c:k,ctx,W,H}=sahne(148,132);
+      ctx.fillStyle='#FFFDF8';ctx.fillRect(0,0,W,H);
+      ctx.fillStyle='#4E4E4E';
+      ctx.font='600 20px Fredoka,Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(s,W/2,H/2);
+      return k;
+    },
+    ipucu:KONUMLAR[dogru].ip,
+    ustGorsel:c
+  };
+}
+
+// ETKİNLİK 3: Yakın - uzak
+function etkYakinUzak(){
+  const cift=pick(CIFTLER);
+  const yakin=rnd(0,1)===0;
+  const soru=yakin?'yakın':'uzak';
+  function ciz(s){
+    const{c,ctx,W,H}=sahne(148,132);
+    ctx.strokeStyle='#E8E0D0';ctx.lineWidth=3;
+    ctx.beginPath();ctx.moveTo(12,H-16);ctx.lineTo(W-12,H-16);ctx.stroke();
+    const my=H/2+4;
+    emoji(ctx,cift.r,34,my,50);
+    emoji(ctx,cift.n, s==='yakın'?72:126, my,38);
+    return c;
+  }
+  return{
+    yonerge:`${cift.ad.charAt(0).toLocaleUpperCase('tr')+cift.ad.slice(1)} ${cift.rad}e ${soru}. Doğru resmi bul.`,
+    secenek:['yakın','uzak'], dogru:soru,
+    ciz,
+    ipucu:soru==='yakın'?'Yakın olan, hemen yanı başındadır.':'Uzak olan, aralarında çok mesafe vardır.'
+  };
+}
+
+// ETKİNLİK 4: Arasında
+function etkArasinda(){
+  const a=pick(CIFTLER), b=pick(CIFTLER.filter(x=>x!==a));
+  const orta=pick(CIFTLER.filter(x=>x!==a&&x!==b));
+  const dogruIdx=1;
+  function ciz(s){
+    const{c,ctx,W,H}=sahne(148,132);
+    ctx.strokeStyle='#E8E0D0';ctx.lineWidth=3;
+    ctx.beginPath();ctx.moveTo(10,H-16);ctx.lineTo(W-10,H-16);ctx.stroke();
+    const my=H/2+4;
+    const yerler=[[30,my],[74,my],[118,my]];
+    // s: ortadaki nesnenin indeksi (0,1,2)
+    const dizi=[a.r,b.r,a.r];
+    yerler.forEach(([x,y],i)=>emoji(ctx,i===+s?orta.n:dizi[i],x,y,+s===i?40:46));
+    return c;
+  }
+  return{
+    yonerge:`${orta.ad.charAt(0).toLocaleUpperCase('tr')+orta.ad.slice(1)} iki ${a.rad}in arasında. Doğru resmi bul.`,
+    secenek:['0','1','2'], dogru:'1',
+    ciz,
+    ipucu:'Arasında olan, tam ortadadır.'
+  };
+}
+
+initEtkinlik([etkKonum,etkTers,etkYakinUzak,etkArasinda],
+  {ad:'Uzamsal İlişkiler',c1:'#a8edea',c2:'#fed6e3',koyu:'#00796B',orta:'#4DB6AC',acik:'#E0F2F1'});
+</script>
+</body>
+</html>

@@ -132,6 +132,16 @@
         </header>
 
         <div class="game-list">
+
+            <!-- Maarif Modeli · 1. Tema -->
+            <div class="game-card">
+                <div class="icon">🧭</div>
+                <h3>Nerede?</h3>
+                <p>Üstünde, altında, sağında, solunda... Nesnelerin yerini bul</p>
+                <div class="difficulty">1. Tema · Sesli</div>
+                <button class="play-button" onclick="playGame('uzamsal')">Oyna!</button>
+            </div>
+
             <!-- Oyun 1: Şekilleri Takip Etme -->
             <div class="game-card">
                 <div class="icon">🔵</div>
@@ -177,6 +187,7 @@
     <script>
         function playGame(game) {
             const games = {
+                'uzamsal': 'grade1-t1-uzamsal.html',
                 'shapes': 'game-shapes-tracking.html',
                 'numbers': 'game-number-recognition.html',
                 'sequence': 'game-number-sequence.html',

@@ -1,0 +1,167 @@
+/* ============================================================
+   1. SINIF ETKİNLİK MOTORU — Türkiye Yüzyılı Maarif Modeli
+   ------------------------------------------------------------
+   4. sınıf motorundan farkları:
+   • Çoktan seçmeli test yok — görsel seçim ve dokunma etkinliği
+   • Her yönerge SESLİ okunur (çocuk henüz okuma yazma öğreniyor)
+   • Yargısal geri bildirim yok: "yanlış" yerine "bir daha bakalım"
+   • Yanlış seçim etkinliği bitirmez, çocuk tekrar dener
+   • Puan yerine yıldızla ilerleme
+   ============================================================ */
+const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const shuffle=a=>a.sort(()=>Math.random()-.5);
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+
+// ---- SESLİ YÖNERGE ----
+let sesAcik=true;
+function seslendir(metin){
+  if(!sesAcik||!('speechSynthesis' in window))return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(metin.replace(/[👆🔊⭐✨🎉]/g,''));
+  u.lang='tr-TR'; u.rate=.82; u.pitch=1.05;
+  speechSynthesis.speak(u);
+}
+function sesiDurdur(){ if('speechSynthesis' in window) speechSynthesis.cancel(); }
+
+// ---- CANVAS ----
+function sahne(W,H){
+  const c=document.createElement('canvas');
+  const dpr=Math.min(devicePixelRatio||1,2);
+  c.width=W*dpr; c.height=H*dpr;
+  c.style.width=W+'px'; c.style.height=H+'px';
+  const ctx=c.getContext('2d');
+  ctx.scale(dpr,dpr);
+  ctx.fillStyle='#FFFDF8'; ctx.fillRect(0,0,W,H);
+  return {c,ctx,W,H};
+}
+function emoji(ctx,ch,x,y,boyut){
+  ctx.font=boyut+'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(ch,x,y);
+}
+
+// ---- DURUM ----
+let ETKINLIKLER=[], sira=0, dogruSayisi=0, denemeSayisi=0, TEMA={};
+const HEDEF=10;
+
+function initEtkinlik(etkinlikler,tema){
+  ETKINLIKLER=etkinlikler; TEMA=tema;
+  const st=document.createElement('style');
+  st.textContent=`
+    body{background:linear-gradient(135deg,${tema.c1} 0%,${tema.c2} 100%)}
+    .baslik h1{color:${tema.koyu}}
+    .yonerge{background:${tema.acik};border-color:${tema.orta}}
+    .yildiz.dolu{color:${tema.koyu}}
+    .btn-ses{background:${tema.koyu}}
+    .btn-devam{background:${tema.koyu}}
+    .ilerleme-dolu{background:${tema.koyu}}`;
+  document.head.appendChild(st);
+  yeniEtkinlik();
+}
+
+function yeniEtkinlik(){
+  denemeSayisi=0;
+  const e=pick(ETKINLIKLER)();
+  window.__aktif=e;
+
+  document.getElementById('yonergeMetin').textContent=e.yonerge;
+
+  // Soru görseli (varsa) yönerge ile seçenekler arasında gösterilir
+  const ust=document.getElementById('soruGorsel');
+  ust.innerHTML='';
+  if(e.ustGorsel){ ust.style.display='flex'; ust.appendChild(e.ustGorsel); }
+  else ust.style.display='none';
+
+  const kutu=document.getElementById('secenekler');
+  kutu.innerHTML='';
+  kutu.className='secenekler'+(e.secenek.length===2?' ikili':'');
+
+  shuffle([...e.secenek]).forEach(s=>{
+    const b=document.createElement('button');
+    b.className='kart';
+    b.appendChild(e.ciz(s));
+    b.onclick=()=>secildi(b,s,e);
+    kutu.appendChild(b);
+  });
+
+  const g=document.getElementById('geri');
+  g.textContent=''; g.className='geri';
+  seslendir(e.yonerge);
+}
+
+function secildi(btn,secim,e){
+  if(btn.disabled)return;
+  const g=document.getElementById('geri');
+
+  if(secim===e.dogru){
+    document.querySelectorAll('.kart').forEach(k=>k.disabled=true);
+    btn.classList.add('dogru');
+    dogruSayisi++;
+    const mesaj=pick(['Aferin! 🎉','Harikasın! ⭐','Çok güzel! ✨','Bravo! 👏','Doğru buldun! 🌟']);
+    g.textContent=mesaj; g.className='geri iyi';
+    seslendir(mesaj);
+    yildizGuncelle();
+    konfeti(16);
+    if(window.IO) IO.cevap(true,TEMA.ad);
+    setTimeout(()=>{ if(dogruSayisi>=HEDEF) tamamlandi(); else yeniEtkinlik(); },1600);
+  }else{
+    // Yargısal değil: yönlendirici geri bildirim, etkinlik devam eder
+    denemeSayisi++;
+    btn.classList.add('salla');
+    setTimeout(()=>btn.classList.remove('salla'),450);
+    const ipucu = denemeSayisi>=2 && e.ipucu ? e.ipucu
+                : pick(['Bir daha bakalım 👀','Başka bir tanesini deneyelim','Acele etme, tekrar bak']);
+    g.textContent=ipucu; g.className='geri ipucu';
+    seslendir(ipucu);
+    if(window.IO) IO.cevap(false,TEMA.ad);
+  }
+}
+
+function yildizGuncelle(){
+  const k=document.getElementById('yildizlar');
+  k.innerHTML='';
+  for(let i=0;i<HEDEF;i++){
+    const s=document.createElement('span');
+    s.className='yildiz'+(i<dogruSayisi?' dolu':'');
+    s.textContent='★';
+    k.appendChild(s);
+  }
+  document.getElementById('ilerlemeDolu').style.width=(dogruSayisi/HEDEF*100)+'%';
+}
+
+function tamamlandi(){
+  sesiDurdur();
+  document.getElementById('yonergeMetin').textContent='Tebrikler! Bütün yıldızları topladın! 🎉';
+  document.getElementById('secenekler').innerHTML=
+    '<div class="bitti">🏆<br><span>Harika iş çıkardın!</span></div>';
+  document.getElementById('geri').textContent='';
+  document.getElementById('devamBtn').textContent='🔄 Yeniden Oyna';
+  document.getElementById('devamBtn').onclick=()=>{dogruSayisi=0;yildizGuncelle();
+    document.getElementById('devamBtn').textContent='🔊 Tekrar Dinle';
+    document.getElementById('devamBtn').onclick=tekrarDinle;yeniEtkinlik();};
+  seslendir('Tebrikler! Bütün yıldızları topladın!');
+  konfeti(60);
+  if(window.IO) IO.oyunBitti(dogruSayisi);
+}
+
+function tekrarDinle(){ if(window.__aktif) seslendir(window.__aktif.yonerge); }
+
+function sesDegistir(){
+  sesAcik=!sesAcik;
+  const b=document.getElementById('sesBtn');
+  b.textContent=sesAcik?'🔊':'🔇';
+  if(!sesAcik) sesiDurdur(); else tekrarDinle();
+}
+
+function konfeti(n){
+  const renkler=[TEMA.koyu,TEMA.orta,'#FFD54F','#66BB6A','#4FC3F7'];
+  for(let i=0;i<n;i++){
+    const c=document.createElement('div');
+    c.className='konfeti';
+    c.style.left=Math.random()*100+'vw';
+    c.style.background=renkler[Math.floor(Math.random()*renkler.length)];
+    c.style.animationDuration=(1.3+Math.random()*1.2)+'s';
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),2800);
+  }
+}
