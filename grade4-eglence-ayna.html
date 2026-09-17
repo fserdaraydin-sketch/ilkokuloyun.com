@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sihirli Simetri Aynası - 4. Sınıf Matematik</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Fredoka',Arial,sans-serif;background:linear-gradient(135deg,#8E2DE2 0%,#4A00E0 100%);display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:12px}
+.container{background:rgba(255,255,255,.96);border-radius:28px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.2);max-width:760px;width:100%}
+.header{text-align:center;margin-bottom:14px}
+.header h1{font-size:26px;font-weight:700;background:linear-gradient(135deg,#8E2DE2,#4A00E0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.header p{color:#9E9E9E;font-size:14px;font-weight:500}
+
+.info{background:linear-gradient(135deg,#f6f0ff 0%,#efe8ff 100%);border:2px solid #d9c8f5;border-radius:16px;padding:13px 16px;margin-bottom:14px;font-size:14px;color:#5b3a8e;line-height:1.55}
+
+#stage{position:relative;width:100%;height:400px;border-radius:20px;overflow:hidden;background:#f7f4ff;border:3px solid #E6DCFA;touch-action:none;cursor:grab}
+#stage.dragging{cursor:grabbing}
+#fallback{position:absolute;inset:0;display:none;align-items:center;justify-content:center;text-align:center;padding:24px;color:#777;font-size:15px;line-height:1.6}
+
+.badge{position:absolute;top:10px;padding:5px 12px;border-radius:14px;font-size:12px;font-weight:600;color:#fff;pointer-events:none;z-index:5}
+.badge.real{left:12px;background:rgba(94,53,177,.85)}
+.badge.mir{right:12px;background:rgba(0,131,143,.85)}
+
+.readout{display:flex;justify-content:center;gap:10px;margin:12px 0}
+.ro{background:#F5F3FB;border-radius:14px;padding:9px 16px;text-align:center;min-width:104px}
+.ro-l{font-size:10px;color:#999;font-weight:600;letter-spacing:.6px}
+.ro-v{font-size:19px;font-weight:700;color:#7E57C2}
+
+.section-t{font-size:12px;color:#999;font-weight:600;letter-spacing:1px;margin:14px 0 8px;text-align:center}
+.shapes{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:8px}
+.sh{padding:11px 6px;border:2px solid #E6E1F5;border-radius:14px;background:#fff;font-family:inherit;font-size:13px;font-weight:600;color:#555;cursor:pointer;transition:all .18s;line-height:1.5}
+.sh span{display:block;font-size:20px;margin-bottom:2px}
+.sh:hover{border-color:#8E2DE2;transform:translateY(-2px)}
+.sh.on{background:linear-gradient(135deg,#8E2DE2,#4A00E0);color:#fff;border-color:#4A00E0}
+
+.sliders{margin-top:12px}
+.sl-row{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.sl-lab{font-size:12px;font-weight:600;color:#777;width:104px;flex-shrink:0}
+input[type=range]{flex:1;height:7px;border-radius:5px;background:#E6E1F5;outline:none;-webkit-appearance:none;appearance:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#8E2DE2,#4A00E0);cursor:pointer;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.25)}
+input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#7E57C2;cursor:pointer;border:3px solid #fff}
+
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.btn{padding:14px;border:none;border-radius:16px;font-family:inherit;font-weight:600;font-size:15px;cursor:pointer;transition:all .2s}
+.btn:active{transform:scale(.96)}
+.btn-a{background:linear-gradient(135deg,#8E2DE2,#4A00E0);color:#fff;box-shadow:0 4px 14px rgba(142,45,226,.35)}
+.btn-b{background:#F1F3F5;color:#555}
+.btn-back{width:100%;padding:13px;background:transparent;color:#999;border:2px solid #E0E0E0;border-radius:16px;font-family:inherit;font-weight:600;font-size:15px;cursor:pointer;margin-top:10px}
+.btn-back:hover{border-color:#8E2DE2;color:#8E2DE2}
+
+.tip{background:#fffbeb;border:2px solid #fcd34d;border-radius:14px;padding:12px 15px;margin-top:14px;font-size:13.5px;color:#78350f;line-height:1.6}
+
+@media(max-width:600px){
+.container{padding:15px}
+.header h1{font-size:21px}
+#stage{height:320px}
+.sl-lab{width:84px;font-size:11px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🪞 Sihirli Simetri Aynası</h1>
+    <p>Cismi sürükle, aynadaki görüntüsünü izle</p>
+  </div>
+
+  <div class="info">
+    👆 <strong>Cismi parmağınla sürükle.</strong> Aynaya yaklaştır, uzaklaştır, döndür. Aynadaki görüntü anında değişsin!
+  </div>
+
+  <div id="stage">
+    <div class="badge real">🟣 GERÇEK CİSİM</div>
+    <div class="badge mir">🔵 AYNADAKİ GÖRÜNTÜ</div>
+    <div id="fallback">
+      ⏳ 3 boyutlu sahne yükleniyor...<br>
+      <span style="font-size:13px">İnternet bağlantını kontrol et ve sayfayı yenile.</span>
+    </div>
+  </div>
+
+  <div class="readout">
+    <div class="ro"><div class="ro-l">CİSİM ↔ AYNA</div><div class="ro-v" id="d1">0</div></div>
+    <div class="ro"><div class="ro-l">GÖRÜNTÜ ↔ AYNA</div><div class="ro-v" id="d2">0</div></div>
+  </div>
+
+  <div class="section-t">CİSİM SEÇ</div>
+  <div class="shapes" id="shapes"></div>
+
+  <div class="sliders">
+    <div class="sl-row">
+      <span class="sl-lab">🔄 Cismi döndür</span>
+      <input type="range" id="rot" min="0" max="360" value="25">
+    </div>
+    <div class="sl-row">
+      <span class="sl-lab">📷 Kamera açısı</span>
+      <input type="range" id="cam" min="-55" max="55" value="0">
+    </div>
+  </div>
+
+  <div class="btns">
+    <button class="btn btn-b" onclick="resetAll()">🔄 Başa Al</button>
+    <button class="btn btn-a" onclick="toggleSpin()" id="spinBtn">▶️ Otomatik Döndür</button>
+  </div>
+
+  <div class="tip" id="tip">💡 Cismi aynaya yaklaştırdığında görüntüsü de aynı kadar yaklaşır. İki uzaklık her zaman eşittir!</div>
+
+  <button class="btn-back" onclick="history.back()">← Geri Dön</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const stage=document.getElementById('stage');
+let scene,camera,renderer,realGroup,mirrorGroup,mirrorPlane,shadowReal,shadowMir;
+let obj=null,objMirror=null;
+let posX=-2.2,posZ=0,rotY=25*Math.PI/180,camAngle=0,spinning=false;
+const MIRROR_X=0;          // ayna düzlemi x=0
+const LIMIT_X=-0.75;       // cisim aynayı geçemez
+const MIN_X=-5.2, MAX_Z=2.6, MIN_Z=-2.6;
+
+// ===== CİSİMLER =====
+const SHAPES=[
+  {id:'L',   icon:'🧩', name:'L Şekli'},
+  {id:'cube',icon:'🟪', name:'Küp'},
+  {id:'pyr', icon:'🔺', name:'Piramit'},
+  {id:'cyl', icon:'🔵', name:'Silindir'},
+  {id:'arrow',icon:'➡️',name:'Ok'},
+  {id:'hand',icon:'✋', name:'El'}
+];
+let currentShape='L';
+
+function buildMesh(kind){
+  const g=new THREE.Group();
+  const mat=(c)=>new THREE.MeshLambertMaterial({color:c,side:THREE.DoubleSide});
+
+  function box(w,h,d,x,y,z,c){
+    const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat(c));
+    m.position.set(x,y,z);
+    const e=new THREE.LineSegments(
+      new THREE.EdgesGeometry(m.geometry),
+      new THREE.LineBasicMaterial({color:0x3b2465}));
+    m.add(e);
+    g.add(m);return m;
+  }
+
+  if(kind==='L'){                     // asimetrik — yansıma farkı çok belli
+    box(.7,2.1,.7,0,0,0,0x7E57C2);
+    box(1.4,.7,.7,1.05,-.7,0,0xAB47BC);
+  }else if(kind==='cube'){
+    const m=new THREE.Mesh(new THREE.BoxGeometry(1.5,1.5,1.5),[
+      mat(0xE53935),mat(0x1E88E5),mat(0x43A047),
+      mat(0xFDD835),mat(0xFB8C00),mat(0x8E24AA)]);
+    const e=new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry),
+      new THREE.LineBasicMaterial({color:0x2c1d4d}));
+    m.add(e);g.add(m);
+  }else if(kind==='pyr'){
+    const m=new THREE.Mesh(new THREE.ConeGeometry(1.05,1.9,4),mat(0xEC407A));
+    m.rotation.y=Math.PI/4;
+    const e=new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry),
+      new THREE.LineBasicMaterial({color:0x7b1f45}));
+    m.add(e);g.add(m);
+    box(.28,.28,.28,.62,-.8,.62,0xFFEB3B);   // asimetri için köşe işareti
+  }else if(kind==='cyl'){
+    const m=new THREE.Mesh(new THREE.CylinderGeometry(.75,.75,1.7,26),mat(0x26A69A));
+    g.add(m);
+    box(.3,1.75,.3,.62,0,.45,0xFF7043);      // yan çıkıntı
+  }else if(kind==='arrow'){
+    box(1.5,.55,.55,-.2,0,0,0x42A5F5);
+    const h=new THREE.Mesh(new THREE.ConeGeometry(.6,.95,4),mat(0x1565C0));
+    h.rotation.z=-Math.PI/2;h.rotation.y=Math.PI/4;h.position.set(1,0,0);
+    const e=new THREE.LineSegments(new THREE.EdgesGeometry(h.geometry),
+      new THREE.LineBasicMaterial({color:0x0d3c6e}));
+    h.add(e);g.add(h);
+  }else if(kind==='hand'){
+    box(.95,1.15,.45,0,-.2,0,0xFFB74D);              // avuç
+    [-.33,-.02,.29].forEach((x,i)=>box(.2,.8,.4,x,.68,0,0xFFA726));  // parmaklar
+    box(.55,.24,.4,-.72,.1,0,0xFF9800);              // başparmak (solda → asimetri)
+  }
+  return g;
+}
+
+function makeShadow(){
+  const s=new THREE.Mesh(
+    new THREE.CircleGeometry(1.15,26),
+    new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:.11}));
+  s.rotation.x=-Math.PI/2;s.position.y=-1.34;
+  return s;
+}
+
+function init(){
+  if(typeof THREE==='undefined'){
+    document.getElementById('fallback').style.display='flex';return;
+  }
+  scene=new THREE.Scene();
+  scene.background=new THREE.Color(0xf7f4ff);
+
+  const w=stage.clientWidth,h=stage.clientHeight;
+  camera=new THREE.PerspectiveCamera(42,w/h,.1,100);
+
+  renderer=new THREE.WebGLRenderer({antialias:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setSize(w,h);
+  stage.appendChild(renderer.domElement);
+
+  scene.add(new THREE.AmbientLight(0xffffff,.72));
+  const d=new THREE.DirectionalLight(0xffffff,.6);d.position.set(-4,7,6);scene.add(d);
+  const d2=new THREE.DirectionalLight(0xffffff,.28);d2.position.set(5,4,-4);scene.add(d2);
+
+  // ZEMİN (ızgara)
+  const grid=new THREE.GridHelper(16,16,0xcfc3ec,0xe3dcf5);
+  grid.position.y=-1.35;scene.add(grid);
+
+  // AYNA DÜZLEMİ
+  const mg=new THREE.Group();
+  const glass=new THREE.Mesh(
+    new THREE.PlaneGeometry(5.4,4.4),
+    new THREE.MeshBasicMaterial({color:0x81D4FA,transparent:true,opacity:.26,side:THREE.DoubleSide}));
+  glass.rotation.y=Math.PI/2;glass.position.y=.55;
+  mg.add(glass);
+  const frame=new THREE.Mesh(
+    new THREE.BoxGeometry(.13,4.6,5.6),
+    new THREE.MeshLambertMaterial({color:0x5E35B1}));
+  frame.position.y=.55;
+  const fe=new THREE.LineSegments(new THREE.EdgesGeometry(frame.geometry),
+    new THREE.LineBasicMaterial({color:0x311B92}));
+  frame.add(fe);
+  // çerçeveyi içi boş göstermek için sadece kenarları bırak
+  frame.material.transparent=true;frame.material.opacity=.25;
+  mg.add(frame);
+  mg.position.x=MIRROR_X;
+  scene.add(mg);
+  mirrorPlane=mg;
+
+  // GERÇEK CİSİM
+  realGroup=new THREE.Group();scene.add(realGroup);
+  shadowReal=makeShadow();realGroup.add(shadowReal);
+
+  // AYNADAKİ GÖRÜNTÜ — x ekseninde yansıtılmış grup
+  mirrorGroup=new THREE.Group();
+  mirrorGroup.scale.x=-1;              // yansıma
+  mirrorGroup.position.x=2*MIRROR_X;   // düzleme göre kaydır
+  scene.add(mirrorGroup);
+  shadowMir=makeShadow();mirrorGroup.add(shadowMir);
+
+  setShape(currentShape);
+  bindInput();
+  animate();
+}
+
+function setShape(kind){
+  currentShape=kind;
+  if(obj){realGroup.remove(obj);mirrorGroup.remove(objMirror);}
+  obj=buildMesh(kind);
+  objMirror=buildMesh(kind);
+  // yansıma daha soğuk/soluk görünsün
+  objMirror.traverse(o=>{
+    if(o.isMesh){
+      const tint=m=>{const n=m.clone();n.transparent=true;n.opacity=.82;
+        if(n.color)n.color.lerp(new THREE.Color(0x4FC3F7),.30);return n;};
+      o.material=Array.isArray(o.material)?o.material.map(tint):tint(o.material);
+    }
+  });
+  realGroup.add(obj);mirrorGroup.add(objMirror);
+  document.querySelectorAll('.sh').forEach(b=>b.classList.toggle('on',b.dataset.id===kind));
+  updateTransform();
+}
+
+function updateTransform(){
+  realGroup.position.set(posX,0,posZ);
+  realGroup.rotation.y=rotY;
+  // Yansıma: aynı yerel konum/rotasyon, grubun -1 ölçeği yansımayı yapar
+  objMirror.rotation.y=rotY;
+  mirrorGroup.position.set(2*MIRROR_X,0,0);
+  // yerel konumu ayarla (grup scale -1 olduğu için x otomatik yansır)
+  objMirror.position.set(posX,0,posZ);
+  shadowMir.position.set(posX,-1.34,posZ);
+  shadowReal.position.set(0,-1.34,0);
+
+  const dist=Math.abs(MIRROR_X-posX);
+  const cm=Math.round(dist*20);
+  document.getElementById('d1').textContent=cm+' cm';
+  document.getElementById('d2').textContent=cm+' cm';
+}
+
+// ===== SÜRÜKLEME =====
+function bindInput(){
+  let dragging=false,lastX=0,lastY=0;
+  const down=e=>{dragging=true;stage.classList.add('dragging');
+    const p=pt(e);lastX=p.x;lastY=p.y;};
+  const move=e=>{
+    if(!dragging)return;e.preventDefault();
+    const p=pt(e);
+    const dx=(p.x-lastX)/stage.clientWidth;
+    const dy=(p.y-lastY)/stage.clientHeight;
+    lastX=p.x;lastY=p.y;
+    posX=Math.max(MIN_X,Math.min(LIMIT_X,posX+dx*11));
+    posZ=Math.max(MIN_Z,Math.min(MAX_Z,posZ+dy*9));
+    updateTransform();hint();
+  };
+  const up=()=>{dragging=false;stage.classList.remove('dragging');};
+  const pt=e=>e.touches?{x:e.touches[0].clientX,y:e.touches[0].clientY}:{x:e.clientX,y:e.clientY};
+
+  stage.addEventListener('mousedown',down);
+  stage.addEventListener('mousemove',move);
+  window.addEventListener('mouseup',up);
+  stage.addEventListener('touchstart',down,{passive:false});
+  stage.addEventListener('touchmove',move,{passive:false});
+  stage.addEventListener('touchend',up);
+
+  document.getElementById('rot').addEventListener('input',e=>{
+    rotY=e.target.value*Math.PI/180;updateTransform();});
+  document.getElementById('cam').addEventListener('input',e=>{
+    camAngle=e.target.value*Math.PI/180;});
+
+  const sb=document.getElementById('shapes');
+  SHAPES.forEach(s=>{
+    const b=document.createElement('button');
+    b.className='sh'+(s.id===currentShape?' on':'');
+    b.dataset.id=s.id;
+    b.innerHTML=`<span>${s.icon}</span>${s.name}`;
+    b.onclick=()=>setShape(s.id);
+    sb.appendChild(b);
+  });
+
+  window.addEventListener('resize',()=>{
+    const w=stage.clientWidth,h=stage.clientHeight;
+    camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);
+  });
+}
+
+const TIPS=[
+  '💡 Cismi aynaya yaklaştırdığında görüntüsü de aynı kadar yaklaşır. İki uzaklık her zaman eşittir!',
+  '💡 Aynadaki görüntü ters döner: cismin sağı, görüntünün solu olur.',
+  '💡 Görüntü hiçbir zaman aynanın önüne çıkamaz, hep arkasında kalır.',
+  '💡 Cismi yukarı-aşağı sürüklediğinde görüntü de aynı yönde gider — sadece sağ-sol değişir.',
+  '💡 ✋ El şeklini dene! Sağ elin aynada sol el gibi görünür.'
+];
+let tipIdx=0,tipTimer=0;
+function hint(){
+  if(Date.now()-tipTimer<7000)return;
+  tipTimer=Date.now();
+  tipIdx=(tipIdx+1)%TIPS.length;
+  document.getElementById('tip').textContent=TIPS[tipIdx];
+}
+
+function resetAll(){
+  posX=-2.2;posZ=0;rotY=25*Math.PI/180;camAngle=0;spinning=false;
+  document.getElementById('rot').value=25;
+  document.getElementById('cam').value=0;
+  document.getElementById('spinBtn').textContent='▶️ Otomatik Döndür';
+  updateTransform();
+}
+
+function toggleSpin(){
+  spinning=!spinning;
+  document.getElementById('spinBtn').textContent=spinning?'⏸️ Durdur':'▶️ Otomatik Döndür';
+}
+
+function animate(){
+  requestAnimationFrame(animate);
+  if(spinning){
+    rotY+=.012;
+    document.getElementById('rot').value=Math.round((rotY*180/Math.PI)%360);
+    updateTransform();
+  }
+  // kamera: aynanın önünden, hafif yukarıdan
+  const r=10.5;
+  camera.position.set(
+    -r*Math.sin(camAngle)+1.5,
+    3.6,
+    r*Math.cos(camAngle));
+  camera.lookAt(0,.2,0);
+  renderer.render(scene,camera);
+}
+
+if(typeof THREE!=='undefined') init();
+else window.addEventListener('load',()=>setTimeout(init,300));
+</script>
+</body>
+</html>
