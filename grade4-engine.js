@@ -44,6 +44,7 @@ function initGame(levels,theme){
     .btn-back:hover{border-color:${theme.c1};color:${theme.c1}}`;
   document.head.appendChild(st);
   buildLevels();newQuestion();
+  if(window.IO && levels[0]) IO.asama(levels[0].name,1);
 }
 
 function buildLevels(){
@@ -52,7 +53,8 @@ function buildLevels(){
     const b=document.createElement('button');
     b.className='level-btn'+(i===level?' active':'');
     b.innerHTML=`<span class="num">AŞAMA ${i+1}</span>${l.name}`;
-    b.onclick=()=>{level=i;buildLevels();newQuestion();};
+    b.onclick=()=>{level=i;buildLevels();newQuestion();
+      if(window.IO) IO.asama(l.name,i+1);};
     box.appendChild(b);
   });
 }
@@ -109,6 +111,7 @@ function finishInteractive(ok,explain){
   }else{
     fb.textContent='💪 Olmadı, doğrusu gösteriliyor.';fb.className='feedback no';
   }
+  if(window.IO) IO.cevap(ok, LEVELS[level] && LEVELS[level].name);
   const ex=document.getElementById('explain');
   ex.textContent='📖 Çözüm:\n'+explain;ex.className='explain show';
   document.getElementById('score').textContent=score;
@@ -123,13 +126,15 @@ function checkAnswer(btn,choice,explain){
     const val=b.dataset.val!==undefined?b.dataset.val:b.textContent;
     if(val===currentAnswer)b.classList.add('correct');});
   const fb=document.getElementById('feedback');
-  if(choice===currentAnswer){
+  const dogruMu=(choice===currentAnswer);
+  if(dogruMu){
     correctCount++;score+=100;
     fb.textContent='🌟 Doğru! Harikasın!';fb.className='feedback ok';confetti(14);
   }else{
     btn.classList.add('wrong');
     fb.textContent='💪 Olmadı, doğrusu işaretli.';fb.className='feedback no';
   }
+  if(window.IO) IO.cevap(dogruMu, LEVELS[level] && LEVELS[level].name);
   const ex=document.getElementById('explain');
   ex.textContent='📖 Çözüm:\n'+explain;ex.className='explain show';
   document.getElementById('score').textContent=score;

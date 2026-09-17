@@ -65,6 +65,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
 .sl-lab{width:74px;font-size:11.5px}
 }
 </style>
+  <script defer src="analytics.js"></script>
 </head>
 <body>
 <div class="container">
@@ -274,6 +275,7 @@ function setShape(kind){
   objMirror=buildMesh(kind);
   realGroup.add(obj);mirrorGroup.add(objMirror);
   document.querySelectorAll('.sh').forEach(b=>b.classList.toggle('on',b.dataset.id===kind));
+  if(window.IO) IO.asama('cisim: '+kind);
   updateTransform();
 }
 
@@ -343,6 +345,7 @@ function zeroAxis(ax){
 }
 
 function setView(v){
+  if(window.IO) IO.olay('ayna-bakis',{bakis:v});
   if(v==='front'){camYaw=0;camPitch=18*Math.PI/180;camDist=13.6;}
   else if(v==='side'){camYaw=-0.35;camPitch=14*Math.PI/180;camDist=14.2;}
   else{camYaw=0;camPitch=60*Math.PI/180;camDist=18.5;}

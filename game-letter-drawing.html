@@ -322,6 +322,7 @@
             .letter-big { font-size: 34px; }
         }
     </style>
+  <script defer src="analytics.js"></script>
 </head>
 <body>
     <div class="container">
@@ -551,6 +552,7 @@
             document.getElementById('done').textContent = lettersDone;
 
             showMessage('🌟 "' + displayLetter + '" tamamlandı!', 'success');
+            if(window.IO) IO.asamaTamam(displayLetter, currentStep+1);
             launchConfetti(12);
 
             setTimeout(nextLetter, 1100);
@@ -590,12 +592,14 @@
         function nextLetter() {
             if (currentStep < steps.length - 1) {
                 currentStep++;
+                if(window.IO) IO.asama(steps[currentStep].letter, currentStep+1);
                 messageEl.textContent = '';
                 drawLetter();
                 speakLetter();
             } else {
                 launchConfetti(40);
                 setTimeout(() => {
+                    if(window.IO) IO.oyunBitti(score);
                     alert('🎉 TEBRİKLER!\n\nTüm alfabeyi tamamladın!\n\nToplam Puan: ' + score + ' 🏆');
                     location.reload();
                 }, 500);

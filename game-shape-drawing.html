@@ -336,6 +336,7 @@
             }
         }
     </style>
+  <script defer src="analytics.js"></script>
 </head>
 <body>
     <div class="container">
@@ -660,6 +661,7 @@
             if (covered >= required) {
                 showMessage('🌟 SÜPER! ' + shapes[level].name + ' çizdin!', 'success');
                 score += 100;
+                if(window.IO) IO.asamaTamam(shapes[level].name, level+1);
                 document.getElementById('score').textContent = score;
                 launchConfetti(15);
                 setTimeout(nextLevel, 1200);
@@ -698,11 +700,13 @@
         function nextLevel() {
             if (level < shapes.length - 1) {
                 level++;
+                if(window.IO) IO.asama(shapes[level].name, level+1);
                 document.getElementById('level').textContent = (level + 1) + '/' + shapes.length;
                 resetLevel();
             } else {
                 launchConfetti(40);
                 setTimeout(() => {
+                    if(window.IO) IO.oyunBitti(score);
                     alert('🎉 OYUNU BİTİRDİN!\n\nToplam Puan: ' + score + ' 🏆\n\nTüm şekilleri öğrendin: Üçgen, Kare, Dikdörtgen, Beşgen, Altıgen, Çember!');
                     location.reload();
                 }, 500);

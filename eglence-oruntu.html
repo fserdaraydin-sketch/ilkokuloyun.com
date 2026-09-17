@@ -86,6 +86,7 @@ canvas{display:block;max-width:100%;border-radius:10px;touch-action:manipulation
 .palette{grid-template-columns:repeat(5,1fr)}
 }
 </style>
+  <script defer src="analytics.js"></script>
 </head>
 <body>
 <div class="container">
@@ -227,6 +228,7 @@ function setTab(t){
   document.getElementById('pDesign').classList.toggle('on',d);
   document.getElementById('pGuess').classList.toggle('on',!d);
   if(d) drawStrip(); else drawQuiz();
+  if(window.IO) IO.asama(d?'Tasarla':'Bil Bakalım');
 }
 
 // ============================================================
@@ -351,7 +353,7 @@ function toggleCarpet(){
   carpetOn=!carpetOn;
   document.getElementById('carpetBox').style.display=carpetOn?'block':'none';
   document.getElementById('carpetBtn').textContent=carpetOn?'🧶 Halıyı Gizle':'🧶 Halı Yap';
-  if(carpetOn){drawCarpet();confetti(12);}
+  if(carpetOn){drawCarpet();confetti(12);if(window.IO) IO.olay('oruntu-hali',{cekirdek:coreLen});}
 }
 
 function randomCore(){
@@ -492,6 +494,7 @@ function checkQuiz(btn,choice){
     if(b.dataset.key===key) b.classList.add('correct');
   });
 
+  if(window.IO) IO.cevap(correct,'Bil Bakalım');
   if(correct){
     qOk++;qScore+=100;
     msg.textContent='🌟 Doğru! Kuralı buldun!';msg.className='msg ok';

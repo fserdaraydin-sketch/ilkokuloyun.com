@@ -299,6 +299,7 @@
             }
         }
     </style>
+  <script defer src="analytics.js"></script>
 </head>
 <body>
     <div class="container">
@@ -626,6 +627,7 @@
             if (covered >= required) {
                 showMessage('🌟 SÜPER! Harika takip ettin!', 'success');
                 score += 100;
+                if(window.IO) IO.asamaTamam(wavePatterns[level].name, level+1);
                 document.getElementById('score').textContent = score;
                 launchConfetti(15);
                 setTimeout(nextLevel, 1200);
@@ -664,11 +666,13 @@
         function nextLevel() {
             if (level < wavePatterns.length - 1) {
                 level++;
+                if(window.IO) IO.asama(wavePatterns[level].name, level+1);
                 document.getElementById('level').textContent = (level + 1) + '/' + wavePatterns.length;
                 resetLevel();
             } else {
                 launchConfetti(40);
                 setTimeout(() => {
+                    if(window.IO) IO.oyunBitti(score);
                     alert('🎉 OYUNU BİTİRDİN!\n\nToplam Puan: ' + score + ' 🏆\n\nTüm dalga tiplerini başarıyla takip ettin!');
                     location.reload();
                 }, 500);
