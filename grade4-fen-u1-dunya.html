@@ -11,7 +11,7 @@
 </head>
 <body>
 <div class="container">
-  <div class="header"><h1>🌍 1. Ünite: Yer Kabuğu ve Dünyamız</h1><p>Kolaydan zora 7 aşama</p></div>
+  <div class="header"><h1>🌍 1. Ünite: Yer Kabuğu ve Dünyamız</h1><p>Kolaydan zora 8 aşama</p></div>
   <div class="levels" id="levels"></div>
   <div class="stats">
     <div class="stat"><div class="stat-l">PUAN</div><div class="stat-v" id="score">0</div></div>
@@ -479,6 +479,105 @@ function genCoklu(){
   };
 }
 
+/* ==========================================================
+   AŞAMA 8 — GÜNLÜK YAŞAMDAN
+   ========================================================== */
+
+// --- Mineral mi, değil mi? ---
+const MINERAL_MI=[
+ {ad:'Tuz',m:true, n:'Tuz bir MİNERALDİR. Yer altından kaya tuzu olarak çıkarılır ya da deniz suyundan elde edilir. İnsanın doğrudan yiyebildiği tek mineraldir.'},
+ {ad:'Kaya tuzu',m:true, n:'Kaya tuzu doğrudan yer altından çıkarılan bir mineraldir (halit).'},
+ {ad:'Şeker',m:false,n:'Şeker MİNERAL DEĞİLDİR. Şeker pancarı ve şeker kamışı BİTKİLERİNDEN elde edilir.'},
+ {ad:'Karabiber',m:false,n:'Karabiber MİNERAL DEĞİLDİR. Karabiber bitkisinin kurutulmuş meyvesidir.'},
+ {ad:'Un',m:false,n:'Un MİNERAL DEĞİLDİR. Buğdayın öğütülmesiyle elde edilir, bitkiseldir.'},
+ {ad:'Tarçın',m:false,n:'Tarçın MİNERAL DEĞİLDİR. Tarçın ağacının kabuğudur.'},
+ {ad:'Elmas',m:true, n:'Elmas bir MİNERALDİR. Doğadaki en sert mineraldir.'},
+ {ad:'Altın',m:true, n:'Altın doğada bulunan bir MİNERALDİR, aynı zamanda değerli bir madendir.'},
+ {ad:'Grafit',m:true, n:'Grafit bir MİNERALDİR. Kurşun kalemin ucu grafitten yapılır.'},
+ {ad:'Kuvars',m:true, n:'Kuvars yaygın bir MİNERALDİR. Kum tanelerinin çoğu kuvarstır.'},
+ {ad:'Plastik',m:false,n:'Plastik MİNERAL DEĞİLDİR. Petrolden üretilen yapay bir maddedir.'},
+ {ad:'Kâğıt',m:false,n:'Kâğıt MİNERAL DEĞİLDİR. Ağaçtan elde edilen selülozdan yapılır.'},
+ {ad:'Talk',m:true, n:'Talk bir MİNERALDİR. Doğadaki en yumuşak mineraldir, bebek pudrasında kullanılır.'},
+ {ad:'Çay',m:false,n:'Çay MİNERAL DEĞİLDİR. Çay bitkisinin yapraklarından elde edilir.'}
+];
+function genMineralMi(){
+  const it=pick(MINERAL_MI);
+  return{
+    text:`"${it.ad}" bir mineral midir?`,
+    numberDisplay:it.ad,
+    answer:it.m?'Evet, mineraldir':'Hayır, mineral değildir',
+    options:shuffle(['Evet, mineraldir','Hayır, mineral değildir']),
+    explain:`${it.n}\n\n💡 MİNERAL: doğada kendiliğinden oluşan, canlı olmayan katı madde.\n💡 Bitkilerden ve hayvanlardan elde edilenler mineral değildir.\n\n📌 Dikkat: Besinlerdeki "mineral" (kalsiyum, demir) sözcüğü, vücudumuzun ihtiyaç duyduğu maddeler için kullanılır. İkisi farklı anlamdadır.`
+  };
+}
+
+// --- Bu eşya neyden yapılır? ---
+const HAMMADDE=[
+ {esya:'Cam bardak',ham:'Kum',n:'Kum (kuvars) yüksek sıcaklıkta eritilerek cam yapılır.'},
+ {esya:'Porselen tabak',ham:'Kil',n:'Kil şekillendirilip fırında pişirilerek porselen olur.'},
+ {esya:'Tuğla',ham:'Kil',n:'Kil kalıplanıp pişirilerek tuğla yapılır.'},
+ {esya:'Çelik tencere',ham:'Demir',n:'Çelik, demir madeninden üretilir.'},
+ {esya:'Kurşun kalemin ucu',ham:'Grafit',n:'Adı "kurşun kalem" olsa da ucunda kurşun YOKTUR, grafit vardır.'},
+ {esya:'Elektrik kablosu',ham:'Bakır',n:'Bakır elektriği çok iyi ilettiği için kablolarda kullanılır.'},
+ {esya:'Mutfak tezgâhı',ham:'Mermer',n:'Mermer sert ve kolay temizlenen bir kayaçtır.'},
+ {esya:'Tebeşir',ham:'Kireç taşı',n:'Tebeşir kireç taşından (kalsiyum karbonat) yapılır.'},
+ {esya:'Bebek pudrası',ham:'Talk',n:'Talk minerali öğütülerek pudra elde edilir.'},
+ {esya:'Isıya dayanıklı cam',ham:'Bor',n:'Bora katılan cam yüksek sıcaklığa dayanır. Türkiye borda dünya lideridir.'},
+ {esya:'Beton',ham:'Kum ve çakıl',n:'Çimento, kum ve çakıl karıştırılarak beton yapılır.'}
+];
+function genHammadde(){
+  const it=pick(HAMMADDE);
+  const w=distractors(it.ham,()=>pick(HAMMADDE).ham);
+  return{
+    text:`"${it.esya}" hangi ham maddeden yapılır?`,
+    numberDisplay:it.esya,
+    answer:it.ham,
+    options:shuffle([it.ham,...w]),
+    explain:`${it.esya} → ${it.ham}\n${it.n}\n\n💡 Etrafımızdaki eşyaların çoğunun ham maddesi yer kabuğundaki kayaç ve madenlerdir.`
+  };
+}
+
+// --- Günlük yaşam gözlemleri ---
+const GUNLUK=[
+ {s:'Sabah okula giderken gölgen çok uzun, öğle teneffüsünde ise kısacık oluyor.\n\nBunun sebebi nedir?',
+  c:'Güneş’in gökyüzündeki yüksekliğinin değişmesi',y:['Boyunun gün içinde uzayıp kısalması','Havanın ısınması','Gölgenin yorulması'],
+  e:'Dünya döndükçe Güneş yükselir. Işınlar diklestikçe gölge kısalır. Öğlede Güneş en tepede olduğu için gölge en kısadır.'},
+ {s:'Doğum günün her yıl aynı tarihte kutlanıyor.\n\nBunu sağlayan Dünya hareketi hangisidir?',
+  c:'Güneş etrafındaki dolanma',y:['Kendi ekseni etrafındaki dönme','Ay’ın dönmesi','Mevsim rüzgârları'],
+  e:'Dünya Güneş etrafındaki turunu 365 gün 6 saatte tamamlar. Bu süreye 1 yıl denir, takvimler buna göre yapılır.'},
+ {s:'Türkiye’de akşam olurken, Amerika’da insanlar öğle yemeği yiyor.\n\nBunun sebebi nedir?',
+  c:'Dünya’nın kendi ekseni etrafında dönmesi',y:['Amerika’nın Güneş’e daha yakın olması','Saatlerin farklı ayarlanması','Dünya’nın Güneş etrafında dolanması'],
+  e:'Dünya dönerken her yer Güneş’i farklı saatlerde görür. Bu yüzden ülkeler arasında saat farkı vardır.'},
+ {s:'Deniz kenarında topladığın bir taşın içinde deniz kabuğu izi görüyorsun.\n\nBu ne olabilir?',
+  c:'Bir fosil',y:['Bir mineral','Bir maden','Bir magma parçası'],
+  e:'Canlı kalıntısının ya da izinin taşlaşmış hâline fosil denir. Genellikle tortul kayaçlarda bulunur.'},
+ {s:'Kurşun kalemle yazı yazarken kâğıda siyah iz kalıyor.\n\nBu izi bırakan madde nedir?',
+  c:'Grafit minerali',y:['Kurşun madeni','Kömür','Mürekkep'],
+  e:'Kurşun kalemin ucunda kurşun yoktur! Yumuşak bir mineral olan grafit vardır, bu yüzden kâğıda iz bırakır.'},
+ {s:'Annen yemeğe tuz ekliyor. Tuzun kaynağı nedir?',
+  c:'Yer altındaki kaya tuzu ya da deniz suyu',y:['Bir bitkinin tohumu','Bir hayvanın sütü','Fabrikada üretilen yapay madde'],
+  e:'Tuz doğal bir mineraldir. Tuz gölünden, madenlerden ya da deniz suyunun buharlaştırılmasıyla elde edilir.'},
+ {s:'Kum sahilde parmaklarının arasından akıyor. Bu kum nereden gelmiştir?',
+  c:'Kayaçların uzun süre parçalanmasından',y:['Denizin içinde oluşmuştur','Rüzgâr tarafından üretilmiştir','Balıklar tarafından yapılmıştır'],
+  e:'Dalgalar, rüzgâr ve sıcaklık farkı kayaçları binlerce yılda küçük tanelere ayırır. Kum böyle oluşur.'},
+ {s:'Evinizin duvarındaki takvimde 365 gün var.\n\nBu sayı neye göre belirlenmiştir?',
+  c:'Dünya’nın Güneş etrafındaki bir turunu tamamlama süresine',y:['Ay’ın evrelerine','Mevsim sayısına','Güneş’in dönmesine'],
+  e:'Takvim yılı, Dünya’nın Güneş çevresindeki bir tam turuna göre düzenlenmiştir.'},
+ {s:'Müzede bir dinozor iskeleti görüyorsun.\n\nBu iskeleti inceleyen bilim insanına ne denir?',
+  c:'Paleontolog',y:['Arkeolog','Astronot','Veteriner'],
+  e:'Fosilleri inceleyen bilim dalı paleontolojidir. Arkeologlar ise insanların geçmişte yaptığı eserleri inceler.'}
+];
+function genGunluk(){
+  const it=pick(GUNLUK);
+  return{text:it.s,answer:it.c,options:shuffle([it.c,...it.y]),
+    explain:`${it.e}\n\n💡 Fen sadece kitapta değil, her gün etrafında yaşanır.`};
+}
+
+function genGunlukKarisik(){
+  const t=rnd(0,2);
+  return t===0?genMineralMi():t===1?genHammadde():genGunluk();
+}
+
 initGame([
   {name:'Terimler ve Tanımlar',gen:genTerim},
   {name:'Yer Kabuğu ve Mineraller',gen:genKatman},
@@ -486,7 +585,8 @@ initGame([
   {name:'Gölge ve Güneş',gen:genGolge},
   {name:'Kayaçlar ve Madenler',gen:genMaden},
   {name:'Fosiller',gen:genFosil},
-  {name:'Çoklu Değerlendirme',gen:genCoklu}
+  {name:'Çoklu Değerlendirme',gen:genCoklu},
+  {name:'Günlük Yaşamdan',gen:genGunlukKarisik}
 ],{c1:'#1565C0',c2:'#42A5F5',shadow:'rgba(21,101,192,.35)',boxBg:'linear-gradient(135deg,#f0f7ff 0%,#e8f3fe 100%)',boxBorder:'#bbdefb'});
 </script>
 </body>
