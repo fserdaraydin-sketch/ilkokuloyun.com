@@ -414,14 +414,14 @@ function bagla(){
 const iki=n=>String(n).padStart(2,'0');
 
 function guncelle(){
-  // Dünya batıdan doğuya döner: doku eşlemesiyle uyumlu olması için -aci
-  dunya.rotation.y=-aci;
+  // Rotasyon yönü: zaman ileri aksın ve doğudaki şehir saatte ileri olsun
+  dunya.rotation.y=aci;
 
   // Güneş yönü (Dünya'dan Güneş'e): -X
   const gunesYon=new THREE.Vector3(-1,0,0);
 
   ['A','B'].forEach(k=>{
-    const yon=pins[k].yon.clone().applyAxisAngle(new THREE.Vector3(0,1,0),-aci);
+    const yon=pins[k].yon.clone().applyAxisAngle(new THREE.Vector3(0,1,0),aci);
     const d=yon.dot(gunesYon);           // >0 ise Güneş'e bakıyor = gündüz
     const gunduz=d>0;
 
