@@ -11,7 +11,7 @@
 </head>
 <body>
 <div class="container">
-  <div class="header"><h1>🌍 1. Ünite: Yer Kabuğu ve Dünyamız</h1><p>Kolaydan zora 6 aşama</p></div>
+  <div class="header"><h1>🌍 1. Ünite: Yer Kabuğu ve Dünyamız</h1><p>Kolaydan zora 7 aşama</p></div>
   <div class="levels" id="levels"></div>
   <div class="stats">
     <div class="stat"><div class="stat-l">PUAN</div><div class="stat-v" id="score">0</div></div>
@@ -31,7 +31,137 @@
 <script src="grade4-engine.js"></script>
 <script>
 /* ==========================================================
-   AŞAMA 1 — YER KABUĞU, KATMANLAR VE MİNERALLER
+   AŞAMA 1 — TERİMLER, TANIMLAR VE BOŞLUK DOLDURMA
+   ========================================================== */
+const TERIM=[
+ {ad:'Kayaç',tanim:'Bir veya birden fazla mineralin bir araya gelmesiyle oluşan doğal katı yapı',
+  ornek:'Granit, mermer ve kireç taşı birer kayaçtır.'},
+ {ad:'Mineral',tanim:'Kayaçları oluşturan, doğada bulunan yapı taşı',
+  ornek:'Kayaçların rengini ve sertliğini mineraller belirler.'},
+ {ad:'Maden',tanim:'Ekonomik değeri olan, işlenerek kullanılabilen mineral',
+  ornek:'Bor, bakır, altın ve demir birer madendir.'},
+ {ad:'Fosil',tanim:'Geçmişte yaşamış canlıların günümüze ulaşan sertleşmiş kalıntı ve izleri',
+  ornek:'Tortul kayaçların içinde bulunur.'},
+ {ad:'Paleontoloji',tanim:'Fosilleri inceleyen bilim dalı',
+  ornek:'Bu bilimle uğraşan kişiye paleontolog denir.'},
+ {ad:'Jeoloji',tanim:'Dünya’nın yapısını, kayaçları ve katmanlarını inceleyen bilim dalı',
+  ornek:'Bu bilimle uğraşan kişiye jeolog denir.'},
+ {ad:'Yer kabuğu',tanim:'Dünya’nın üzerinde yaşadığımız en dış ve en ince katmanı',
+  ornek:'Kayaçlardan oluşur.'},
+ {ad:'Manto',tanim:'Yer kabuğunun altındaki en kalın katman',
+  ornek:'İçinde sıcak ve akışkan magma bulunur.'},
+ {ad:'Çekirdek',tanim:'Dünya’nın en iç ve en sıcak katmanı',
+  ornek:'Dünya’nın merkezinde yer alır.'},
+ {ad:'Magma',tanim:'Yer altındaki erimiş hâldeki sıcak kayaç',
+  ornek:'Soğuyup katılaştığında magmatik kayaçları oluşturur.'},
+ {ad:'Dönme',tanim:'Dünya’nın kendi ekseni etrafındaki hareketi',
+  ornek:'24 saatte tamamlanır, gece ve gündüzü oluşturur.'},
+ {ad:'Dolanma',tanim:'Dünya’nın Güneş etrafındaki hareketi',
+  ornek:'365 gün 6 saatte tamamlanır, mevsimleri oluşturur.'},
+ {ad:'Erozyon',tanim:'Toprağın rüzgâr ve suyla aşınıp taşınması',
+  ornek:'Ağaç kökleri toprağı tutarak erozyonu önler.'}
+];
+
+// Boşluk doldurma cümleleri
+const BOSLUK=[
+ {c:'Bir veya birden fazla mineralden oluşan doğal yapılara ______ denir.',d:'kayaç'},
+ {c:'Kayaçları oluşturan yapı taşlarına ______ denir.',d:'mineral'},
+ {c:'Ekonomik değeri olan minerallere ______ denir.',d:'maden'},
+ {c:'Geçmişte yaşamış canlıların taşlaşmış kalıntılarına ______ denir.',d:'fosil'},
+ {c:'Fosilleri inceleyen bilim dalına ______ denir.',d:'paleontoloji'},
+ {c:'Dünya’nın üzerinde yaşadığımız en dış katmanı ______ dur.',d:'yer kabuğu'},
+ {c:'Dünya’nın en kalın katmanı ______ dur.',d:'manto'},
+ {c:'Dünya’nın en sıcak ve en iç katmanı ______ tir.',d:'çekirdek'},
+ {c:'Yer altındaki erimiş hâldeki sıcak kayaca ______ denir.',d:'magma'},
+ {c:'Dünya’nın kendi ekseni etrafındaki hareketine ______ denir.',d:'dönme'},
+ {c:'Dünya’nın Güneş etrafındaki hareketine ______ denir.',d:'dolanma'},
+ {c:'Toprağın rüzgâr ve suyla aşınıp taşınmasına ______ denir.',d:'erozyon'},
+ {c:'Dünya kendi ekseni etrafındaki dönüşünü ______ saatte tamamlar.',d:'24'},
+ {c:'Dünya, Güneş etrafındaki dolanımını ______ günde tamamlar.',d:'365'},
+ {c:'Dünya batıdan ______ doğru döner.',d:'doğuya'},
+ {c:'Öğle vaktinde gölge boyu en ______ olur.',d:'kısa'},
+ {c:'Fosiller en çok ______ kayaçlarda bulunur.',d:'tortul'}
+];
+
+// Çift boşluklu (kitaptaki I-II kalıbı)
+const CIFT=[
+ {c:'Geçmişte yaşamış canlıların sertleşmiş kalıntılarına ...I... denir.\nBu kalıntıları inceleyen bilim dalına ise ...II... denir.',
+  d:['Fosil','Paleontoloji'],
+  y:[['Maden','Madencilik'],['Fosil','Jeoloji'],['Maden','Paleontoloji']]},
+ {c:'Kayaçları oluşturan yapı taşlarına ...I... denir.\nBunlardan ekonomik değeri olanlara ise ...II... denir.',
+  d:['Mineral','Maden'],
+  y:[['Maden','Mineral'],['Fosil','Maden'],['Mineral','Fosil']]},
+ {c:'Dünya’nın kendi ekseni etrafındaki hareketine ...I... denir.\nGüneş etrafındaki hareketine ise ...II... denir.',
+  d:['Dönme','Dolanma'],
+  y:[['Dolanma','Dönme'],['Dönme','Eksen'],['Dolanma','Mevsim']]},
+ {c:'Dünya’nın kendi etrafında bir tam dönüş süresi ...I... olarak kabul edilir.\nGüneş etrafında bir tam dolanma süresi ise ...II... olarak kabul edilir.',
+  d:['gün','yıl'],
+  y:[['gün','hafta'],['ay','yıl'],['yıl','gün']]},
+ {c:'Dünya’nın en dış katmanı ...I... , en iç katmanı ise ...II... tir.',
+  d:['yer kabuğu','çekirdek'],
+  y:[['çekirdek','yer kabuğu'],['manto','çekirdek'],['yer kabuğu','manto']]},
+ {c:'Dünya’nın dönme hareketi sonucu ...I... oluşur.\nDolanma hareketi sonucu ise ...II... oluşur.',
+  d:['gece ve gündüz','mevsimler'],
+  y:[['mevsimler','gece ve gündüz'],['gece ve gündüz','bir hafta'],['bir yıl','mevsimler']]}
+];
+
+function genTerim(){
+  const tip=rnd(0,3);
+
+  // TİP 1: Terimin tanımı
+  if(tip===0){
+    const it=pick(TERIM);
+    const w=distractors(it.tanim,()=>pick(TERIM).tanim);
+    return{
+      text:`"${it.ad}" ne demektir?`,
+      numberDisplay:it.ad,
+      answer:it.tanim,
+      options:shuffle([it.tanim,...w]),
+      explain:`${it.ad}: ${it.tanim}.\n${it.ornek}\n\n💡 Terimleri öğrenirken tanımını ve bir örneğini birlikte aklında tut.`
+    };
+  }
+
+  // TİP 2: Tanımdan terimi bul
+  if(tip===1){
+    const it=pick(TERIM);
+    const w=distractors(it.ad,()=>pick(TERIM).ad);
+    return{
+      text:'Aşağıda tanımı verilen terim hangisidir?',
+      readDisplay:it.tanim,
+      answer:it.ad,
+      options:shuffle([it.ad,...w]),
+      explain:`${it.ad}: ${it.tanim}.\n${it.ornek}`
+    };
+  }
+
+  // TİP 3: Boşluk doldurma
+  if(tip===2){
+    const it=pick(BOSLUK);
+    const havuz=BOSLUK.filter(x=>x.d!==it.d).map(x=>x.d);
+    const w=distractors(it.d,()=>pick(havuz));
+    return{
+      text:'Aşağıdaki cümlede boş bırakılan yere hangisi gelmelidir?',
+      readDisplay:it.c,
+      answer:it.d,
+      options:shuffle([it.d,...w]),
+      explain:`Doğru cümle:\n${it.c.replace('______',it.d.toUpperCase())}\n\n💡 Boşluk doldururken cümleyi her şıkla tek tek okuyup dene.`
+    };
+  }
+
+  // TİP 4: Çift boşluk (I ve II)
+  const it=pick(CIFT);
+  const fmt2=a=>'I → '+a[0]+'  |  II → '+a[1];
+  return{
+    text:'Aşağıdaki cümlelerde I ve II ile gösterilen yerlere hangileri gelmelidir?',
+    readDisplay:it.c,
+    answer:fmt2(it.d),
+    options:shuffle([fmt2(it.d),...it.y.map(fmt2)]),
+    explain:`Doğru eşleşme:\nI → ${it.d[0]}\nII → ${it.d[1]}\n\n💡 Bu soru tipinde önce EMİN olduğun boşluğu bul, o boşluğa uymayan şıkları ele. Kalan şıklar arasından ikinciyi seç.`
+  };
+}
+
+/* ==========================================================
+   AŞAMA 2 — YER KABUĞU, KATMANLAR VE MİNERALLER
    ========================================================== */
 const KATMAN_S=[
  {s:'Dünya’nın dıştan içe doğru katmanları hangi sırayla dizilir?',
@@ -66,7 +196,7 @@ function genKatman(){
 }
 
 /* ==========================================================
-   AŞAMA 2 — DÖNME VE DOLANMA
+   AŞAMA 3 — DÖNME VE DOLANMA
    ========================================================== */
 const HAREKET=[
  {s:'Dünya kendi ekseni etrafındaki bir tam dönüşünü ne kadar sürede tamamlar?',
@@ -104,7 +234,7 @@ function genHareket(){
 }
 
 /* ==========================================================
-   AŞAMA 3 — GÖLGE VE GÜNEŞ'İN KONUMU  (GÖRSEL)
+   AŞAMA 4 — GÖLGE VE GÜNEŞ'İN KONUMU  (GÖRSEL)
    ========================================================== */
 function drawGolge(vakit){
   const{c,ctx,W,H}=newCanvas(1,.6,400);
@@ -182,7 +312,7 @@ function genGolge(){
 }
 
 /* ==========================================================
-   AŞAMA 4 — KAYAÇLAR, MADENLER VE KULLANIM ALANLARI
+   AŞAMA 5 — KAYAÇLAR, MADENLER VE KULLANIM ALANLARI
    ========================================================== */
 const MADEN=[
  {ad:'Bor',ozellik:'Ülkemizde dünyadaki en büyük rezerv bulunur. Isıya dayanıklı cam, hava yastığı ve hidrolik fren yapımında kullanılır.'},
@@ -234,7 +364,7 @@ function genMaden(){
 }
 
 /* ==========================================================
-   AŞAMA 5 — FOSİLLER VE PALEONTOLOJİ
+   AŞAMA 6 — FOSİLLER VE PALEONTOLOJİ
    ========================================================== */
 const FOSIL_S=[
  {s:'Geçmişte yaşamış canlıların günümüze ulaşan sertleşmiş kalıntılarına ne denir?',
@@ -294,7 +424,7 @@ function genFosil(){
 }
 
 /* ==========================================================
-   AŞAMA 6 — ÇOKLU BİLGİ DEĞERLENDİRME (en zor)
+   AŞAMA 7 — ÇOKLU BİLGİ DEĞERLENDİRME (en zor)
    ========================================================== */
 const COKLU=[
  {konu:'Dünya’nın hareketleri',bilgiler:[
@@ -350,6 +480,7 @@ function genCoklu(){
 }
 
 initGame([
+  {name:'Terimler ve Tanımlar',gen:genTerim},
   {name:'Yer Kabuğu ve Mineraller',gen:genKatman},
   {name:'Dönme ve Dolanma',gen:genHareket},
   {name:'Gölge ve Güneş',gen:genGolge},
