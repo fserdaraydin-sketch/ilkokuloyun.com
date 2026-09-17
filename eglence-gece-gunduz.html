@@ -241,23 +241,21 @@ function konum(lat,lon,r){
 function isinlariCiz(){
   if(!isinlar) return;
   while(isinlar.children.length) isinlar.remove(isinlar.children[0]);
-  const mat=new THREE.LineBasicMaterial({color:0xFFE082,transparent:true,opacity:.3});
+  const mat=new THREE.LineBasicMaterial({color:0xFFE082,transparent:true,opacity:.22});
   const R=4, DX=5;
-  const basla=GX+3.2;
-  for(let i=-6;i<=6;i++){
-    for(const z of [0,-2.6,2.6]){
-      const y=i*0.72;
-      const uzak=Math.hypot(y,z);
-      let bitX;
-      if(uzak<R-0.05) bitX=DX-Math.sqrt(R*R-uzak*uzak);   // küre yüzeyinde dur
-      else if(uzak<R+3.4) bitX=DX+R*0.8;                  // Dünya'yı sıyırıp geçer
-      else continue;
-      if(bitX<=basla) continue;
-      const g=new THREE.BufferGeometry().setFromPoints([
-        new THREE.Vector3(basla,y,z), new THREE.Vector3(bitX,y,z)]);
-      isinlar.add(new THREE.Line(g,mat));
-    }
-  }
+  const basla=GX+3.4;                 // Güneş halesinin DIŞINDAN başla
+  const yDeg=[-3.4,-2.3,-1.15,0,1.15,2.3,3.4];
+  const zDeg=[-1.9,0,1.9];
+  yDeg.forEach(y=>zDeg.forEach(z=>{
+    const uzak=Math.hypot(y,z);
+    if(uzak>R-0.15) return;            // sadece Dünya'ya çarpan ışınlar
+    const bitX=DX-Math.sqrt(R*R-uzak*uzak);
+    if(bitX<=basla) return;
+    isinlar.add(new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(basla,y,z), new THREE.Vector3(bitX,y,z)]),
+      mat));
+  }));
 }
 
 // ===== İŞARETÇİ =====
@@ -316,11 +314,11 @@ function init(){
   scene.add(new THREE.Points(yg,new THREE.PointsMaterial({color:0xffffff,size:.5})));
 
   // GÜNEŞ (solda, sabit) — uzaklığı ekran oranına göre ayarlanır
-  gunesMesh=new THREE.Mesh(new THREE.SphereGeometry(3,28,28),
+  gunesMesh=new THREE.Mesh(new THREE.SphereGeometry(2.3,28,28),
     new THREE.MeshBasicMaterial({color:0xFFD54F}));
   scene.add(gunesMesh);
-  gunesHale=new THREE.Mesh(new THREE.SphereGeometry(4.1,24,24),
-    new THREE.MeshBasicMaterial({color:0xFFB300,transparent:true,opacity:.2}));
+  gunesHale=new THREE.Mesh(new THREE.SphereGeometry(3.0,24,24),
+    new THREE.MeshBasicMaterial({color:0xFFB300,transparent:true,opacity:.16}));
   scene.add(gunesHale);
 
   // Işık yönü hep -X, mesafe ışığı etkilemez
@@ -362,13 +360,13 @@ function init(){
 
 // Dar ekranda Güneş'i Dünya'ya yaklaştır: sahne kompaktlaşır, Dünya büyük kalır
 function kamerayiYerlestir(){
-  const yeniGX = camera.aspect<1.45 ? -10.5 : -15;
+  const yeniGX = camera.aspect<1.45 ? -12 : -16;
   const degisti = yeniGX!==GX;
   GX = yeniGX;
   if(gunesMesh){ gunesMesh.position.set(GX,0,0); gunesHale.position.set(GX,0,0); }
   if(degisti) isinlariCiz();
 
-  const solKenar=GX-4.2, sagKenar=9.5;          // Güneş halesi ... Dünya + iğne
+  const solKenar=GX-3.2, sagKenar=9.5;          // Güneş halesi ... Dünya + iğne
   const merkez=(solKenar+sagKenar)/2;
   const yariGenislik=(sagKenar-solKenar)/2;
   const yariYukseklik=5.6;
