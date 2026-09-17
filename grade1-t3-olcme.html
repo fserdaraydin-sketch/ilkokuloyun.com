@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ölçelim - 1. Sınıf Matematik</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade1-style.css">
+<script defer src="analytics.js"></script>
+</head>
+<body>
+<div class="kutu">
+  <div class="baslik"><h1>📏 Ölçelim</h1><p>3. Tema · Uzunluk ve Kütle</p></div>
+  <div class="ilerleme"><div class="ilerleme-dolu" id="ilerlemeDolu"></div></div>
+  <div class="yildizlar" id="yildizlar"></div>
+  <div class="yonerge">
+    <span class="yonerge-metin" id="yonergeMetin">Hazırlanıyor...</span>
+    <button class="btn-ses" id="sesBtn" onclick="sesDegistir()" aria-label="Sesi aç kapat">🔊</button>
+  </div>
+  <div class="soru-gorsel" id="soruGorsel"></div>
+  <div class="secenekler" id="secenekler"></div>
+  <div class="geri" id="geri"></div>
+  <button class="btn-devam" id="devamBtn" onclick="tekrarDinle()">🔊 Tekrar Dinle</button>
+  <button class="btn-geri" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade1-engine.js"></script>
+<script>
+// ---- Çubuk (uzunluk) ----
+function cizCubuk(ctx,x,y,uzunluk,renk){
+  ctx.save();
+  ctx.fillStyle=renk; ctx.strokeStyle='rgba(0,0,0,.25)'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.roundRect(x,y-9,uzunluk,18,9); ctx.fill(); ctx.stroke();
+  ctx.restore();
+}
+function sayiKarti(t,b){
+  const{c,ctx,W,H}=sahne(148,86);
+  ctx.save(); ctx.fillStyle='#37474F'; ctx.font='700 '+(b||38)+'px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(t,W/2,H/2); ctx.restore();
+  return c;
+}
+function metinKarti(t,b){
+  const{c,ctx,W,H}=sahne(148,80);
+  ctx.save(); ctx.fillStyle='#37474F'; ctx.font='600 '+(b||20)+'px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(t,W/2,H/2); ctx.restore();
+  return c;
+}
+
+// ETKİNLİK 1: Hangisi daha uzun / kısa
+function etkUzunKisa(){
+  const uzunMu=rnd(0,1)===0;
+  const a=rnd(60,90), b=rnd(20,50);
+  const renkA='#42A5F5', renkB='#EF5350';
+  const solUzun=rnd(0,1)===0;
+  const solU=solUzun?a:b, sagU=solUzun?b:a;
+  const{c,ctx,W,H}=sahne(258,104);
+  ctx.save(); ctx.fillStyle='#78909C'; ctx.font='600 12px Fredoka,Arial'; ctx.textAlign='left';
+  ctx.fillText('A',10,26); ctx.fillText('B',10,74); ctx.restore();
+  cizCubuk(ctx,28,34,solU*2.2,renkA);
+  cizCubuk(ctx,28,78,sagU*2.2,renkB);
+  c.style.width='244px';
+  const dogru = uzunMu ? (solU>sagU?'A':'B') : (solU<sagU?'A':'B');
+  return{
+    yonerge:'Hangi çubuk daha '+(uzunMu?'UZUN':'KISA')+'?',
+    secenek:['A','B'], dogru,
+    ustGorsel:c, ciz:t=>metinKarti(t+' çubuğu',22),
+    ipucu:uzunMu?'Uzun olan daha çok yer kaplar.':'Kısa olan daha az yer kaplar.'
+  };
+}
+
+// ETKİNLİK 2: Standart olmayan birimle ölçme (kaç ataç uzunluğunda?)
+function etkBirimle(){
+  const birim=pick([{ch:'📎',ad:'ataç'},{ch:'✏️',ad:'kalem'},{ch:'🧊',ad:'küp'}]);
+  const adet=rnd(3,8);
+  const birimGen=26;
+  const{c,ctx,W,H}=sahne(258,108);
+  cizCubuk(ctx,16,34,adet*birimGen,'#66BB6A');
+  for(let i=0;i<adet;i++) emoji(ctx,birim.ch,16+i*birimGen+birimGen/2,78,22);
+  ctx.save(); ctx.strokeStyle='#BDBDBD'; ctx.lineWidth=1.5; ctx.setLineDash([3,3]);
+  for(let i=0;i<=adet;i++){ ctx.beginPath(); ctx.moveTo(16+i*birimGen,24); ctx.lineTo(16+i*birimGen,62); ctx.stroke(); }
+  ctx.setLineDash([]); ctx.restore();
+  c.style.width='244px';
+  const w=distractors(String(adet),()=>String(Math.max(1,adet+pick([-2,-1,1,2]))));
+  return{
+    yonerge:'Yeşil çubuk kaç '+birim.ad+' uzunluğunda?',
+    secenek:shuffle([String(adet),...w.slice(0,2)]), dogru:String(adet),
+    ustGorsel:c, ciz:t=>sayiKarti(t),
+    ipucu:'Çubuğun altındaki '+birim.ad+'ları tek tek say.'
+  };
+}
+
+// ETKİNLİK 3: En uzun / en kısa (üç çubuk)
+function etkEnUzun(){
+  const uzunluklar=shuffle([30,55,85]);
+  const enUzunMu=rnd(0,1)===0;
+  const renkler=['#42A5F5','#FFA726','#AB47BC'];
+  const adlar=['A','B','C'];
+  const{c,ctx,W,H}=sahne(258,120);
+  uzunluklar.forEach((u,i)=>{
+    ctx.save(); ctx.fillStyle='#78909C'; ctx.font='600 12px Fredoka,Arial';
+    ctx.textAlign='left'; ctx.fillText(adlar[i],8,22+i*36); ctx.restore();
+    cizCubuk(ctx,26,26+i*36,u*2.4,renkler[i]);
+  });
+  c.style.width='244px';
+  const hedef = enUzunMu ? Math.max(...uzunluklar) : Math.min(...uzunluklar);
+  return{
+    yonerge:'Hangi çubuk EN '+(enUzunMu?'UZUN':'KISA')+'?',
+    secenek:[...adlar], dogru:adlar[uzunluklar.indexOf(hedef)],
+    ustGorsel:c, ciz:t=>metinKarti(t+' çubuğu',22),
+    ipucu:'Üçünün başlangıcı aynı yerde. Nereye kadar uzandıklarına bak.'
+  };
+}
+
+// ETKİNLİK 4: Terazi — hangisi daha ağır / hafif
+function cizTerazi(solAgir,chSol,chSag,denge){
+  const{c,ctx,W,H}=sahne(258,126);
+  const mx=W/2, my=40;
+  // Direk
+  ctx.fillStyle='#8D6E63'; ctx.fillRect(mx-5,my,10,62);
+  ctx.fillStyle='#6D4C41'; ctx.beginPath();
+  ctx.moveTo(mx-30,H-10); ctx.lineTo(mx+30,H-10); ctx.lineTo(mx+18,H-22); ctx.lineTo(mx-18,H-22);
+  ctx.closePath(); ctx.fill();
+  // Kol
+  const egim = denge?0:(solAgir?14:-14);
+  ctx.save(); ctx.translate(mx,my); ctx.rotate(Math.atan2(egim,90));
+  ctx.strokeStyle='#5D4037'; ctx.lineWidth=5; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(-90,0); ctx.lineTo(90,0); ctx.stroke();
+  // Kefeler
+  [-90,90].forEach((x,i)=>{
+    ctx.strokeStyle='#8D6E63'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,22); ctx.stroke();
+    ctx.fillStyle='#BCAAA4';
+    ctx.beginPath(); ctx.ellipse(x,26,26,7,0,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='#795548'; ctx.stroke();
+  });
+  ctx.restore();
+  // Nesneler (kefelerin üstünde)
+  const solY=my+(denge?26:(solAgir?40:12)), sagY=my+(denge?26:(solAgir?12:40));
+  emoji(ctx,chSol,mx-90,solY-6,28);
+  emoji(ctx,chSag,mx+90,sagY-6,28);
+  return c;
+}
+function etkTerazi(){
+  const AGIR=['🍉','🎃','🪨','🧱'], HAFIF=['🪶','🎈','🍓','🍬'];
+  const solAgir=rnd(0,1)===0;
+  const chSol=solAgir?pick(AGIR):pick(HAFIF);
+  const chSag=solAgir?pick(HAFIF):pick(AGIR);
+  const agirMi=rnd(0,1)===0;
+  const c=cizTerazi(solAgir,chSol,chSag,false); c.style.width='244px';
+  const dogru = agirMi ? (solAgir?'sol':'sag') : (solAgir?'sag':'sol');
+  return{
+    yonerge:'Terazide hangisi daha '+(agirMi?'AĞIR':'HAFİF')+'?',
+    secenek:['sol','sag'], dogru,
+    ustGorsel:c,
+    ciz:t=>{const{c:k,ctx,W,H}=sahne(148,88);
+      emoji(ctx,t==='sol'?chSol:chSag,W/2,H/2-6,42);
+      ctx.save(); ctx.fillStyle='#78909C'; ctx.font='600 13px Fredoka,Arial';
+      ctx.textAlign='center'; ctx.fillText(t==='sol'?'sol kefe':'sağ kefe',W/2,H-12); ctx.restore();
+      return k;},
+    ipucu:agirMi?'Ağır olan kefe AŞAĞIYA iner.':'Hafif olan kefe YUKARI kalkar.'
+  };
+}
+
+// ETKİNLİK 5: Denge — terazi eşit mi?
+function etkDenge(){
+  const AGIR=['🍉','🎃','🪨'], HAFIF=['🪶','🎈','🍓'];
+  const dengeli=rnd(0,1)===0;
+  const ch=pick(AGIR);
+  const chSol=dengeli?ch:pick(AGIR), chSag=dengeli?ch:pick(HAFIF);
+  const solAgir=!dengeli;
+  const c=cizTerazi(solAgir,chSol,chSag,dengeli); c.style.width='244px';
+  return{
+    yonerge:'Terazi dengede mi?',
+    secenek:['Dengede','Dengede değil'],
+    dogru:dengeli?'Dengede':'Dengede değil',
+    ustGorsel:c, ciz:t=>metinKarti(t,19),
+    ipucu:dengeli?'İki kefe de aynı hizada duruyorsa terazi dengededir.'
+                 :'Bir kefe aşağıda, diğeri yukarıdaysa terazi dengede değildir.'
+  };
+}
+
+initEtkinlik([etkUzunKisa,etkBirimle,etkEnUzun,etkTerazi,etkDenge],
+  {ad:'Uzunluk ve Kütle',c1:'#d4fc79',c2:'#96e6a1',koyu:'#2E7D32',orta:'#66BB6A',acik:'#E8F5E9'});
+</script>
+</body>
+</html>

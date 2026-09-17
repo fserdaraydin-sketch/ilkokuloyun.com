@@ -133,50 +133,54 @@
 
         <div class="game-list">
 
-            <!-- Maarif Modeli · 1. Tema -->
             <div class="game-card">
                 <div class="icon">🧭</div>
                 <h3>Nerede?</h3>
-                <p>Üstünde, altında, sağında, solunda... Nesnelerin yerini bul</p>
+                <p>Üstünde, altında, sağında, önünde... Nesnelerin yerini bul</p>
                 <div class="difficulty">1. Tema · Sesli</div>
-                <button class="play-button" onclick="playGame('uzamsal')">Oyna!</button>
+                <button class="play-button" onclick="git('grade1-t1-uzamsal.html')">Oyna!</button>
             </div>
 
-            <!-- Oyun 1: Şekilleri Takip Etme -->
             <div class="game-card">
-                <div class="icon">🔵</div>
-                <h3>Şekilleri Takip Et</h3>
-                <p>Parmağınla daire, kare, üçgeni izleyin</p>
-                <div class="difficulty">Kolay</div>
-                <button class="play-button" onclick="playGame('shapes')">Oyna!</button>
+                <div class="icon">🧩</div>
+                <h3>Eşini Bul</h3>
+                <p>Aynı şekil, aynı renk, aynı büyüklük olanı bul</p>
+                <div class="difficulty">1. Tema · Sesli</div>
+                <button class="play-button" onclick="git('grade1-t1-es-nesneler.html')">Oyna!</button>
             </div>
 
-            <!-- Oyun 2: Sayı Tanıma -->
             <div class="game-card">
-                <div class="icon">1️⃣</div>
-                <h3>Sayıları Tanı</h3>
-                <p>1-10 arasındaki sayıları tanıyın ve dokunun</p>
-                <div class="difficulty">Kolay</div>
-                <button class="play-button" onclick="playGame('numbers')">Oyna!</button>
+                <div class="icon">🔢</div>
+                <h3>Sayalım</h3>
+                <p>1'den 20'ye sayma, okunuş, onluk-birlik, sıra sayıları</p>
+                <div class="difficulty">2. Tema · Sesli</div>
+                <button class="play-button" onclick="git('grade1-t2-sayilar.html')">Oyna!</button>
             </div>
 
-            <!-- Oyun 3: Sayı Sırası -->
             <div class="game-card">
-                <div class="icon">📊</div>
-                <h3>Sayı Sırasını Düzenle</h3>
-                <p>1-5 sayılarını doğru sırayla yerleştirin</p>
-                <div class="difficulty">Orta</div>
-                <button class="play-button" onclick="playGame('sequence')">Oyna!</button>
+                <div class="icon">🎵</div>
+                <h3>Ritim ve Örüntü</h3>
+                <p>İleriye geriye ritmik sayma, örüntü, tahmin</p>
+                <div class="difficulty">2. Tema · Sesli</div>
+                <button class="play-button" onclick="git('grade1-t2-ritmik.html')">Oyna!</button>
             </div>
 
-            <!-- Oyun 4: Parmak Egzersizi -->
             <div class="game-card">
-                <div class="icon">✋</div>
-                <h3>Parmak Egzersizi</h3>
-                <p>Ekrana dokunarak parmak kontrolünü geliştirin</p>
-                <div class="difficulty">Kolay</div>
-                <button class="play-button" onclick="playGame('fingers')">Oyna!</button>
+                <div class="icon">📏</div>
+                <h3>Ölçelim</h3>
+                <p>Uzun kısa, ağır hafif, terazi ve denge</p>
+                <div class="difficulty">3. Tema · Sesli</div>
+                <button class="play-button" onclick="git('grade1-t3-olcme.html')">Oyna!</button>
             </div>
+
+            <div class="game-card">
+                <div class="icon">✏️</div>
+                <h3>Şekil Çizme</h3>
+                <p>Parmağınla şekilleri takip et</p>
+                <div class="difficulty">Motor beceri</div>
+                <button class="play-button" onclick="git('game-shapes-tracking.html')">Oyna!</button>
+            </div>
+
         </div>
 
         <div class="footer">
@@ -185,27 +189,7 @@
     </div>
 
     <script>
-        function playGame(game) {
-            const games = {
-                'uzamsal': 'grade1-t1-uzamsal.html',
-                'shapes': 'game-shapes-tracking.html',
-                'numbers': 'game-number-recognition.html',
-                'sequence': 'game-number-sequence.html',
-                'fingers': 'game-finger-exercise.html'
-            };
-            alert('🎮 ' + game + ' oyunu yakında geliyor!\n\nŞimdilik \"Oyna!\" butonuna tıklamayı deneyin.');
-            // window.location.href = games[game];
-        }
-
-        document.querySelectorAll('.game-card').forEach(card => {
-            card.addEventListener('click', function(e) {
-                if (e.target.classList.contains('play-button')) return;
-                this.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                    this.style.transform = '';
-                }, 150);
-            });
-        });
+        function git(url){ window.location.href = url; }
     </script>
 </body>
 </html>

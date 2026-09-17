@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sayalım - 1. Sınıf Matematik</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade1-style.css">
+<script defer src="analytics.js"></script>
+</head>
+<body>
+<div class="kutu">
+  <div class="baslik"><h1>🔢 Sayalım</h1><p>2. Tema · Rakamlar ve Sayılar</p></div>
+  <div class="ilerleme"><div class="ilerleme-dolu" id="ilerlemeDolu"></div></div>
+  <div class="yildizlar" id="yildizlar"></div>
+  <div class="yonerge">
+    <span class="yonerge-metin" id="yonergeMetin">Hazırlanıyor...</span>
+    <button class="btn-ses" id="sesBtn" onclick="sesDegistir()" aria-label="Sesi aç kapat">🔊</button>
+  </div>
+  <div class="soru-gorsel" id="soruGorsel"></div>
+  <div class="secenekler" id="secenekler"></div>
+  <div class="geri" id="geri"></div>
+  <button class="btn-devam" id="devamBtn" onclick="tekrarDinle()">🔊 Tekrar Dinle</button>
+  <button class="btn-geri" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade1-engine.js"></script>
+<script>
+const SAYI_ADI=['sıfır','bir','iki','üç','dört','beş','altı','yedi','sekiz','dokuz','on',
+ 'on bir','on iki','on üç','on dört','on beş','on altı','on yedi','on sekiz','on dokuz','yirmi'];
+const SIRA_ADI=['','birinci','ikinci','üçüncü','dördüncü','beşinci','altıncı','yedinci','sekizinci','dokuzuncu','onuncu'];
+const NESNE=['🍎','⚽','🌷','🐠','🦋','🍓','⭐','🧸','🚗','🐤'];
+
+// Sayı kartı
+function sayiKarti(t,boyut){
+  const{c,ctx,W,H}=sahne(148,92);
+  ctx.save(); ctx.fillStyle='#37474F';
+  ctx.font='700 '+(boyut||42)+'px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(t,W/2,H/2); ctx.restore();
+  return c;
+}
+// Nesne kümesi çiz
+function kumeCiz(ch,adet,W,H){
+  const{c,ctx}=sahne(W,H);
+  const sut=Math.min(5,adet), sat=Math.ceil(adet/5);
+  const gx=W/(sut+1), gy=H/(sat+1);
+  for(let i=0;i<adet;i++){
+    const r=Math.floor(i/5), k=i%5;
+    const satirAdet=Math.min(5,adet-r*5);
+    const x=W/(satirAdet+1)*(k+1), y=gy*(r+1);
+    emoji(ctx,ch,x,y,Math.min(30,H/(sat+1)*0.8));
+  }
+  return c;
+}
+
+// ETKİNLİK 1: Kaç tane var? (1-20)
+function etkSay(){
+  const adet=rnd(1,20), ch=pick(NESNE);
+  const g=kumeCiz(ch,adet,250,adet>10?116:76);
+  g.style.width='240px';
+  const w=distractors(String(adet),()=>String(Math.max(1,adet+pick([-3,-2,-1,1,2,3]))));
+  return{
+    yonerge:'Kaç tane var? Sayıp doğru rakamı seç.',
+    secenek:shuffle([String(adet),...w.slice(0,2)]), dogru:String(adet),
+    ustGorsel:g, ciz:t=>sayiKarti(t),
+    ipucu:'Parmağınla tek tek dokunarak say: bir, iki, üç...'
+  };
+}
+
+// ETKİNLİK 2: Rakamın okunuşu
+function etkOkunus(){
+  const n=rnd(0,20);
+  const yon=rnd(0,1);
+  if(yon===0){
+    const w=distractors(SAYI_ADI[n],()=>SAYI_ADI[rnd(0,20)]);
+    return{
+      yonerge:'Bu sayı nasıl okunur?',
+      secenek:shuffle([SAYI_ADI[n],...w.slice(0,2)]), dogru:SAYI_ADI[n],
+      ustGorsel:(()=>{const c=sayiKarti(String(n),56);c.style.width='120px';c.style.height='86px';return c;})(),
+      ciz:t=>{const{c,ctx,W,H}=sahne(148,80);ctx.save();ctx.fillStyle='#37474F';
+        ctx.font='600 19px Fredoka,Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText(t,W/2,H/2);ctx.restore();return c;},
+      ipucu:'Sayıyı yüksek sesle söyle, hangi yazıya benziyor?'
+    };
+  }
+  const w=distractors(String(n),()=>String(rnd(0,20)));
+  return{
+    yonerge:'"'+SAYI_ADI[n]+'" sayısı hangisidir?',
+    secenek:shuffle([String(n),...w.slice(0,2)]), dogru:String(n),
+    ciz:t=>sayiKarti(t),
+    ipucu:'Söylenen sayıyı tekrar et, sonra rakamlara bak.'
+  };
+}
+
+// ETKİNLİK 3: Onluk - birlik çözümleme
+function etkCozumle(){
+  const n=rnd(11,20);
+  const birlik=n-10;
+  const{c,ctx,W,H}=sahne(250,100);
+  // 1 onluk çubuk + birlikler
+  ctx.fillStyle='#42A5F5'; ctx.strokeStyle='#1565C0'; ctx.lineWidth=2;
+  ctx.fillRect(16,18,26,64); ctx.strokeRect(16,18,26,64);
+  for(let i=1;i<10;i++){ ctx.beginPath(); ctx.moveTo(16,18+i*6.4); ctx.lineTo(42,18+i*6.4); ctx.stroke(); }
+  ctx.save(); ctx.fillStyle='#1565C0'; ctx.font='600 12px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.fillText('1 onluk',29,95); ctx.restore();
+  ctx.fillStyle='#FFA726'; ctx.strokeStyle='#E65100';
+  for(let i=0;i<birlik;i++){ const x=68+i*19; ctx.fillRect(x,64,14,14); ctx.strokeRect(x,64,14,14); }
+  ctx.save(); ctx.fillStyle='#E65100'; ctx.font='600 12px Fredoka,Arial';
+  ctx.textAlign='left'; ctx.fillText(birlik+' birlik',68,95); ctx.restore();
+  c.style.width='240px';
+
+  const w=distractors(String(n),()=>String(rnd(11,20)));
+  return{
+    yonerge:'1 onluk ve '+birlik+' birlik kaç eder?',
+    secenek:shuffle([String(n),...w.slice(0,2)]), dogru:String(n),
+    ustGorsel:c, ciz:t=>sayiKarti(t),
+    ipucu:'1 onluk 10 demektir. 10 ile '+birlik+' sayısını topla.'
+  };
+}
+
+// ETKİNLİK 4: Sıra sayıları
+function etkSira(){
+  const n=rnd(4,6);
+  const liste=shuffle([...NESNE]).slice(0,n);
+  const hedef=rnd(1,n);
+  const{c,ctx,W,H}=sahne(268,96);
+  cizOk(ctx,W,H);
+  liste.forEach((ch,i)=>emoji(ctx,ch,26+i*(216/(n-1)),H/2-4,32));
+  c.style.width='252px';
+  return{
+    yonerge:'Soldan '+SIRA_ADI[hedef]+' sırada olan hangisi?',
+    secenek:shuffle([...liste]).slice(0,3).includes(liste[hedef-1])
+      ? shuffle([liste[hedef-1],...shuffle(liste.filter(x=>x!==liste[hedef-1])).slice(0,2)])
+      : shuffle([liste[hedef-1],...shuffle(liste.filter(x=>x!==liste[hedef-1])).slice(0,2)]),
+    dogru:liste[hedef-1],
+    ustGorsel:c,
+    ciz:ch=>{const{c:k,ctx,W,H}=sahne(148,92); emoji(ctx,ch,W/2,H/2,46); return k;},
+    ipucu:'Soldan başla ve say: birinci, ikinci, üçüncü...'
+  };
+}
+function cizOk(ctx,W,H){
+  ctx.save(); ctx.fillStyle='#8D6E63'; ctx.font='600 11px Fredoka,Arial';
+  ctx.textAlign='left'; ctx.fillText('◀ sol',4,H-6);
+  ctx.textAlign='right'; ctx.fillText('sağ ▶',W-4,H-6); ctx.restore();
+}
+
+// ETKİNLİK 5: Hangisi daha çok / az
+function etkKarsilastir(){
+  const a=rnd(2,12); let b; do{ b=rnd(2,12); }while(b===a);
+  const chA=pick(NESNE), chB=pick(NESNE.filter(x=>x!==chA));
+  const cok=rnd(0,1)===0;
+  const dogru = cok ? (a>b?'sol':'sag') : (a<b?'sol':'sag');
+  const{c,ctx,W,H}=sahne(268,110);
+  ctx.strokeStyle='#CFC6B0'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(W/2,8); ctx.lineTo(W/2,H-8); ctx.stroke();
+  const ciz=(ch,n,x0)=>{ for(let i=0;i<n;i++){ const r=Math.floor(i/4),k=i%4;
+    emoji(ctx,ch,x0+18+k*26,26+r*28,22); } };
+  ciz(chA,a,6); ciz(chB,b,W/2+6);
+  c.style.width='252px';
+  return{
+    yonerge:'Hangi tarafta daha '+(cok?'ÇOK':'AZ')+' nesne var?',
+    secenek:['sol','sag'], dogru,
+    ustGorsel:c,
+    ciz:t=>{const{c:k,ctx,W,H}=sahne(148,80); ctx.save(); ctx.fillStyle='#37474F';
+      ctx.font='600 20px Fredoka,Arial'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(t==='sol'?'◀ Sol taraf':'Sağ taraf ▶',W/2,H/2); ctx.restore(); return k;},
+    ipucu:'İki tarafı da say, sonra karşılaştır.'
+  };
+}
+
+initEtkinlik([etkSay,etkOkunus,etkCozumle,etkSira,etkKarsilastir],
+  {ad:'Rakamlar ve Sayılar',c1:'#a1c4fd',c2:'#c2e9fb',koyu:'#1565C0',orta:'#42A5F5',acik:'#E3F2FD'});
+</script>
+</body>
+</html>

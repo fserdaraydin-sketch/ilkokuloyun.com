@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ritim ve Örüntü - 1. Sınıf Matematik</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade1-style.css">
+<script defer src="analytics.js"></script>
+</head>
+<body>
+<div class="kutu">
+  <div class="baslik"><h1>🎵 Ritim ve Örüntü</h1><p>2. Tema · Ritmik Sayma, Örüntü, Tahmin</p></div>
+  <div class="ilerleme"><div class="ilerleme-dolu" id="ilerlemeDolu"></div></div>
+  <div class="yildizlar" id="yildizlar"></div>
+  <div class="yonerge">
+    <span class="yonerge-metin" id="yonergeMetin">Hazırlanıyor...</span>
+    <button class="btn-ses" id="sesBtn" onclick="sesDegistir()" aria-label="Sesi aç kapat">🔊</button>
+  </div>
+  <div class="soru-gorsel" id="soruGorsel"></div>
+  <div class="secenekler" id="secenekler"></div>
+  <div class="geri" id="geri"></div>
+  <button class="btn-devam" id="devamBtn" onclick="tekrarDinle()">🔊 Tekrar Dinle</button>
+  <button class="btn-geri" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade1-engine.js"></script>
+<script>
+const NESNE=['🍎','⚽','🌷','🐠','🦋','🍓','⭐','🧸'];
+const SEKIL_RENK=[['🔴','🔵'],['🟢','🟡'],['🟣','🟠'],['❤️','💙']];
+
+function sayiKarti(t,b){
+  const{c,ctx,W,H}=sahne(148,88);
+  ctx.save(); ctx.fillStyle='#37474F'; ctx.font='700 '+(b||40)+'px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(t,W/2,H/2); ctx.restore();
+  return c;
+}
+// Sayı şeridi (boşluklu)
+function seritCiz(dizi,W){
+  const{c,ctx,H}=sahne(W,72);
+  const n=dizi.length, gen=(W-16)/n;
+  dizi.forEach((v,i)=>{
+    const x=8+i*gen, bos=(v===null);
+    ctx.fillStyle=bos?'#FFF3E0':'#E3F2FD';
+    ctx.strokeStyle=bos?'#FB8C00':'#42A5F5';
+    ctx.lineWidth=bos?3.5:2.5;
+    ctx.beginPath(); ctx.roundRect(x+3,14,gen-6,44,10); ctx.fill(); ctx.stroke();
+    ctx.save(); ctx.fillStyle=bos?'#E65100':'#0D47A1';
+    ctx.font='700 '+(gen>44?22:18)+'px Fredoka,Arial';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(bos?'?':String(v),x+gen/2,37); ctx.restore();
+  });
+  return c;
+}
+
+// ETKİNLİK 1: İleriye ritmik sayma (birer, ikişer, beşer, onar)
+function etkIleri(){
+  const adim=pick([1,1,2,5,10]);
+  const bas=adim===10?rnd(0,4)*10:adim===5?rnd(0,3)*5:rnd(1,10);
+  const dizi=[bas,bas+adim,bas+2*adim,bas+3*adim,null];
+  const dogru=bas+4*adim;
+  const g=seritCiz(dizi,268); g.style.width='252px';
+  const w=distractors(String(dogru),()=>String(dogru+pick([-adim,adim,-1,1])));
+  return{
+    yonerge:adim+'\u2019er '+adim+'\u2019er ileriye sayalım. Boşluğa hangi sayı gelmeli?',
+    secenek:shuffle([String(dogru),...w.slice(0,2)]), dogru:String(dogru),
+    ustGorsel:g, ciz:t=>sayiKarti(t),
+    ipucu:'Her adımda '+adim+' ekleniyor. Son sayıya '+adim+' ekle.'
+  };
+}
+
+// ETKİNLİK 2: Geriye ritmik sayma (birer, ikişer)
+function etkGeri(){
+  const adim=pick([1,1,2]);
+  const bas=rnd(10,20);
+  const dizi=[bas,bas-adim,bas-2*adim,bas-3*adim,null];
+  const dogru=bas-4*adim;
+  const g=seritCiz(dizi,268); g.style.width='252px';
+  const w=distractors(String(dogru),()=>String(Math.max(0,dogru+pick([-adim,adim,-1,1]))));
+  return{
+    yonerge:adim+'\u2019er '+adim+'\u2019er geriye sayalım. Boşluğa hangi sayı gelmeli?',
+    secenek:shuffle([String(dogru),...w.slice(0,2)]), dogru:String(dogru),
+    ustGorsel:g, ciz:t=>sayiKarti(t),
+    ipucu:'Geriye sayarken her adımda '+adim+' çıkarılır.'
+  };
+}
+
+// ETKİNLİK 3: Şekil örüntüsü (AB, AAB, ABC)
+function etkOruntu(){
+  const tip=pick(['AB','AAB','ABC']);
+  const renk=pick(SEKIL_RENK);
+  const ucuncu=pick(['🟡','🟢','🟣','🟠'].filter(x=>!renk.includes(x)));
+  const cekirdek = tip==='AB' ? [renk[0],renk[1]]
+                 : tip==='AAB'? [renk[0],renk[0],renk[1]]
+                 : [renk[0],renk[1],ucuncu];
+  const dizi=[]; for(let i=0;i<7;i++) dizi.push(cekirdek[i%cekirdek.length]);
+  const dogru=cekirdek[7%cekirdek.length];
+
+  const{c,ctx,W,H}=sahne(268,80);
+  dizi.forEach((ch,i)=>emoji(ctx,ch,22+i*33,H/2-4,26));
+  ctx.save(); ctx.strokeStyle='#FB8C00'; ctx.lineWidth=3.5; ctx.setLineDash([5,4]);
+  ctx.beginPath(); ctx.roundRect(22+7*33-16,H/2-22,32,32,9); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle='#E65100'; ctx.font='700 20px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('?',22+7*33,H/2-5); ctx.restore();
+  c.style.width='252px';
+
+  const secenekler=[...new Set([...cekirdek,ucuncu,'🔴','🔵'])].filter(x=>x!==dogru);
+  return{
+    yonerge:'Örüntü tekrar ediyor. Sıradaki hangisi olmalı?',
+    secenek:shuffle([dogru,...shuffle(secenekler).slice(0,2)]), dogru,
+    ustGorsel:c,
+    ciz:ch=>{const{c:k,ctx,W,H}=sahne(148,88); emoji(ctx,ch,W/2,H/2,44); return k;},
+    ipucu:'Baştan bak: hangi sıra tekrar ediyor? Aynı sırayı devam ettir.'
+  };
+}
+
+// ETKİNLİK 4: Sayı örüntüsü (artan/azalan)
+function etkSayiOruntu(){
+  const artan=rnd(0,1)===0, adim=pick([1,2,3,5]);
+  const bas=artan?rnd(1,6):rnd(14,20);
+  const dizi=[0,1,2,3].map(i=>artan?bas+i*adim:bas-i*adim);
+  const dogru=artan?bas+4*adim:bas-4*adim;
+  const g=seritCiz([...dizi,null],268); g.style.width='252px';
+  const w=distractors(String(dogru),()=>String(Math.max(0,dogru+pick([-adim,adim,-1,1]))));
+  return{
+    yonerge:'Sayılar bir kurala göre gidiyor. Boşluğa hangi sayı gelmeli?',
+    secenek:shuffle([String(dogru),...w.slice(0,2)]), dogru:String(dogru),
+    ustGorsel:g, ciz:t=>sayiKarti(t),
+    ipucu:'İki sayı arasındaki farkı bul: '+dizi[0]+' ile '+dizi[1]+' arasında kaç var?'
+  };
+}
+
+// ETKİNLİK 5: Nesne sayısını tahmin etme
+function etkTahmin(){
+  const adet=pick([5,10,15,20,8,12,16]);
+  const ch=pick(NESNE);
+  const{c,ctx,W,H}=sahne(258,120);
+  for(let i=0;i<adet;i++){
+    const r=Math.floor(i/6), k=i%6;
+    const satir=Math.min(6,adet-r*6);
+    emoji(ctx,ch,W/(satir+1)*(k+1),22+r*28,22);
+  }
+  c.style.width='244px';
+  // Tahmin seçenekleri: gerçek + belirgin farklı iki değer
+  const w=[Math.max(2,adet-pick([4,5,6])), adet+pick([4,5,6])];
+  return{
+    yonerge:'Yaklaşık kaç tane var? Saymadan tahmin et, sonra kontrol edebilirsin.',
+    secenek:shuffle([String(adet),...w.map(String)]), dogru:String(adet),
+    ustGorsel:c, ciz:t=>sayiKarti(t),
+    ipucu:'Önce bir satırı say, sonra kaç satır olduğuna bak.'
+  };
+}
+
+initEtkinlik([etkIleri,etkGeri,etkOruntu,etkSayiOruntu,etkTahmin],
+  {ad:'Ritmik Sayma ve Örüntü',c1:'#ffecd2',c2:'#fcb69f',koyu:'#E65100',orta:'#FB8C00',acik:'#FFF3E0'});
+</script>
+</body>
+</html>

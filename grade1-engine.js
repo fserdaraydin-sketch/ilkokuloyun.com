@@ -12,6 +12,22 @@ const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
 const shuffle=a=>a.sort(()=>Math.random()-.5);
 const pick=a=>a[Math.floor(Math.random()*a.length)];
 
+// Doğru cevaptan farklı, kendi aralarında da farklı çeldiriciler üretir
+function distractors(dogru,uretici,adet){
+  const set=new Set(); let guvenlik=0;
+  while(set.size<(adet||3) && guvenlik++<200){
+    const v=uretici();
+    if(v!==null && v!==undefined && String(v)!==String(dogru)) set.add(String(v));
+  }
+  // Havuz tükenirse tamamla
+  let ek=1;
+  while(set.size<(adet||3)){
+    const v=String(dogru)+'\u200b'.repeat(ek++);
+    if(v!==String(dogru)) set.add(v);
+  }
+  return [...set];
+}
+
 // ---- SESLİ YÖNERGE ----
 let sesAcik=true;
 function seslendir(metin){
