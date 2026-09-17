@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1. Bölüm: Kelime Anlamı - 4. Sınıf Türkçe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade4-style.css">
+</head>
+<body>
+<div class="container">
+  <div class="header"><h1>🔤 1. Bölüm: Kelime Anlamı</h1><p>Kolaydan zora 5 aşama</p></div>
+  <div class="levels" id="levels"></div>
+  <div class="stats">
+    <div class="stat"><div class="stat-l">PUAN</div><div class="stat-v" id="score">0</div></div>
+    <div class="stat"><div class="stat-l">DOĞRU</div><div class="stat-v" id="correct">0</div></div>
+    <div class="stat"><div class="stat-l">SORU</div><div class="stat-v" id="total">0</div></div>
+  </div>
+  <div class="question-box">
+    <div class="q-text" id="qText">Yükleniyor...</div>
+    <div id="qVisual"></div>
+    <div class="options" id="options"></div>
+  </div>
+  <div class="feedback" id="feedback"></div>
+  <div class="explain" id="explain"></div>
+  <button class="btn btn-next" onclick="newQuestion()">Yeni Soru ➜</button>
+  <button class="btn btn-back" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade4-engine.js"></script>
+<script>
+// ===== KELİME HAZİNESİ =====
+const ES=[  // eş anlamlı çiftler
+ ['okul','mektep'],['öğretmen','muallim'],['kelime','sözcük'],['hatıra','anı'],
+ ['misafir','konuk'],['hediye','armağan'],['cevap','yanıt'],['kırmızı','al'],
+ ['siyah','kara'],['beyaz','ak'],['yıl','sene'],['ihtiyar','yaşlı'],
+ ['zengin','varsıl'],['fakir','yoksul'],['millet','ulus'],['vatan','yurt'],
+ ['bellek','hafıza'],['nehir','ırmak'],['dil','lisan'],['duyu','his'],
+ ['vatandaş','yurttaş'],['çağrı','davet'],['örnek','model'],['hikâye','öykü'],
+ ['doktor','hekim'],['hastane','şifahane'],['yolculuk','seyahat'],['sözlük','lügat'],
+ ['kalp','yürek'],['acele','ivedi'],['güçlü','kuvvetli'],['sınav','imtihan']
+];
+const ZIT=[ // zıt anlamlı çiftler
+ ['büyük','küçük'],['uzun','kısa'],['sıcak','soğuk'],['açık','kapalı'],
+ ['ileri','geri'],['gece','gündüz'],['güzel','çirkin'],['zengin','fakir'],
+ ['hızlı','yavaş'],['dolu','boş'],['yaşlı','genç'],['kolay','zor'],
+ ['temiz','kirli'],['kalın','ince'],['ağır','hafif'],['yakın','uzak'],
+ ['cimri','cömert'],['parlak','mat'],['ret','kabul'],['seyrek','sık'],
+ ['ilkel','çağdaş'],['sevinç','üzüntü'],['doğru','yanlış'],['erken','geç'],
+ ['aydınlık','karanlık'],['savaş','barış'],['iyi','kötü'],['tatlı','acı'],
+ ['sert','yumuşak'],['derin','sığ'],['bol','az'],['ıslak','kuru']
+];
+const SESTES=[ // eş sesli kelimeler: iki anlamıyla
+ {k:'yüz',a:['Suda ilerlemek','Doksan dokuzdan sonra gelen sayı','Surat, çehre']},
+ {k:'gül',a:['Dikenli, güzel kokulu çiçek','Sevinçle gülmek']},
+ {k:'yaz',a:['Sıcak mevsim','Kalemle yazmak']},
+ {k:'kaz',a:['Büyük su kuşu','Toprağı kazmak']},
+ {k:'bin',a:['Dokuz yüz doksan dokuzdan sonraki sayı','Bir şeyin üstüne çıkmak']},
+ {k:'dolu',a:['İçi boş olmayan','Gökten düşen buz taneleri']},
+ {k:'kır',a:['Şehir dışındaki açık alan','Bir şeyi parçalamak']},
+ {k:'ekmek',a:['Fırında pişen besin','Tohum ekmek']},
+ {k:'yat',a:['Uzanmak, uykuya geçmek','Lüks deniz teknesi']},
+ {k:'ben',a:['Kendimi anlatan sözcük','Deride bulunan küçük leke']},
+ {k:'çay',a:['Sıcak içecek','Küçük akarsu']},
+ {k:'kalem',a:['Yazı yazmaya yarayan araç','Resmî yazı bürosu']},
+ {k:'ay',a:['Dünyanın uydusu','Yılın on iki bölümünden biri']},
+ {k:'yatak',a:['Uyunan mobilya','Nehrin aktığı çukur yer']}
+];
+const MECAZ=[ // {c: cümle, m: mecaz mı, exp: açıklama}
+ {c:'Babam bugün çok tatlı bir haber verdi.',w:'tatlı',m:true, g:'Şekerli, hoş lezzetli olma',x:'Burada "tatlı" güzel, sevindirici anlamında kullanılmış.'},
+ {c:'Annem tatlı yaptı, hep birlikte yedik.',w:'tatlı',m:false,g:'Şekerli yiyecek',x:'Burada "tatlı" gerçek anlamıyla, yiyecek olarak kullanılmış.'},
+ {c:'Öğretmenimiz çok sıcak bir insandır.',w:'sıcak',m:true, g:'Yüksek ısı',x:'Burada "sıcak" içten, sevecen anlamında kullanılmış.'},
+ {c:'Çay çok sıcaktı, ağzımı yaktı.',w:'sıcak',m:false,g:'Yüksek ısılı',x:'Burada "sıcak" gerçek anlamıyla, ısı olarak kullanılmış.'},
+ {c:'Kardeşimin kalbi çok temizdir.',w:'temiz',m:true, g:'Kirli olmayan',x:'Burada "temiz" iyi niyetli, dürüst anlamında kullanılmış.'},
+ {c:'Odamı süpürdüm, şimdi tertemiz oldu.',w:'temiz',m:false,g:'Kirli olmayan',x:'Burada "temiz" gerçek anlamıyla kullanılmış.'},
+ {c:'Bu konuda elim kolum bağlı kaldı.',w:'bağlı',m:true, g:'İple tutturulmuş',x:'Burada hiçbir şey yapamamak anlatılıyor.'},
+ {c:'Paketi iple sımsıkı bağladım.',w:'bağladım',m:false,g:'İple tutturmak',x:'Burada "bağlamak" gerçek anlamıyla kullanılmış.'},
+ {c:'Ağır bir sorumluluk aldı omuzlarına.',w:'ağır',m:true, g:'Çok kilolu',x:'Burada "ağır" zor, güç anlamında kullanılmış.'},
+ {c:'Çanta çok ağırdı, zor taşıdım.',w:'ağır',m:false,g:'Kilosu fazla',x:'Burada "ağır" gerçek anlamıyla, kilo olarak kullanılmış.'},
+ {c:'Sınavda soğuk bir sürprizle karşılaştım.',w:'soğuk',m:true, g:'Düşük ısılı',x:'Burada "soğuk" hoş olmayan anlamında kullanılmış.'},
+ {c:'Kışın havalar iyice soğudu.',w:'soğudu',m:false,g:'Isı düştü',x:'Burada "soğumak" gerçek anlamıyla kullanılmış.'},
+ {c:'Onun eli açıktır, herkese yardım eder.',w:'eli açık',m:true, g:'Avucu açılmış',x:'Burada cömert olmak anlatılıyor.'},
+ {c:'Pencereyi açık bıraktım, hava girsin.',w:'açık',m:false,g:'Kapalı olmayan',x:'Burada "açık" gerçek anlamıyla kullanılmış.'},
+ {c:'Sözlerim boşa gitti, kimse dinlemedi.',w:'boşa',m:true, g:'İçi dolu olmayan',x:'Burada işe yaramamak anlatılıyor.'},
+ {c:'Bardak boştu, doldurdum.',w:'boş',m:false,g:'İçinde bir şey olmayan',x:'Burada "boş" gerçek anlamıyla kullanılmış.'}
+];
+
+const cap=s=>s.charAt(0).toLocaleUpperCase('tr-TR')+s.slice(1);
+
+// ===== AŞAMA 1: EŞ ANLAMLI =====
+function genEs(){
+  const [a,b]=pick(ES);
+  const askFirst=rnd(0,1)===0;
+  const soru=askFirst?a:b, cevap=askFirst?b:a;
+  const pool=ES.flat().filter(w=>w!==a&&w!==b);
+  const w=distractors(cevap,()=>pick(pool));
+  return{
+    text:`"${cap(soru)}" kelimesinin EŞ ANLAMLISI aşağıdakilerden hangisidir?`,
+    numberDisplay:cap(soru),
+    answer:cevap,
+    options:shuffle([cevap,...w]),
+    explain:`"${cap(soru)}" ve "${cevap}" aynı anlama gelir.\n\n💡 Eş anlamlı kelimeler yazılışları farklı, anlamları aynıdır.\nBiri yerine diğeri kullanılabilir: "${cap(soru)} geldi." = "${cap(cevap)} geldi."`
+  };
+}
+
+// ===== AŞAMA 2: ZIT ANLAMLI =====
+function genZit(){
+  const [a,b]=pick(ZIT);
+  const askFirst=rnd(0,1)===0;
+  const soru=askFirst?a:b, cevap=askFirst?b:a;
+  const pool=ZIT.flat().filter(w=>w!==a&&w!==b);
+  const w=distractors(cevap,()=>pick(pool));
+  return{
+    text:`"${cap(soru)}" kelimesinin ZIT ANLAMLISI aşağıdakilerden hangisidir?`,
+    numberDisplay:cap(soru),
+    answer:cevap,
+    options:shuffle([cevap,...w]),
+    explain:`"${cap(soru)}" kelimesinin karşıtı "${cevap}"dır.\n\n💡 Zıt anlamlı kelimeler birbirinin tam tersini anlatır.\nBiri varsa diğeri olamaz: bir şey hem ${a} hem ${b} olamaz.`
+  };
+}
+
+// ===== AŞAMA 3: EŞ SESLİ (SESTEŞ) =====
+function genSestes(){
+  const item=pick(SESTES);
+  const kind=rnd(0,1);
+  if(kind===0){
+    // Verilen anlamlardan hangisi bu kelimeye ait DEĞİL? -> basitleştir: kelimeyi bul
+    const w=distractors(item.k,()=>pick(SESTES).k);
+    const iki=item.a.slice(0,2);
+    return{
+      text:'Aşağıdaki iki anlama da gelen EŞ SESLİ kelime hangisidir?',
+      readDisplay:'1) '+iki[0]+'\n2) '+iki[1],
+      answer:item.k,
+      options:shuffle([item.k,...w]),
+      explain:`"${cap(item.k)}" kelimesi yazılışı ve okunuşu aynı, anlamları farklı bir kelimedir:\n• ${iki[0]}\n• ${iki[1]}\n\n💡 Eş sesli (sesteş) kelimeler aynı yazılır ama cümledeki anlamları farklıdır.`
+    };
+  }
+  // Doğru anlam eşleştirme
+  const dogru=pick(item.a);
+  const digerler=SESTES.filter(s=>s.k!==item.k).flatMap(s=>s.a);
+  const w=distractors(dogru,()=>pick(digerler));
+  return{
+    text:`"${cap(item.k)}" kelimesinin anlamlarından biri aşağıdakilerden hangisidir?`,
+    numberDisplay:cap(item.k),
+    answer:dogru,
+    options:shuffle([dogru,...w]),
+    explain:`"${cap(item.k)}" eş sesli bir kelimedir. Anlamları:\n`+item.a.map(a=>'• '+a).join('\n')+`\n\n💡 Hangi anlamda kullanıldığını CÜMLEDEN anlarız.`
+  };
+}
+
+// ===== AŞAMA 4: GERÇEK VE MECAZ ANLAM =====
+function genMecaz(){
+  const item=pick(MECAZ);
+  const ans=item.m?'Mecaz anlam':'Gerçek anlam';
+  return{
+    text:`Aşağıdaki cümlede altı çizili kelime hangi anlamda kullanılmıştır?`,
+    readDisplay:item.c.replace(item.w,'⟨'+item.w+'⟩'),
+    answer:ans,
+    options:shuffle(['Gerçek anlam','Mecaz anlam']),
+    explain:`${item.x}\n\nKelimenin gerçek anlamı: ${item.g}\n\n💡 GERÇEK anlam: kelimenin sözlükteki ilk, bilinen anlamı.\n💡 MECAZ anlam: benzetme yoluyla kazandığı yeni anlam.`
+  };
+}
+
+// ===== AŞAMA 5: KELİME IZGARASI (GÖRSEL) =====
+function genGrid(){
+  const rows=4, cols=3;
+  const tip=rnd(0,1)===0?'es':'zit';
+  const kaynak=tip==='es'?ES:ZIT;
+  const etiket=tip==='es'?'EŞ ANLAMLI':'ZIT ANLAMLI';
+
+  // Her satırda 1 doğru çift + 2 rastgele (ilişkisiz) çift
+  const grid=[], dogruSutun=[];
+  const kullanilan=new Set();
+  for(let r=0;r<rows;r++){
+    const hedef=[];
+    let ok; do{ ok=pick(kaynak); }while(kullanilan.has(ok[0]));
+    kullanilan.add(ok[0]);
+    const dogruIdx=rnd(0,cols-1);
+    dogruSutun.push(dogruIdx);
+    for(let c=0;c<cols;c++){
+      if(c===dogruIdx){ hedef.push(ok[0]+' - '+ok[1]); }
+      else{
+        // ilişkisiz çift: iki farklı çiftten birer kelime
+        let p1,p2,g=0;
+        do{ p1=pick(kaynak); p2=pick(kaynak); }while(p1===p2&&g++<30);
+        hedef.push(p1[0]+' - '+p2[1]);
+      }
+    }
+    grid.push(hedef);
+  }
+
+  // Şıklar: desen dizileri (görsel)
+  const key=dogruSutun.join('');
+  const wrongKeys=distractors(key,()=>Array.from({length:rows},()=>rnd(0,cols-1)).join(''));
+
+  return{
+    text:`Zeynep bir kelime oyunu oynuyor. Her satırda ${etiket} sözcüklerin bulunduğu kutuya basarak ilerliyor.\n\nDoğru kutulara bastığında hangi desen oluşur?`,
+    visual:()=>drawWordGrid(grid,rows,cols),
+    answer:key,
+    options:shuffle([key,...wrongKeys]),
+    optionVisuals:(k)=>drawPattern(k,rows,cols),
+    explain:'Doğru '+etiket.toLowerCase()+' çiftler:\n'+
+      dogruSutun.map((c,r)=>`${r+1}. satır → ${c+1}. kutu: ${grid[r][c]}`).join('\n')+
+      '\n\n💡 Her satırda önce doğru çifti bul, sonra kaçıncı kutuda olduğunu işaretle.'
+  };
+}
+
+function drawWordGrid(grid,rows,cols){
+  const{c,ctx,W,H}=newCanvas(1,.62,440);
+  const cw=(W-16)/cols, ch=(H-16)/rows;
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  for(let r=0;r<rows;r++)for(let i=0;i<cols;i++){
+    const x=8+i*cw, y=8+r*ch;
+    ctx.fillStyle=(r+i)%2===0?'#FFE0B2':'#FFCC80';
+    ctx.fillRect(x,y,cw-3,ch-3);
+    ctx.strokeStyle='#E65100';ctx.lineWidth=1.6;
+    ctx.strokeRect(x,y,cw-3,ch-3);
+    ctx.fillStyle='#5D4037';
+    ctx.font='600 '+Math.max(9,Math.min(12,cw/9))+'px Fredoka,Arial';
+    ctx.fillText(grid[r][i],x+(cw-3)/2,y+(ch-3)/2);
+  }
+  // satır okları
+  ctx.fillStyle='#E65100';ctx.font='700 10px Fredoka,Arial';ctx.textAlign='left';
+  for(let r=0;r<rows;r++) ctx.fillText('▶',1,8+r*ch+ch/2);
+  return c;
+}
+
+function drawPattern(key,rows,cols){
+  const c=document.createElement('canvas');
+  const S=Math.min(84,(window.innerWidth-120)/2);
+  c.width=S;c.height=S*rows/cols*0.92;
+  c.style.width='100%';c.style.height='auto';
+  const ctx=c.getContext('2d');
+  const cw=c.width/cols, ch=c.height/rows;
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);
+  for(let r=0;r<rows;r++)for(let i=0;i<cols;i++){
+    ctx.fillStyle=(+key[r]===i)?'#F9A825':'#FFE0B2';
+    ctx.fillRect(i*cw,r*ch,cw-1.5,ch-1.5);
+  }
+  return c;
+}
+
+initGame([
+  {name:'Eş Anlamlı',gen:genEs},
+  {name:'Zıt Anlamlı',gen:genZit},
+  {name:'Eş Sesli',gen:genSestes},
+  {name:'Gerçek / Mecaz',gen:genMecaz},
+  {name:'Kelime Izgarası',gen:genGrid}
+],{c1:'#EF6C00',c2:'#FFA726',shadow:'rgba(239,108,0,.35)',boxBg:'linear-gradient(135deg,#fffaf3 0%,#fff5e8 100%)',boxBorder:'#ffd9a0'});
+</script>
+</body>
+</html>

@@ -78,11 +78,23 @@ function newQuestion(){
     q.mount(ob,{
       done:(ok,explain)=>finishInteractive(ok,explain)
     });
+  }else if(q.optionVisuals){
+    // Görsel şıklar: her şık bir canvas (metin yerine resim)
+    ob.style.display='';
+    q.options.forEach((o,i)=>{
+      const b=document.createElement('button');
+      b.className='opt';b.style.padding='8px';
+      b.appendChild(q.optionVisuals(o,i));
+      b.dataset.val=o;
+      b.onclick=()=>checkAnswer(b,o,q.explain);
+      ob.appendChild(b);
+    });
   }else{
     ob.style.display='';
     q.options.forEach(o=>{
       const b=document.createElement('button');b.className='opt';b.textContent=o;
-      b.onclick=()=>checkAnswer(b,o,q.explain);ob.appendChild(b);
+      b.onclick=()=>checkAnswer(b,o,q.explain);
+      ob.appendChild(b);
     });
   }
 }
@@ -107,7 +119,9 @@ function finishInteractive(ok,explain){
 function checkAnswer(btn,choice,explain){
   if(answered)return;answered=true;totalCount++;
   document.querySelectorAll('.opt').forEach(b=>{
-    b.disabled=true;if(b.textContent===currentAnswer)b.classList.add('correct');});
+    b.disabled=true;
+    const val=b.dataset.val!==undefined?b.dataset.val:b.textContent;
+    if(val===currentAnswer)b.classList.add('correct');});
   const fb=document.getElementById('feedback');
   if(choice===currentAnswer){
     correctCount++;score+=100;
