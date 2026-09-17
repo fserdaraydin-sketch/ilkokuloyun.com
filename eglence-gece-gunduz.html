@@ -32,6 +32,8 @@ body{font-family:'Fredoka',Arial,sans-serif;background:linear-gradient(135deg,#0
 .city-saat{font-size:30px;font-weight:700;color:#263238;text-align:center;letter-spacing:1px;line-height:1.1}
 .sky{height:42px;border-radius:10px;margin-top:8px;position:relative;overflow:hidden}
 .sky-gunes{position:absolute;width:20px;height:20px;border-radius:50%;background:#FDD835;box-shadow:0 0 14px rgba(253,216,53,.9);transition:none}
+.sec{width:100%;margin-top:8px;padding:9px;border-radius:10px;border:2px solid #D6DCE5;background:#fff;font-family:inherit;font-size:13.5px;font-weight:600;color:#37474F;cursor:pointer}
+.sec:focus{outline:none;border-color:#1565C0}
 
 .controls{margin-top:14px}
 .sl-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
@@ -66,7 +68,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
   </div>
 
   <div class="info">
-    👆 <strong>Saati kaydır</strong> ya da <strong>Oynat</strong>'a bas. Dünya döndükçe Türkiye ve New York sırayla aydınlanır. Saatlerin arasındaki farkı izle!
+    👆 <strong>Saati kaydır</strong> ya da <strong>Oynat</strong>'a bas. Dünya döndükçe şehirler sırayla aydınlanır. Alttaki listelerden başka şehirler seçip saat farkını karşılaştır!
   </div>
 
   <div id="stage">
@@ -74,21 +76,23 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
   </div>
 
   <div class="cities">
-    <div class="city" id="cityTR">
+    <div class="city" id="cityA">
       <div class="city-top">
-        <span class="city-ad">🇹🇷 Türkiye</span>
-        <span class="rozet" id="rozetTR">—</span>
+        <span class="city-ad" id="adA">🇹🇷 İstanbul</span>
+        <span class="rozet" id="rozetA">—</span>
       </div>
-      <div class="city-saat" id="saatTR">--.--</div>
-      <div class="sky" id="skyTR"><div class="sky-gunes" id="gunesTR"></div></div>
+      <div class="city-saat" id="saatA">--.--</div>
+      <div class="sky" id="skyA"><div class="sky-gunes" id="gunesA"></div></div>
+      <select class="sec" id="secA" onchange="sehirDegistir('A',this.value)"></select>
     </div>
-    <div class="city" id="cityUS">
+    <div class="city" id="cityB">
       <div class="city-top">
-        <span class="city-ad">🇺🇸 New York</span>
-        <span class="rozet" id="rozetUS">—</span>
+        <span class="city-ad" id="adB">🇺🇸 New York</span>
+        <span class="rozet" id="rozetB">—</span>
       </div>
-      <div class="city-saat" id="saatUS">--.--</div>
-      <div class="sky" id="skyUS"><div class="sky-gunes" id="gunesUS"></div></div>
+      <div class="city-saat" id="saatB">--.--</div>
+      <div class="sky" id="skyB"><div class="sky-gunes" id="gunesB"></div></div>
+      <select class="sec" id="secB" onchange="sehirDegistir('B',this.value)"></select>
     </div>
   </div>
 
@@ -116,52 +120,107 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 const stage=document.getElementById('stage');
-let scene,camera,renderer,dunya,gunesMesh,gunesHale,terminator;
+let scene,camera,renderer,dunya,gunesMesh,gunesHale,terminator,isinlar;
 let GX=-15;
 let aci=0;            // Dünya'nın dönüş açısı (radyan)
 let oynuyor=false;
 let hiz=4;
 
-// Şehirler: enlem, boylam
-const SEHIR={
-  TR:{ad:'Türkiye', lat:39,  lon:35,   renk:0xE53935},
-  US:{ad:'New York',lat:40.7,lon:-74,  renk:0x42A5F5}
+// Seçilebilir şehirler: enlem, boylam
+const SEHIRLER={
+  ist:{ad:'🇹🇷 İstanbul', lat:41.0,  lon:29.0},
+  nyc:{ad:'🇺🇸 New York', lat:40.7,  lon:-74.0},
+  lon:{ad:'🇬🇧 Londra',   lat:51.5,  lon:-0.1},
+  tok:{ad:'🇯🇵 Tokyo',    lat:35.7,  lon:139.7},
+  syd:{ad:'🇦🇺 Sydney',   lat:-33.9, lon:151.2},
+  rio:{ad:'🇧🇷 Rio',      lat:-22.9, lon:-43.2},
+  del:{ad:'🇮🇳 Delhi',    lat:28.6,  lon:77.2},
+  cap:{ad:'🇿🇦 Cape Town',lat:-33.9, lon:18.4},
+  mos:{ad:'🇷🇺 Moskova',  lat:55.8,  lon:37.6},
+  los:{ad:'🇺🇸 Los Angeles',lat:34.1,lon:-118.2}
 };
+const SEHIR={A:{kod:'ist',renk:0xE53935},B:{kod:'nyc',renk:0x42A5F5}};
 const pins={};
 
 // ===== DÜNYA DOKUSU (kaba kıtalar) =====
 const KITALAR=[
-  // Avrupa + Afrika
-  [[-10,36],[0,45],[15,46],[28,45],[36,36],[43,12],[51,12],[43,-2],[40,-16],[32,-26],[25,-34],[18,-34],[12,-18],[9,4],[-5,5],[-16,14],[-17,26],[-10,36]],
+  // Afrika
+  [[-17,21],[-16,12],[-11,5],[-4,5],[3,6],[9,4],[9,10],[15,13],[24,16],[32,23],[35,24],[43,12],[51,12],[48,3],[41,-2],[40,-11],[35,-20],[33,-26],[28,-32],[20,-34],[18,-30],[13,-17],[12,-6],[9,0],[2,4],[-8,4],[-13,8],[-17,21]],
+  // Avrupa
+  [[-10,36],[-9,43],[-2,43],[-1,49],[4,52],[8,54],[11,55],[13,56],[18,55],[22,54],[28,57],[24,60],[30,62],[40,66],[32,70],[24,70],[15,68],[11,63],[5,58],[0,51],[-5,48],[-9,44],[-10,36]],
   // Asya
-  [[28,45],[45,48],[60,52],[80,52],[100,53],[120,50],[135,45],[140,35],[122,30],[120,22],[106,10],[100,5],[92,20],[80,8],[72,20],[60,25],[50,30],[36,36],[28,45]],
+  [[28,45],[35,42],[45,40],[50,45],[60,50],[70,55],[80,58],[95,60],[110,60],[125,55],[135,48],[140,42],[130,35],[122,30],[120,22],[109,15],[100,6],[97,16],[92,21],[88,22],[80,10],[73,17],[68,24],[62,25],[57,28],[50,30],[43,30],[36,36],[28,45]],
   // Kuzey Amerika
-  [[-125,50],[-110,52],[-95,50],[-80,46],[-66,46],[-72,40],[-80,32],[-90,29],[-97,26],[-105,23],[-115,32],[-124,40],[-125,50]],
-  // Orta + Güney Amerika
-  [[-90,15],[-78,8],[-60,5],[-50,-2],[-38,-6],[-40,-22],[-48,-28],[-58,-38],[-70,-45],[-72,-30],[-76,-14],[-80,-2],[-84,8],[-90,15]],
+  [[-125,49],[-120,54],[-130,57],[-140,60],[-155,65],[-165,65],[-160,58],[-150,59],[-140,68],[-125,70],[-110,68],[-95,68],[-85,63],[-78,60],[-64,60],[-56,51],[-66,45],[-70,42],[-76,36],[-81,26],[-90,29],[-97,26],[-105,21],[-98,16],[-92,15],[-87,13],[-83,9],[-95,17],[-106,24],[-114,31],[-121,35],[-124,42],[-125,49]],
+  // Güney Amerika
+  [[-78,8],[-72,11],[-62,10],[-52,5],[-50,0],[-44,-2],[-35,-6],[-38,-13],[-40,-21],[-48,-26],[-58,-35],[-62,-40],[-65,-46],[-70,-53],[-74,-50],[-73,-42],[-71,-33],[-76,-22],[-80,-12],[-81,-5],[-78,3],[-78,8]],
   // Avustralya
-  [[114,-22],[130,-12],[142,-11],[150,-24],[146,-38],[136,-36],[120,-34],[114,-22]],
+  [[114,-22],[122,-18],[130,-12],[136,-12],[142,-11],[146,-18],[152,-25],[150,-34],[144,-38],[138,-35],[130,-32],[122,-34],[115,-34],[113,-26],[114,-22]],
   // Grönland
-  [[-50,60],[-30,70],[-20,78],[-40,82],[-58,76],[-56,66],[-50,60]]
+  [[-45,60],[-30,68],[-20,73],[-22,80],[-38,83],[-55,80],[-60,72],[-52,64],[-45,60]],
+  // Hindistan yarımadası ucu
+  [[73,17],[77,10],[80,9],[82,17],[73,17]],
+  // Madagaskar
+  [[43,-12],[50,-15],[50,-24],[45,-25],[43,-19],[43,-12]],
+  // Japonya
+  [[130,32],[135,34],[140,36],[142,42],[145,44],[141,45],[138,37],[132,34],[130,32]],
+  // Britanya
+  [[-5,50],[-2,52],[0,53],[-1,55],[-3,58],[-5,58],[-6,54],[-5,50]],
+  // Yeni Zelanda
+  [[172,-34],[176,-38],[178,-39],[174,-41],[170,-44],[167,-46],[169,-44],[172,-40],[172,-34]],
+  // Endonezya
+  [[95,5],[105,0],[115,-4],[120,-8],[112,-8],[100,-2],[95,5]],
+  // İzlanda
+  [[-24,65],[-18,66],[-14,65],[-19,63],[-24,65]],
+  // Antarktika şeridi
+  [[-180,-72],[-120,-74],[-60,-72],[0,-70],[60,-68],[120,-70],[180,-72],[180,-90],[-180,-90],[-180,-72]]
+];
+// Çöl bölgeleri (kum rengi)
+const COLLER=[
+  [[-12,28],[10,30],[30,30],[35,22],[25,15],[10,16],[-5,20],[-12,28]],   // Sahra
+  [[38,30],[55,30],[58,22],[45,14],[38,20],[38,30]],                      // Arabistan
+  [[118,-20],[135,-20],[138,-28],[122,-30],[118,-20]],                    // Avustralya içi
+  [[75,40],[95,45],[105,42],[95,37],[80,36],[75,40]]                      // Gobi
 ];
 
 function dunyaDokusu(){
   const c=document.createElement('canvas');
-  c.width=1024;c.height=512;
+  c.width=2048;c.height=1024;
   const x=c.getContext('2d');
-  // Okyanus
-  x.fillStyle='#1B5E9E';x.fillRect(0,0,1024,512);
-  // Kutup buzulları
-  x.fillStyle='#E8F0F5';
-  x.fillRect(0,0,1024,26);x.fillRect(0,486,1024,26);
-  // Kıtalar
-  const px=(lon,lat)=>[(lon+180)/360*1024,(90-lat)/180*512];
-  x.fillStyle='#3E8B45';
-  KITALAR.forEach(k=>{
+  const px=(lon,lat)=>[(lon+180)/360*2048,(90-lat)/180*1024];
+
+  // Okyanus — kutuplara doğru koyulaşan
+  const og=x.createLinearGradient(0,0,0,1024);
+  og.addColorStop(0,'#0E3D6B');
+  og.addColorStop(.5,'#1C6BAE');
+  og.addColorStop(1,'#0E3D6B');
+  x.fillStyle=og;x.fillRect(0,0,2048,1024);
+
+  function ciz(poly,dolgu,kenar){
     x.beginPath();
-    k.forEach((p,i)=>{const [a,b]=px(p[0],p[1]);i===0?x.moveTo(a,b):x.lineTo(a,b);});
-    x.closePath();x.fill();
-  });
+    poly.forEach((p,i)=>{const [a,b]=px(p[0],p[1]);i===0?x.moveTo(a,b):x.lineTo(a,b);});
+    x.closePath();
+    x.fillStyle=dolgu;x.fill();
+    if(kenar){x.strokeStyle=kenar;x.lineWidth=5;x.stroke();}
+  }
+
+  // Kıta sığlığı (kıyı halkası)
+  KITALAR.forEach(k=>ciz(k,'#2E7FBE','#2E7FBE'));
+  // Kara
+  KITALAR.forEach(k=>ciz(k,'#3F8C4A'));
+  // Çöller
+  COLLER.forEach(k=>ciz(k,'#C9A961'));
+  // Kuzey ormanları (üst enlemler biraz koyu)
+  x.globalAlpha=.35;
+  x.fillStyle='#2C6B38';
+  x.fillRect(0,px(0,68)[1],2048,px(0,50)[1]-px(0,68)[1]);
+  x.globalAlpha=1;
+
+  // Kutup buzulları
+  x.fillStyle='#EAF2F7';
+  x.fillRect(0,0,2048,px(0,78)[1]);
+  x.fillRect(0,px(0,-75)[1],2048,1024-px(0,-75)[1]);
+
   const t=new THREE.CanvasTexture(c);
   t.needsUpdate=true;
   return t;
@@ -176,6 +235,59 @@ function konum(lat,lon,r){
      r*Math.cos(phi),
      r*Math.sin(phi)*Math.sin(theta)
   );
+}
+
+// ===== GÜNEŞ IŞINLARI =====
+function isinlariCiz(){
+  if(!isinlar) return;
+  while(isinlar.children.length) isinlar.remove(isinlar.children[0]);
+  const mat=new THREE.LineBasicMaterial({color:0xFFE082,transparent:true,opacity:.3});
+  const R=4, DX=5;
+  const basla=GX+3.2;
+  for(let i=-6;i<=6;i++){
+    for(const z of [0,-2.6,2.6]){
+      const y=i*0.72;
+      const uzak=Math.hypot(y,z);
+      let bitX;
+      if(uzak<R-0.05) bitX=DX-Math.sqrt(R*R-uzak*uzak);   // küre yüzeyinde dur
+      else if(uzak<R+3.4) bitX=DX+R*0.8;                  // Dünya'yı sıyırıp geçer
+      else continue;
+      if(bitX<=basla) continue;
+      const g=new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(basla,y,z), new THREE.Vector3(bitX,y,z)]);
+      isinlar.add(new THREE.Line(g,mat));
+    }
+  }
+}
+
+// ===== İŞARETÇİ =====
+function isaretciKur(k){
+  if(pins[k]) dunya.remove(pins[k].grup);
+  const sh=SEHIRLER[SEHIR[k].kod];
+  const renk=SEHIR[k].renk;
+  const g=new THREE.Group();
+  const p=konum(sh.lat,sh.lon,4);
+  const nokta=new THREE.Mesh(new THREE.SphereGeometry(.26,16,16),
+    new THREE.MeshBasicMaterial({color:renk}));
+  nokta.position.copy(p);
+  const ucu=p.clone().multiplyScalar(1.3);
+  const cizgi=new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints([p,ucu]),
+    new THREE.LineBasicMaterial({color:renk}));
+  const bas=new THREE.Mesh(new THREE.SphereGeometry(.36,16,16),
+    new THREE.MeshBasicMaterial({color:renk}));
+  bas.position.copy(ucu);
+  g.add(nokta);g.add(cizgi);g.add(bas);
+  dunya.add(g);
+  pins[k]={grup:g,yon:p.clone().normalize()};
+}
+
+function sehirDegistir(k,kod){
+  SEHIR[k].kod=kod;
+  isaretciKur(k);
+  document.getElementById('ad'+k).textContent=SEHIRLER[kod].ad;
+  guncelle();
+  if(window.IO) IO.olay('gece-gunduz-sehir',{sehir:SEHIRLER[kod].ad});
 }
 
 function init(){
@@ -228,24 +340,13 @@ function init(){
   );
   dunya.add(kure);
 
-  // İşaretçiler (Dünya ile birlikte döner)
-  Object.entries(SEHIR).forEach(([k,s])=>{
-    const g=new THREE.Group();
-    const p=konum(s.lat,s.lon,4);
-    const nokta=new THREE.Mesh(new THREE.SphereGeometry(.26,16,16),
-      new THREE.MeshBasicMaterial({color:s.renk}));
-    nokta.position.copy(p);
-    // dikey iğne
-    const ucu=p.clone().multiplyScalar(1.28);
-    const cg=new THREE.BufferGeometry().setFromPoints([p,ucu]);
-    const cizgi=new THREE.Line(cg,new THREE.LineBasicMaterial({color:s.renk}));
-    const bas=new THREE.Mesh(new THREE.SphereGeometry(.34,16,16),
-      new THREE.MeshBasicMaterial({color:s.renk}));
-    bas.position.copy(ucu);
-    g.add(nokta);g.add(cizgi);g.add(bas);
-    dunya.add(g);
-    pins[k]={grup:g,yon:p.clone().normalize()};
-  });
+  // İşaretçiler (Dünya ile birlikte döner) — şehir seçilince yeniden kurulur
+  ['A','B'].forEach(k=>isaretciKur(k));
+
+  // GÜNEŞ IŞINLARI — soluk sarı, Dünya'nın aydınlık yüzeyinde biten çizgiler
+  isinlar=new THREE.Group();
+  scene.add(isinlar);
+  isinlariCiz();
 
   // GECE-GÜNDÜZ ÇİZGİSİ (terminatör) — Dünya ile dönmez, sabit halka
   const tg=new THREE.TorusGeometry(4.03,.035,8,64);
@@ -261,8 +362,11 @@ function init(){
 
 // Dar ekranda Güneş'i Dünya'ya yaklaştır: sahne kompaktlaşır, Dünya büyük kalır
 function kamerayiYerlestir(){
-  GX = camera.aspect<1.45 ? -10.5 : -15;
+  const yeniGX = camera.aspect<1.45 ? -10.5 : -15;
+  const degisti = yeniGX!==GX;
+  GX = yeniGX;
   if(gunesMesh){ gunesMesh.position.set(GX,0,0); gunesHale.position.set(GX,0,0); }
+  if(degisti) isinlariCiz();
 
   const solKenar=GX-4.2, sagKenar=9.5;          // Güneş halesi ... Dünya + iğne
   const merkez=(solKenar+sagKenar)/2;
@@ -277,7 +381,22 @@ function kamerayiYerlestir(){
   camera.lookAt(merkez,0,0);
 }
 
+function selectleriDoldur(){
+  ['A','B'].forEach(k=>{
+    const sel=document.getElementById('sec'+k);
+    sel.innerHTML='';
+    Object.entries(SEHIRLER).forEach(([kod,sh])=>{
+      const o=document.createElement('option');
+      o.value=kod;o.textContent=sh.ad;
+      if(kod===SEHIR[k].kod) o.selected=true;
+      sel.appendChild(o);
+    });
+    document.getElementById('ad'+k).textContent=SEHIRLER[SEHIR[k].kod].ad;
+  });
+}
+
 function bagla(){
+  selectleriDoldur();
   document.getElementById('saat').addEventListener('input',e=>{
     if(oynuyor) oynatDurdur();
     aci=(+e.target.value/1440)*Math.PI*2;
@@ -301,7 +420,7 @@ function guncelle(){
   // Güneş yönü (Dünya'dan Güneş'e): -X
   const gunesYon=new THREE.Vector3(-1,0,0);
 
-  Object.entries(SEHIR).forEach(([k,s])=>{
+  ['A','B'].forEach(k=>{
     const yon=pins[k].yon.clone().applyAxisAngle(new THREE.Vector3(0,1,0),-aci);
     const d=yon.dot(gunesYon);           // >0 ise Güneş'e bakıyor = gündüz
     const gunduz=d>0;
@@ -363,6 +482,8 @@ function oynatDurdur(){
 }
 function basaAl(){
   aci=0;oynuyor=false;hiz=4;
+  SEHIR.A.kod='ist';SEHIR.B.kod='nyc';
+  isaretciKur('A');isaretciKur('B');selectleriDoldur();
   document.getElementById('saat').value=720;
   document.getElementById('hiz').value=4;
   document.getElementById('oynatBtn').textContent='▶️ Oynat';
