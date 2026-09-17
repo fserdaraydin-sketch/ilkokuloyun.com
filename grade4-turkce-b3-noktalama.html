@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3. Bölüm: Noktalama İşaretleri - 4. Sınıf Türkçe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade4-style.css">
+</head>
+<body>
+<div class="container">
+  <div class="header"><h1>📍 3. Bölüm: Noktalama İşaretleri</h1><p>Kolaydan zora 5 aşama</p></div>
+  <div class="levels" id="levels"></div>
+  <div class="stats">
+    <div class="stat"><div class="stat-l">PUAN</div><div class="stat-v" id="score">0</div></div>
+    <div class="stat"><div class="stat-l">DOĞRU</div><div class="stat-v" id="correct">0</div></div>
+    <div class="stat"><div class="stat-l">SORU</div><div class="stat-v" id="total">0</div></div>
+  </div>
+  <div class="question-box">
+    <div class="q-text" id="qText">Yükleniyor...</div>
+    <div id="qVisual"></div>
+    <div class="options" id="options"></div>
+  </div>
+  <div class="feedback" id="feedback"></div>
+  <div class="explain" id="explain"></div>
+  <button class="btn btn-next" onclick="newQuestion()">Yeni Soru ➜</button>
+  <button class="btn btn-back" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade4-engine.js"></script>
+<script>
+// ---- CÜMLE SONU ----
+const BILDIRIM=[
+ 'Yarın okula erken gideceğiz','Bahçedeki çiçekler açmış','Kardeşim ödevini bitirdi',
+ 'Hava bugün çok güzel','Kitabı masanın üstüne bıraktım','Dedem bize masal anlattı',
+ 'Öğretmenimiz sınıfa girdi','Kuşlar güneye göç ediyor'
+];
+const SORU=[
+ 'Bu kitabı nereden aldın','Ödevini bitirdin mi','Sinemaya kaçta gideceğiz',
+ 'Bugün hangi dersimiz var','Annen nerede çalışıyor','Kaç kardeşin var',
+ 'Yarın hava nasıl olacak','Bunu kim yapmış'
+];
+const UNLEM=[
+ 'Ne kadar güzel bir manzara','Aman dikkat et','Yaşasın tatil başladı',
+ 'Eyvah otobüsü kaçırdık','Ne mutlu bize','Hey buraya bak','Vah vah çok üzüldüm'
+];
+
+function genCumleSonu(){
+  const t=rnd(0,2);
+  const c = t===0?pick(BILDIRIM):t===1?pick(SORU):pick(UNLEM);
+  const ans= t===0?'Nokta ( . )':t===1?'Soru işareti ( ? )':'Ünlem ( ! )';
+  const exp= t===0?'Tamamlanmış bir yargı bildiren cümlelerin sonuna NOKTA konur.'
+           : t===1?'Soru anlamı taşıyan cümlelerin sonuna SORU İŞARETİ konur.'
+           : 'Sevinç, korku, şaşkınlık, üzüntü gibi duyguları anlatan cümlelerin sonuna ÜNLEM konur.';
+  return{
+    text:'Aşağıdaki cümlenin sonuna hangi noktalama işareti gelmelidir?',
+    readDisplay:c+' ___',
+    answer:ans,
+    options:shuffle(['Nokta ( . )','Soru işareti ( ? )','Ünlem ( ! )','Virgül ( , )']),
+    explain:`${c}${t===0?'.':t===1?'?':'!'}\n\n💡 ${exp}`
+  };
+}
+
+// ---- VİRGÜL ----
+const VIRGUL=[
+ {c:'Çantama kalem silgi defter ve kitap koydum.',d:'Çantama kalem, silgi, defter ve kitap koydum.',k:'Sıralanan kelimelerin arasına virgül konur (son kelimeden önce "ve" varsa oraya konmaz).'},
+ {c:'Ali gel buraya.',d:'Ali, gel buraya.',k:'Seslenme sözlerinden sonra virgül konur.'},
+ {c:'Evet seninle geliyorum.',d:'Evet, seninle geliyorum.',k:'"Evet, hayır, peki" gibi onay/ret sözlerinden sonra virgül konur.'},
+ {c:'Bahçede kedi köpek kuş vardı.',d:'Bahçede kedi, köpek, kuş vardı.',k:'Sıralanan kelimelerin arasına virgül konur.'},
+ {c:'Öğretmenim bu soruyu anlamadım.',d:'Öğretmenim, bu soruyu anlamadım.',k:'Seslenme sözlerinden sonra virgül konur.'},
+ {c:'Hayır ben gelmeyeceğim.',d:'Hayır, ben gelmeyeceğim.',k:'Ret bildiren sözlerden sonra virgül konur.'},
+ {c:'Kırmızı sarı mavi balonlar uçuştu.',d:'Kırmızı, sarı, mavi balonlar uçuştu.',k:'Art arda sıralanan kelimelerin arasına virgül konur.'}
+];
+function genVirgul(){
+  const it=pick(VIRGUL);
+  const w=distractors(it.d,()=>{
+    const o=pick(VIRGUL); return o===it?null:o.d;
+  });
+  return{
+    text:'Aşağıdaki cümlenin virgülleri doğru konulmuş hâli hangisidir?',
+    readDisplay:it.c,
+    answer:it.d,
+    options:shuffle([it.d,...w]),
+    explain:`Doğrusu: ${it.d}\n\n💡 ${it.k}`
+  };
+}
+
+// ---- KESME İŞARETİ ----
+const OZEL=[
+ {a:'Ankara',e:"'ya",tam:"Ankara'ya",tip:'şehir adı'},
+ {a:'Ahmet',e:"'in",tam:"Ahmet'in",tip:'kişi adı'},
+ {a:'Türkiye',e:"'nin",tam:"Türkiye'nin",tip:'ülke adı'},
+ {a:'İstanbul',e:"'da",tam:"İstanbul'da",tip:'şehir adı'},
+ {a:'Atatürk',e:"'ün",tam:"Atatürk'ün",tip:'kişi adı'},
+ {a:'Kızılırmak',e:"'ın",tam:"Kızılırmak'ın",tip:'nehir adı'},
+ {a:'Ayşe',e:"'ye",tam:"Ayşe'ye",tip:'kişi adı'},
+ {a:'Erciyes',e:"'e",tam:"Erciyes'e",tip:'dağ adı'}
+];
+const KURUM=[
+ {y:'Türk Dil Kurumuna',tip:'kurum adı'},
+ {y:'Millî Eğitim Bakanlığında',tip:'kurum adı'},
+ {y:'Ankara Üniversitesinden',tip:'kurum adı'}
+];
+function genKesme(){
+  const kind=rnd(0,1);
+  if(kind===0){
+    const it=pick(OZEL);
+    const yanlis=it.a+it.e.slice(1);
+    const w=[yanlis, it.a+' '+it.e.slice(1), it.a.toLowerCase()+it.e];
+    return{
+      text:'Aşağıdakilerden hangisi DOĞRU yazılmıştır?',
+      answer:it.tam,
+      options:shuffle([it.tam,...w]),
+      explain:`Doğrusu: ${it.tam}\n\n"${it.a}" bir özel addır (${it.tip}).\n\n💡 Özel adlara gelen ekler KESME İŞARETİ ile ayrılır.\nÖzel ad her zaman büyük harfle başlar.`
+    };
+  }
+  const it=pick(KURUM);
+  const yanlis=it.y.replace(/([a-zçğıöşü]+)$/,"'$1");
+  return{
+    text:'Aşağıdaki kullanımlardan hangisi DOĞRUDUR?',
+    answer:it.y,
+    options:shuffle([it.y,yanlis,it.y.toLowerCase(),yanlis.toLowerCase()]),
+    explain:`Doğrusu: ${it.y}\n\n💡 Kurum ve kuruluş adlarına gelen ekler kesme işaretiyle AYRILMAZ.\nAma kişi, şehir, ülke gibi özel adlarda ayrılır: Ankara'ya, Ahmet'in`
+  };
+}
+
+// ---- DİĞER İŞARETLER ----
+const DIGER=[
+ {c:'Annem şöyle dedi ___ "Erken yat."',i:'İki nokta ( : )',k:'Bir açıklama veya alıntı yapılacaksa öncesine iki nokta konur.'},
+ {c:'Çantada şunlar vardı ___ kalem, defter, silgi.',i:'İki nokta ( : )',k:'Sıralama veya açıklama yapılacaksa öncesine iki nokta konur.'},
+ {c:'Öğretmen ___ Ödevinizi getirdiniz mi ___ diye sordu.',i:'Tırnak ( " " )',k:'Başkasının sözü aynen aktarılırken tırnak içine alınır.'},
+ {c:'Ata ___ türk sözcüğü hece hece ayrılırsa böyle olur.',i:'Kısa çizgi ( - )',k:'Kelime hecelerine ayrılırken kısa çizgi kullanılır.'},
+ {c:'1881 ___ 1938 yılları arasında yaşamıştır.',i:'Kısa çizgi ( - )',k:'Başlangıç ve bitiş gösteren sayıların arasına kısa çizgi konur.'},
+ {c:'Bugün ___ 23 Nisan ___ bayram var.',i:'Virgül ( , )',k:'Cümle içinde açıklama yapan söz iki virgül arasına alınır.'}
+];
+function genDiger(){
+  const it=pick(DIGER);
+  return{
+    text:'Aşağıdaki cümlede boş bırakılan yere hangi noktalama işareti gelmelidir?',
+    readDisplay:it.c,
+    answer:it.i,
+    options:shuffle(['İki nokta ( : )','Tırnak ( " " )','Kısa çizgi ( - )','Virgül ( , )']),
+    explain:`Doğru işaret: ${it.i}\n\n💡 ${it.k}`
+  };
+}
+
+// ---- YANLIŞI BUL (en zor) ----
+const YANLIS=[
+ {y:'Ali, dün İstanbul,a gitti.',d:"Ali, dün İstanbul'a gitti.",n:'Özel ada gelen ek kesme işaretiyle ayrılır, virgülle değil.'},
+ {y:'Sen bu soruyu çözdün mü.',d:'Sen bu soruyu çözdün mü?',n:'Soru cümlesinin sonuna soru işareti konur.'},
+ {y:'Çantamda kalem defter ve silgi var.',d:'Çantamda kalem, defter ve silgi var.',n:'Sıralanan kelimelerin arasına virgül konur.'},
+ {y:'Ne kadar güzel bir gün.',d:'Ne kadar güzel bir gün!',n:'Duygu bildiren cümlenin sonuna ünlem konur.'},
+ {y:'Ayşe gel buraya!',d:'Ayşe, gel buraya!',n:'Seslenme sözünden sonra virgül konur.'},
+ {y:"Türk Dil Kurumu'na gittik.",d:'Türk Dil Kurumuna gittik.',n:'Kurum adlarına gelen ek kesme işaretiyle ayrılmaz.'},
+ {y:'Öğretmen: Ödevinizi getirin dedi.',d:'Öğretmen: "Ödevinizi getirin." dedi.',n:'Aynen aktarılan söz tırnak içine alınır.'}
+];
+function genYanlis(){
+  const it=pick(YANLIS);
+  const w=distractors(it.y,()=>{const o=pick(YANLIS);return o===it?null:o.d;});
+  return{
+    text:'Aşağıdaki cümlelerden hangisinde noktalama YANLIŞI vardır?',
+    answer:it.y,
+    options:shuffle([it.y,...w]),
+    explain:`Yanlış: ${it.y}\nDoğrusu: ${it.d}\n\n💡 ${it.n}`
+  };
+}
+
+initGame([
+  {name:'Cümle Sonu',gen:genCumleSonu},
+  {name:'Virgül',gen:genVirgul},
+  {name:'Kesme İşareti',gen:genKesme},
+  {name:'Diğer İşaretler',gen:genDiger},
+  {name:'Yanlışı Bul',gen:genYanlis}
+],{c1:'#00897B',c2:'#4DB6AC',shadow:'rgba(0,137,123,.35)',boxBg:'linear-gradient(135deg,#f0fbf9 0%,#e8f8f5 100%)',boxBorder:'#a7ded5'});
+</script>
+</body>
+</html>

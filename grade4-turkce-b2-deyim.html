@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2. Bölüm: Deyim ve Atasözü - 4. Sınıf Türkçe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade4-style.css">
+</head>
+<body>
+<div class="container">
+  <div class="header"><h1>💬 2. Bölüm: Deyim ve Atasözü</h1><p>Kolaydan zora 5 aşama</p></div>
+  <div class="levels" id="levels"></div>
+  <div class="stats">
+    <div class="stat"><div class="stat-l">PUAN</div><div class="stat-v" id="score">0</div></div>
+    <div class="stat"><div class="stat-l">DOĞRU</div><div class="stat-v" id="correct">0</div></div>
+    <div class="stat"><div class="stat-l">SORU</div><div class="stat-v" id="total">0</div></div>
+  </div>
+  <div class="question-box">
+    <div class="q-text" id="qText">Yükleniyor...</div>
+    <div id="qVisual"></div>
+    <div class="options" id="options"></div>
+  </div>
+  <div class="feedback" id="feedback"></div>
+  <div class="explain" id="explain"></div>
+  <button class="btn btn-next" onclick="newQuestion()">Yeni Soru ➜</button>
+  <button class="btn btn-back" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade4-engine.js"></script>
+<script>
+const DEYIM=[
+ {d:'göz atmak',a:'Kısaca bakmak, şöyle bir incelemek',c:'Ödevine bir ___ , eksik var mı?'},
+ {d:'kulak kabartmak',a:'Gizlice dinlemeye çalışmak',c:'Konuşmayı duyunca hemen ___ .'},
+ {d:'burnu havada olmak',a:'Kibirli, kendini beğenmiş olmak',c:'Sınavı kazanınca iyice ___ .'},
+ {d:'ağzı kulaklarına varmak',a:'Çok sevinmek',c:'Hediyeyi görünce ___ .'},
+ {d:'eli açık olmak',a:'Cömert olmak, bol bol vermek',c:'Komşumuz çok ___ , herkese yardım eder.'},
+ {d:'göz kulak olmak',a:'Korumak, ilgilenmek',c:'Ben yokken kardeşine ___ .'},
+ {d:'etekleri zil çalmak',a:'Aşırı sevinçli olmak',c:'Tatil haberini alınca ___ .'},
+ {d:'pabucu dama atılmak',a:'Değerini yitirmek, gözden düşmek',c:'Yeni oyuncak gelince eskisinin ___ .'},
+ {d:'dilinin ucunda olmak',a:'Hatırlamak üzere olup söyleyememek',c:'İsmi ___ ama çıkaramıyorum.'},
+ {d:'kafa yormak',a:'Uzun uzun düşünmek',c:'Bu soruya epey ___ .'},
+ {d:'can kulağıyla dinlemek',a:'Çok dikkatli dinlemek',c:'Öğretmeni ___ .'},
+ {d:'burnundan kıl aldırmamak',a:'Çok huysuz, kimseye söz hakkı tanımamak',c:'O kadar aksi ki ___ .'},
+ {d:'ağzından bal damlamak',a:'Çok tatlı ve güzel konuşmak',c:'Dedem anlatırken sanki ___ .'},
+ {d:'göze girmek',a:'Beğenilmek, değer kazanmak',c:'Çalışkanlığıyla öğretmenin ___ .'},
+ {d:'elini çabuk tutmak',a:'Acele etmek, hızlanmak',c:'Geç kalmayalım, ___ .'},
+ {d:'kulak asmamak',a:'Söyleneni dinlememek, önemsememek',c:'Uyarılara hiç ___ .'},
+ {d:'baş göz üstüne',a:'Seve seve kabul etmek',c:'İsteğin ___ , hemen yaparım.'},
+ {d:'iki ayağını bir pabuca sokmak',a:'Birini acele ettirmek, sıkıştırmak',c:'Beni durmadan ___ .'},
+ {d:'gözden kaçmak',a:'Fark edilmemek',c:'Bu hata ___ .'},
+ {d:'diline dolamak',a:'Sürekli aynı şeyi söyleyip durmak',c:'O konuyu iyice ___ .'}
+];
+const ATASOZU=[
+ {a:'Damlaya damlaya göl olur.',m:'Küçük birikimler zamanla büyük değer oluşturur.',eksik:['Damlaya damlaya ___ olur.','göl']},
+ {a:'Sakla samanı, gelir zamanı.',m:'Şimdi işe yaramayan bir şey ileride gerekebilir.',eksik:['Sakla samanı, gelir ___ .','zamanı']},
+ {a:'Ağaç yaşken eğilir.',m:'İyi alışkanlıklar küçük yaşta kazandırılır.',eksik:['Ağaç ___ eğilir.','yaşken']},
+ {a:'Bir elin nesi var, iki elin sesi var.',m:'Birlikte çalışmak tek başına çalışmaktan verimlidir.',eksik:['Bir elin nesi var, iki elin ___ var.','sesi']},
+ {a:'Ayağını yorganına göre uzat.',m:'Gücünün ve imkânının üstünde harcama yapma.',eksik:['Ayağını ___ göre uzat.','yorganına']},
+ {a:'Su akar, yolunu bulur.',m:'İşler zamanla kendiliğinden yoluna girer.',eksik:['Su akar, ___ bulur.','yolunu']},
+ {a:'Söz gümüşse sükût altındır.',m:'Bazen susmak konuşmaktan daha değerlidir.',eksik:['Söz gümüşse ___ altındır.','sükût']},
+ {a:'Yuvarlanan taş yosun tutmaz.',m:'Sürekli yer değiştiren kişi bir şey biriktiremez.',eksik:['Yuvarlanan taş ___ tutmaz.','yosun']},
+ {a:'İşleyen demir ışıldar.',m:'Çalışan kişi gelişir, yeteneği parlar.',eksik:['İşleyen ___ ışıldar.','demir']},
+ {a:'Acele işe şeytan karışır.',m:'Aceleyle yapılan işte hata çıkar.',eksik:['Acele işe ___ karışır.','şeytan']},
+ {a:'Bugünün işini yarına bırakma.',m:'Yapılacak işi ertelememek gerekir.',eksik:['Bugünün işini ___ bırakma.','yarına']},
+ {a:'Komşu komşunun külüne muhtaçtır.',m:'İnsanlar birbirlerine ihtiyaç duyar.',eksik:['Komşu komşunun ___ muhtaçtır.','külüne']},
+ {a:'Dost kara günde belli olur.',m:'Gerçek dost zor zamanda yanında olandır.',eksik:['Dost ___ günde belli olur.','kara']},
+ {a:'Bir fincan kahvenin kırk yıl hatırı vardır.',m:'Yapılan küçük bir iyilik uzun süre unutulmaz.',eksik:['Bir fincan kahvenin ___ yıl hatırı vardır.','kırk']},
+ {a:'Çok gezen çok bilir.',m:'Gezip görmek insanın bilgisini artırır.',eksik:['Çok gezen çok ___ .','bilir']},
+ {a:'Sütten ağzı yanan yoğurdu üfleyerek yer.',m:'Bir kez zarar gören sonrasında çok dikkatli olur.',eksik:['Sütten ağzı yanan ___ üfleyerek yer.','yoğurdu']}
+];
+
+// A1: Deyimin anlamı
+function genDeyimAnlam(){
+  const it=pick(DEYIM);
+  const w=distractors(it.a,()=>pick(DEYIM).a);
+  return{
+    text:`"${it.d}" deyiminin anlamı aşağıdakilerden hangisidir?`,
+    numberDisplay:it.d,
+    answer:it.a,
+    options:shuffle([it.a,...w]),
+    explain:`"${it.d}" = ${it.a}\n\n💡 Deyimler en az iki kelimeden oluşur ve kelimelerin gerçek anlamından farklı bir anlam taşır.`
+  };
+}
+
+// A2: Boşluğa uygun deyim
+function genDeyimCumle(){
+  const it=pick(DEYIM);
+  const w=distractors(it.d,()=>pick(DEYIM).d);
+  return{
+    text:'Aşağıdaki cümlede boş bırakılan yere hangi deyim gelmelidir?',
+    readDisplay:it.c,
+    answer:it.d,
+    options:shuffle([it.d,...w]),
+    explain:`Doğru cümle: ${it.c.replace('___',it.d)}\n\n"${it.d}" = ${it.a}\n\n💡 Cümlenin anlamına bak: hangi deyim oraya uyuyor?`
+  };
+}
+
+// A3: Atasözünün anlamı
+function genAtaAnlam(){
+  const it=pick(ATASOZU);
+  const w=distractors(it.m,()=>pick(ATASOZU).m);
+  return{
+    text:'Aşağıdaki atasözü hangi anlama gelmektedir?',
+    readDisplay:it.a,
+    answer:it.m,
+    options:shuffle([it.m,...w]),
+    explain:`"${it.a}"\n→ ${it.m}\n\n💡 Atasözleri atalarımızın deneyimlerinden doğmuş, öğüt veren kalıplaşmış sözlerdir.`
+  };
+}
+
+// A4: Atasözünü tamamla
+function genAtaTamamla(){
+  const it=pick(ATASOZU);
+  const [cumle,kelime]=it.eksik;
+  const havuz=ATASOZU.filter(x=>x!==it).map(x=>x.eksik[1]);
+  const w=distractors(kelime,()=>pick(havuz));
+  return{
+    text:'Aşağıdaki atasözünde boş bırakılan yere hangi kelime gelmelidir?',
+    readDisplay:cumle,
+    answer:kelime,
+    options:shuffle([kelime,...w]),
+    explain:`Atasözünün tamamı:\n"${it.a}"\n\nAnlamı: ${it.m}`
+  };
+}
+
+// A5: Deyim mi, atasözü mü? + hangisi uygun
+function genAyirt(){
+  const kind=rnd(0,1);
+  if(kind===0){
+    const isAta=rnd(0,1)===0;
+    const soz=isAta?pick(ATASOZU).a:pick(DEYIM).d;
+    return{
+      text:'Aşağıda verilen söz bir DEYİM midir, ATASÖZÜ müdür?',
+      readDisplay:soz,
+      answer:isAta?'Atasözü':'Deyim',
+      options:shuffle(['Deyim','Atasözü']),
+      explain:isAta
+        ? `"${soz}" bir ATASÖZÜDÜR.\n\n💡 Atasözü: öğüt verir, bir yargı bildirir, genellikle tam cümledir ve sonunda nokta vardır.`
+        : `"${soz}" bir DEYİMDİR.\n\n💡 Deyim: öğüt vermez, tek başına tam bir cümle değildir, anlatımı renklendirir.`
+    };
+  }
+  // Durumu anlatan atasözünü seç
+  const it=pick(ATASOZU);
+  const w=distractors(it.a,()=>pick(ATASOZU).a);
+  return{
+    text:`Aşağıdaki durumu en iyi anlatan atasözü hangisidir?\n\n"${it.m}"`,
+    answer:it.a,
+    options:shuffle([it.a,...w]),
+    explain:`Doğru atasözü: "${it.a}"\n→ ${it.m}\n\n💡 Önce durumun ne anlattığını anla, sonra o anlamı veren atasözünü seç.`
+  };
+}
+
+initGame([
+  {name:'Deyimin Anlamı',gen:genDeyimAnlam},
+  {name:'Cümleye Deyim',gen:genDeyimCumle},
+  {name:'Atasözü Anlamı',gen:genAtaAnlam},
+  {name:'Atasözünü Tamamla',gen:genAtaTamamla},
+  {name:'Deyim mi Atasözü mü',gen:genAyirt}
+],{c1:'#C2185B',c2:'#F06292',shadow:'rgba(194,24,91,.35)',boxBg:'linear-gradient(135deg,#fff5f8 0%,#fff0f5 100%)',boxBorder:'#f8bbd0'});
+</script>
+</body>
+</html>

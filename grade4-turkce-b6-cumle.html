@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>6. Bölüm: Cümle ve Metin - 4. Sınıf Türkçe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade4-style.css">
+</head>
+<body>
+<div class="container">
+  <div class="header"><h1>📚 6. Bölüm: Cümle ve Metin</h1><p>Kolaydan zora 5 aşama</p></div>
+  <div class="levels" id="levels"></div>
+  <div class="stats">
+    <div class="stat"><div class="stat-l">PUAN</div><div class="stat-v" id="score">0</div></div>
+    <div class="stat"><div class="stat-l">DOĞRU</div><div class="stat-v" id="correct">0</div></div>
+    <div class="stat"><div class="stat-l">SORU</div><div class="stat-v" id="total">0</div></div>
+  </div>
+  <div class="question-box">
+    <div class="q-text" id="qText">Yükleniyor...</div>
+    <div id="qVisual"></div>
+    <div class="options" id="options"></div>
+  </div>
+  <div class="feedback" id="feedback"></div>
+  <div class="explain" id="explain"></div>
+  <button class="btn btn-next" onclick="newQuestion()">Yeni Soru ➜</button>
+  <button class="btn btn-back" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade4-engine.js"></script>
+<script>
+// ---- CÜMLE TÜRLERİ ----
+const CUMLELER=[
+ {c:'Kardeşim bugün okula gitti.',olumlu:true, soru:false,kurali:true},
+ {c:'Bu soruyu çözemedim.',        olumlu:false,soru:false,kurali:true},
+ {c:'Yarın piknige gidecek misin?',olumlu:true, soru:true, kurali:true},
+ {c:'Bahçeye çıktı çocuklar.',     olumlu:true, soru:false,kurali:false},
+ {c:'Hiç kimse gelmedi.',          olumlu:false,soru:false,kurali:true},
+ {c:'Ödevini bitirdin mi?',        olumlu:true, soru:true, kurali:true},
+ {c:'Çok güzeldi manzara.',        olumlu:true, soru:false,kurali:false},
+ {c:'Kitabı okumadım.',            olumlu:false,soru:false,kurali:true},
+ {c:'Geldi mi kardeşin?',          olumlu:true, soru:true, kurali:false},
+ {c:'Yağmur yağıyor şimdi.',       olumlu:true, soru:false,kurali:false},
+ {c:'Bugün hiç ders çalışmadım.',  olumlu:false,soru:false,kurali:true},
+ {c:'Annem yemek yapıyor.',        olumlu:true, soru:false,kurali:true}
+];
+
+function genOlumlu(){
+  const it=pick(CUMLELER.filter(c=>!c.soru));
+  return{
+    text:'Aşağıdaki cümle OLUMLU mudur, OLUMSUZ mudur?',
+    readDisplay:it.c,
+    answer:it.olumlu?'Olumlu cümle':'Olumsuz cümle',
+    options:shuffle(['Olumlu cümle','Olumsuz cümle']),
+    explain:it.olumlu
+      ? `"${it.c}" → OLUMLU\nİşin yapıldığını, olduğunu bildiriyor.\n\n💡 Olumsuzluk eki (-ma, -me) ya da "değil, yok, hiç...-me" yoksa cümle olumludur.`
+      : `"${it.c}" → OLUMSUZ\nİşin yapılmadığını bildiriyor.\n\n💡 Olumsuzluk "-ma/-me" eki, "değil" ya da "yok" sözcüğüyle yapılır.`
+  };
+}
+
+function genKurali(){
+  const it=pick(CUMLELER);
+  return{
+    text:'Aşağıdaki cümle KURALLI mıdır, DEVRİK midir?',
+    readDisplay:it.c,
+    answer:it.kurali?'Kurallı cümle':'Devrik cümle',
+    options:shuffle(['Kurallı cümle','Devrik cümle']),
+    explain:it.kurali
+      ? `"${it.c}" → KURALLI\nYüklem (yapılan iş) cümlenin SONUNDA.\n\n💡 Türkçede yüklem sonda olursa cümle kurallıdır.`
+      : `"${it.c}" → DEVRİK\nYüklem sonda DEĞİL.\n\n💡 Yüklem sondan başka bir yerdeyse cümle devriktir. Devrik cümleler şiirde ve günlük konuşmada çok kullanılır.`
+  };
+}
+
+// ---- 5N1K ----
+const OLAYLAR=[
+ {m:'Dün akşam Ayşe, parkta kaybolan küçük kediyi bularak eve götürdü.',
+  s:[{q:'Kim?',a:'Ayşe'},{q:'Ne zaman?',a:'Dün akşam'},{q:'Nerede?',a:'Parkta'},{q:'Ne yaptı?',a:'Kediyi bulup eve götürdü'}],
+  yanlis:['Öğretmen','Geçen hafta','Okulda','Ödevini yaptı','Bahçede','Sabah']},
+ {m:'Bu sabah Mehmet, okul bahçesinde arkadaşlarıyla futbol oynadı.',
+  s:[{q:'Kim?',a:'Mehmet'},{q:'Ne zaman?',a:'Bu sabah'},{q:'Nerede?',a:'Okul bahçesinde'},{q:'Ne yaptı?',a:'Futbol oynadı'}],
+  yanlis:['Ayşe','Dün gece','Evde','Kitap okudu','Sokakta','Akşam']},
+ {m:'Geçen hafta sınıfımız, müzeye gezi düzenledi.',
+  s:[{q:'Kim?',a:'Sınıfımız'},{q:'Ne zaman?',a:'Geçen hafta'},{q:'Nerede?',a:'Müzede'},{q:'Ne yaptı?',a:'Gezi düzenledi'}],
+  yanlis:['Öğretmenim','Yarın','Kütüphanede','Resim yaptı','Bugün','Parkta']},
+ {m:'Dedem her sabah bahçede çiçekleri sular.',
+  s:[{q:'Kim?',a:'Dedem'},{q:'Ne zaman?',a:'Her sabah'},{q:'Nerede?',a:'Bahçede'},{q:'Ne yapar?',a:'Çiçekleri sular'}],
+  yanlis:['Ninem','Her akşam','Mutfakta','Gazete okur','Balkonda','Öğlen']}
+];
+function gen5N1K(){
+  const o=pick(OLAYLAR);
+  const s=pick(o.s);
+  const w=distractors(s.a,()=>pick(o.yanlis));
+  return{
+    text:`Aşağıdaki cümleye göre "${s.q}" sorusunun cevabı nedir?`,
+    readDisplay:o.m,
+    answer:s.a,
+    options:shuffle([s.a,...w]),
+    explain:`Soru: ${s.q}\nCevap: ${s.a}\n\nCümlenin tamamı:\n"${o.m}"\n\n💡 5N1K: Ne, Nerede, Ne zaman, Nasıl, Neden, Kim.\nBu sorular bir olayı tam olarak anlamamızı sağlar.`
+  };
+}
+
+// ---- ANA FİKİR ----
+const METINLER=[
+ {p:'Ali her sabah erken kalkar, dişlerini fırçalar ve kahvaltısını yapar. Okula giderken yolda hiç oyalanmaz. Derslerine düzenli çalıştığı için öğretmeni ondan hep memnundur.',
+  a:'Düzenli olmak insanı başarıya götürür.',
+  y:['Kahvaltı günün en önemli öğünüdür.','Okula yürüyerek gitmek sağlıklıdır.','Öğretmenler öğrencilerini sever.']},
+ {p:'Komşumuz Hasan Amca, bahçesindeki meyveleri her yıl mahalledeki çocuklarla paylaşır. Kimseden karşılık beklemez. Onu gören herkes gülümseyerek selam verir.',
+  a:'Paylaşmak insanı sevilen biri yapar.',
+  y:['Meyve ağaçları çok verimlidir.','Bahçe işleri zordur.','Komşular birbirini tanımalıdır.']},
+ {p:'Küçük karınca, kış gelmeden yiyeceklerini yuvasına taşıdı. Ağustos böceği ise bütün yaz şarkı söyledi. Kış gelince karıncanın ambarı doluydu, ağustos böceği ise açtı.',
+  a:'Zamanında çalışan zor günde sıkıntı çekmez.',
+  y:['Karıncalar çok çalışkan hayvanlardır.','Şarkı söylemek güzel bir uğraştır.','Kış mevsimi çok soğuk geçer.']},
+ {p:'Zeynep kitap okumayı çok sever. Her akşam yatmadan önce bir bölüm okur. Zamanla kelime hazinesi genişledi, yazdığı kompozisyonlar arkadaşlarınınkinden daha güzel oldu.',
+  a:'Kitap okumak insanın dilini zenginleştirir.',
+  y:['Akşamları uyumak önemlidir.','Kompozisyon yazmak zordur.','Zeynep arkadaşlarından daha akıllıdır.']}
+];
+function genAnaFikir(){
+  const m=pick(METINLER);
+  return{
+    text:'Aşağıdaki metnin ANA FİKRİ hangisidir?',
+    readDisplay:m.p,
+    answer:m.a,
+    options:shuffle([m.a,...m.y]),
+    explain:`Ana fikir: ${m.a}\n\n💡 Ana fikir, yazarın bize vermek istediği ASIL mesajdır.\nMetindeki ayrıntılar değil, hepsinin birleştiği ortak düşüncedir.\n\n📌 Kendine sor: "Yazar bunu niçin yazmış?"`
+  };
+}
+
+// ---- HİKÂYE UNSURLARI / OLAY SIRASI ----
+const HIKAYE=[
+ {p:'Dün öğleden sonra Deniz, evinin bahçesinde oyun oynarken yaralı bir kuş buldu. Onu içeri aldı, kanadını sardı ve bir kutuya yerleştirdi. Birkaç gün sonra kuş iyileşti ve gökyüzüne uçtu.',
+  u:[{q:'Bu hikâyenin KAHRAMANI kimdir?',a:'Deniz',y:['Kuş','Deniz’in annesi','Komşu çocuk']},
+     {q:'Olay NEREDE geçmektedir?',a:'Evin bahçesinde',y:['Okulda','Ormanda','Parkta']},
+     {q:'Olay NE ZAMAN geçmektedir?',a:'Dün öğleden sonra',y:['Bu sabah','Geçen yıl','Gece yarısı']}],
+  sira:['Deniz bahçede yaralı bir kuş buldu.','Kuşun kanadını sardı.','Kuş iyileşti ve uçtu.']},
+ {p:'Geçen yaz tatilinde Elif, dedesinin köyüne gitti. Orada ilk kez inek sağmayı öğrendi. Akşamları dedesiyle yıldızları izledi. Tatil bitince şehre dönerken çok üzüldü.',
+  u:[{q:'Bu hikâyenin KAHRAMANI kimdir?',a:'Elif',y:['Dedesi','Ninesi','Komşusu']},
+     {q:'Olay NEREDE geçmektedir?',a:'Dedesinin köyünde',y:['Şehirde','Okulda','Deniz kenarında']},
+     {q:'Olay NE ZAMAN geçmektedir?',a:'Geçen yaz tatilinde',y:['Kış tatilinde','Dün','Bu sabah']}],
+  sira:['Elif dedesinin köyüne gitti.','İnek sağmayı öğrendi.','Tatil bitince üzülerek döndü.']}
+];
+function genHikaye(){
+  const h=pick(HIKAYE);
+  const kind=rnd(0,1);
+  if(kind===0){
+    const u=pick(h.u);
+    return{
+      text:u.q,
+      readDisplay:h.p,
+      answer:u.a,
+      options:shuffle([u.a,...u.y]),
+      explain:`Cevap: ${u.a}\n\n💡 Her hikâyede 4 temel unsur vardır:\n• KAHRAMAN (kim)\n• YER (nerede)\n• ZAMAN (ne zaman)\n• OLAY (ne oldu)`
+    };
+  }
+  const dogru=h.sira.map((s,i)=>(i+1)+'. '+s).join('\n');
+  const opts=new Set([h.sira.join(' → ')]);
+  let g=0;
+  while(opts.size<3&&g++<40) opts.add(shuffle([...h.sira]).join(' → '));
+  return{
+    text:'Metindeki olaylar hangi sırayla gerçekleşmiştir?',
+    readDisplay:h.p,
+    answer:h.sira.join(' → '),
+    options:shuffle([...opts]),
+    explain:`Doğru sıra:\n${dogru}\n\n💡 Olayları sıralarken "önce ne oldu, sonra ne oldu" diye ilerle.\nMetindeki zaman ifadeleri sana yol gösterir.`
+  };
+}
+
+initGame([
+  {name:'Olumlu / Olumsuz',gen:genOlumlu},
+  {name:'Kurallı / Devrik',gen:genKurali},
+  {name:'5N1K',gen:gen5N1K},
+  {name:'Ana Fikir',gen:genAnaFikir},
+  {name:'Hikâye Unsurları',gen:genHikaye}
+],{c1:'#D84315',c2:'#FF8A65',shadow:'rgba(216,67,21,.35)',boxBg:'linear-gradient(135deg,#fff6f3 0%,#fff0eb 100%)',boxBorder:'#ffccbc'});
+</script>
+</body>
+</html>

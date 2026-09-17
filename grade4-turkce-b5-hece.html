@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5. Bölüm: Ses ve Hece - 4. Sınıf Türkçe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade4-style.css">
+</head>
+<body>
+<div class="container">
+  <div class="header"><h1>🔡 5. Bölüm: Ses ve Hece</h1><p>Kolaydan zora 5 aşama</p></div>
+  <div class="levels" id="levels"></div>
+  <div class="stats">
+    <div class="stat"><div class="stat-l">PUAN</div><div class="stat-v" id="score">0</div></div>
+    <div class="stat"><div class="stat-l">DOĞRU</div><div class="stat-v" id="correct">0</div></div>
+    <div class="stat"><div class="stat-l">SORU</div><div class="stat-v" id="total">0</div></div>
+  </div>
+  <div class="question-box">
+    <div class="q-text" id="qText">Yükleniyor...</div>
+    <div id="qVisual"></div>
+    <div class="options" id="options"></div>
+  </div>
+  <div class="feedback" id="feedback"></div>
+  <div class="explain" id="explain"></div>
+  <button class="btn btn-next" onclick="newQuestion()">Yeni Soru ➜</button>
+  <button class="btn btn-back" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade4-engine.js"></script>
+<script>
+const ALFABE='abcçdefgğhıijklmnoöprsştuüvyz';
+const UNLULER='aeıioöuü';
+const KELIMELER=[
+ 'kitap','kalem','okul','bahçe','çiçek','araba','pencere','öğretmen','defter','silgi',
+ 'masa','sandalye','kuş','ağaç','deniz','güneş','yıldız','bulut','yağmur','kardeş',
+ 'anne','baba','dede','nine','arkadaş','oyuncak','bisiklet','top','balık','kedi',
+ 'köpek','kuzu','tavşan','kelebek','karınca','elma','armut','portakal','muz','üzüm',
+ 'ekmek','peynir','zeytin','domates','salatalık','havuç','patates','şeker','çilek','kiraz'
+];
+
+const isUnlu=c=>UNLULER.includes(c);
+const trIdx=c=>ALFABE.indexOf(c);
+
+// Türkçe hece bölme: sondan başlayarak her ünlüye bir öncesindeki ünsüzü ekle
+function hecele(k){
+  const h=[]; let cur='';
+  for(let i=k.length-1;i>=0;i--){
+    cur=k[i]+cur;
+    if(isUnlu(k[i])){
+      // ünlünün hemen öncesinde ünsüz varsa ona kat
+      if(i-1>=0 && !isUnlu(k[i-1])){
+        // ama o ünsüz, daha öncesinde başka bir ünlü varsa ve
+        // kalan kısım ünlüyle bitiyorsa alınabilir
+        let onceki=i-1;
+        // kalan kısımda ünlü var mı?
+        let kalanUnlu=false;
+        for(let j=onceki-1;j>=0;j--) if(isUnlu(k[j])){kalanUnlu=true;break;}
+        if(kalanUnlu||onceki===0){ cur=k[onceki]+cur; i=onceki; }
+      }
+      h.unshift(cur); cur='';
+    }
+  }
+  if(cur) h[0]=cur+(h[0]||'');
+  return h;
+}
+
+// A1: Ünlü / ünsüz sayısı
+function genSesSayisi(){
+  const k=pick(KELIMELER);
+  const unlu=[...k].filter(isUnlu).length;
+  const unsuz=k.length-unlu;
+  const soruUnlu=rnd(0,1)===0;
+  const ans=soruUnlu?unlu:unsuz;
+  const w=distractors(ans,()=>ans+pick([-2,-1,1,2]));
+  return{
+    text:`"${k}" kelimesinde kaç tane ${soruUnlu?'ÜNLÜ (sesli)':'ÜNSÜZ (sessiz)'} harf vardır?`,
+    numberDisplay:k,
+    answer:String(ans),
+    options:shuffle([String(ans),...w.filter(x=>x>=0).map(String)]),
+    explain:`"${k}" → ${k.length} harf\nÜnlüler: ${[...k].filter(isUnlu).join(', ')} (${unlu} tane)\nÜnsüzler: ${unsuz} tane\n\n💡 Türkçede 8 ünlü vardır: a e ı i o ö u ü`
+  };
+}
+
+// A2: Hece sayısı
+function genHeceSayisi(){
+  const k=pick(KELIMELER);
+  const h=hecele(k);
+  const ans=h.length;
+  const w=distractors(ans,()=>ans+pick([-1,1,2]));
+  return{
+    text:`"${k}" kelimesi kaç heceden oluşur?`,
+    numberDisplay:k,
+    answer:String(ans),
+    options:shuffle([String(ans),...w.filter(x=>x>0).map(String)]),
+    explain:`${k} → ${h.join(' - ')}\nToplam ${ans} hece.\n\n💡 Bir kelimede kaç ÜNLÜ harf varsa o kadar hece vardır.\n"${k}" içindeki ünlüler: ${[...k].filter(isUnlu).join(', ')}`
+  };
+}
+
+// A3: Hece bölme
+function genHeceBol(){
+  const k=pick(KELIMELER.filter(x=>hecele(x).length>=2));
+  const dogru=hecele(k).join(' - ');
+  const w=new Set();
+  let g=0;
+  while(w.size<3&&g++<80){
+    // yanlış bölmeler üret
+    const pts=[];
+    for(let i=1;i<k.length;i++) pts.push(i);
+    const n=hecele(k).length-1;
+    const sec=shuffle([...pts]).slice(0,n).sort((a,b)=>a-b);
+    let out='',prev=0;
+    sec.forEach(p=>{out+=k.slice(prev,p)+' - ';prev=p;});
+    out+=k.slice(prev);
+    if(out!==dogru) w.add(out);
+  }
+  return{
+    text:`"${k}" kelimesinin hecelerine DOĞRU ayrılmış hâli hangisidir?`,
+    numberDisplay:k,
+    answer:dogru,
+    options:shuffle([dogru,...[...w]]),
+    explain:`${k} → ${dogru}\n\n💡 Her hecede bir ünlü bulunur.\nBir ünsüz, kendinden sonraki ünlüyle birlikte hece olur.`
+  };
+}
+
+// A4: Alfabetik sıralama
+function genAlfabe(){
+  const kind=rnd(0,1);
+  if(kind===0){
+    // İlk sırada hangisi gelir?
+    const secim=[];
+    while(secim.length<4){const k=pick(KELIMELER);if(!secim.includes(k))secim.push(k);}
+    const sirali=[...secim].sort((a,b)=>{
+      for(let i=0;i<Math.min(a.length,b.length);i++){
+        const d=trIdx(a[i])-trIdx(b[i]);
+        if(d!==0) return d;
+      }
+      return a.length-b.length;
+    });
+    return{
+      text:'Aşağıdaki kelimeler sözlükte sıralansaydı hangisi EN ÖNCE gelirdi?',
+      answer:sirali[0],
+      options:shuffle(secim),
+      explain:`Alfabetik sıra:\n${sirali.map((k,i)=>`${i+1}. ${k}`).join('\n')}\n\n💡 Önce ilk harfe bak. Aynıysa ikinci harfe geç.\nTürk alfabesi: a b c ç d e f g ğ h ı i j k l m n o ö p r s ş t u ü v y z`
+    };
+  }
+  // Hangi harf önce gelir
+  const h=[];
+  while(h.length<4){const c=pick([...ALFABE]);if(!h.includes(c))h.push(c);}
+  const sirali=[...h].sort((a,b)=>trIdx(a)-trIdx(b));
+  return{
+    text:'Aşağıdaki harflerden hangisi Türk alfabesinde EN ÖNCE gelir?',
+    answer:sirali[0],
+    options:shuffle(h),
+    explain:`Sıra: ${sirali.join(' → ')}\n\n💡 Türk alfabesi 29 harftir:\na b c ç d e f g ğ h ı i j k l m n o ö p r s ş t u ü v y z\n\n📌 Dikkat: ç-c'den, ğ-g'den, ı-i'den, ö-o'dan, ş-s'den, ü-u'dan SONRA gelir.`
+  };
+}
+
+// A5: Sözlük sırası (en zor - tam sıralama)
+function genSozluk(){
+  // Aynı harfle başlayan kelimeler seç
+  const harf=pick([...'kabçsdg']);
+  let aday=KELIMELER.filter(k=>k[0]===harf);
+  if(aday.length<3){ aday=shuffle([...KELIMELER]).slice(0,3); }
+  const secim=shuffle([...aday]).slice(0,3);
+  const cmp=(a,b)=>{
+    for(let i=0;i<Math.min(a.length,b.length);i++){
+      const d=trIdx(a[i])-trIdx(b[i]);
+      if(d!==0) return d;
+    }
+    return a.length-b.length;
+  };
+  const sirali=[...secim].sort(cmp);
+  const dogru=sirali.join(' → ');
+  const opts=new Set([dogru]);
+  let g=0;
+  while(opts.size<4&&g++<60) opts.add(shuffle([...secim]).join(' → '));
+  return{
+    text:'Aşağıdaki kelimeleri sözlükteki sıraya göre diziniz.',
+    readDisplay:secim.join('  •  '),
+    answer:dogru,
+    options:shuffle([...opts]),
+    explain:`Doğru sıra:\n${dogru}\n\n💡 İlk harfleri aynıysa İKİNCİ harfe bak. O da aynıysa üçüncüye geç.\nTürk alfabesi sırası: a b c ç d e f g ğ h ı i j k l m n o ö p r s ş t u ü v y z`
+  };
+}
+
+initGame([
+  {name:'Ünlü / Ünsüz',gen:genSesSayisi},
+  {name:'Hece Sayısı',gen:genHeceSayisi},
+  {name:'Hecelere Ayır',gen:genHeceBol},
+  {name:'Alfabetik Sıra',gen:genAlfabe},
+  {name:'Sözlük Sırası',gen:genSozluk}
+],{c1:'#0277BD',c2:'#4FC3F7',shadow:'rgba(2,119,189,.35)',boxBg:'linear-gradient(135deg,#f0f9ff 0%,#e8f5fe 100%)',boxBorder:'#b3e0f5'});
+</script>
+</body>
+</html>

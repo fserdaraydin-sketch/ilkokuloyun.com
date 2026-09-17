@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>4. Bölüm: Yazım Kuralları - 4. Sınıf Türkçe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade4-style.css">
+</head>
+<body>
+<div class="container">
+  <div class="header"><h1>✍️ 4. Bölüm: Yazım Kuralları</h1><p>Kolaydan zora 5 aşama</p></div>
+  <div class="levels" id="levels"></div>
+  <div class="stats">
+    <div class="stat"><div class="stat-l">PUAN</div><div class="stat-v" id="score">0</div></div>
+    <div class="stat"><div class="stat-l">DOĞRU</div><div class="stat-v" id="correct">0</div></div>
+    <div class="stat"><div class="stat-l">SORU</div><div class="stat-v" id="total">0</div></div>
+  </div>
+  <div class="question-box">
+    <div class="q-text" id="qText">Yükleniyor...</div>
+    <div id="qVisual"></div>
+    <div class="options" id="options"></div>
+  </div>
+  <div class="feedback" id="feedback"></div>
+  <div class="explain" id="explain"></div>
+  <button class="btn btn-next" onclick="newQuestion()">Yeni Soru ➜</button>
+  <button class="btn btn-back" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade4-engine.js"></script>
+<script>
+// ---- BÜYÜK HARF ----
+const BUYUK=[
+ {y:'ali dün ankara’ya gitti.',d:"Ali dün Ankara'ya gitti.",k:'Cümle başı, kişi adı ve şehir adı büyük harfle başlar.'},
+ {y:'benim adım ayşe yılmaz.',d:'Benim adım Ayşe Yılmaz.',k:'Cümle başı ve kişi ad-soyadı büyük harfle başlar.'},
+ {y:'kardeşim izmir’de oturuyor.',d:"Kardeşim İzmir'de oturuyor.",k:'Cümle başı ve şehir adı büyük harfle başlar.'},
+ {y:'türkiye’nin başkenti ankara’dır.',d:"Türkiye'nin başkenti Ankara'dır.",k:'Ülke ve şehir adları özel addır, büyük harfle başlar.'},
+ {y:'pazartesi günü okula gideceğiz.',d:'Pazartesi günü okula gideceğiz.',k:'Cümle büyük harfle başlar. (Gün adları cümle içinde de büyük yazılır.)'},
+ {y:'kızılırmak en uzun ırmağımızdır.',d:'Kızılırmak en uzun ırmağımızdır.',k:'Nehir adları özel addır, büyük harfle başlar.'},
+ {y:'dedem her sabah gazete okur.',d:'Dedem her sabah gazete okur.',k:'Cümle her zaman büyük harfle başlar.'}
+];
+function genBuyuk(){
+  const it=pick(BUYUK);
+  const w=distractors(it.y,()=>{const o=pick(BUYUK);return o===it?null:o.d;});
+  return{
+    text:'Aşağıdaki cümlelerden hangisinde BÜYÜK HARF yanlışı vardır?',
+    answer:it.y,
+    options:shuffle([it.y,...w]),
+    explain:`Yanlış: ${it.y}\nDoğrusu: ${it.d}\n\n💡 ${it.k}`
+  };
+}
+
+// ---- DE / DA ----
+const DEDA=[
+ {c:'Ben ___ seninle geleceğim.',        d:'Ben de seninle geleceğim.',        ayri:true, k:'"Ayrıca, o da" anlamı veriyorsa AYRI yazılır. Cümleden çıkarınca anlam bozulmaz.'},
+ {c:'Kitap masanın üstün___ duruyor.',   d:'Kitap masanın üstünde duruyor.',   ayri:false,k:'"Nerede?" sorusuna cevap veriyorsa BİTİŞİK yazılır (bulunma hâli eki).'},
+ {c:'Sen ___ bizimle gel.',              d:'Sen de bizimle gel.',              ayri:true, k:'"Sen de" = "sen ayrıca" anlamında, bağlaçtır, AYRI yazılır.'},
+ {c:'Çantam oda___ kaldı.',              d:'Çantam odada kaldı.',              ayri:false,k:'"Nerede kaldı?" → "odada". Bulunma eki, BİTİŞİK yazılır.'},
+ {c:'Annem ___ babam ___ geldi.',        d:'Annem de babam da geldi.',         ayri:true, k:'Bağlaç olan "de/da" AYRI yazılır.'},
+ {c:'Kuşlar ağaçlar___ ötüyor.',         d:'Kuşlar ağaçlarda ötüyor.',         ayri:false,k:'"Nerede ötüyor?" → "ağaçlarda". Hâl eki, BİTİŞİK.'},
+ {c:'Bu soruyu ben ___ çözemedim.',      d:'Bu soruyu ben de çözemedim.',      ayri:true, k:'"Ben de" = "ben ayrıca", bağlaç, AYRI yazılır.'},
+ {c:'Defterim sıra___ unutulmuş.',       d:'Defterim sırada unutulmuş.',       ayri:false,k:'"Nerede?" → "sırada". Hâl eki, BİTİŞİK.'},
+ {c:'Yarın hava ___ güzel olacakmış.',   d:'Yarın hava da güzel olacakmış.',   ayri:true, k:'"Ayrıca" anlamı katıyor, bağlaç, AYRI yazılır.'},
+ {c:'Kardeşim bahçe___ oynuyor.',        d:'Kardeşim bahçede oynuyor.',        ayri:false,k:'"Nerede oynuyor?" → "bahçede". Hâl eki, BİTİŞİK.'}
+];
+function genDeDa(){
+  const it=pick(DEDA);
+  const ek=it.d.includes(' da ')||/[aıou][a-zçğşü]*da\b/.test(it.d)?'da':'de';
+  return{
+    text:`Aşağıdaki cümlede "de / da" nasıl yazılmalıdır?`,
+    readDisplay:it.c,
+    answer:it.ayri?'Ayrı yazılır':'Bitişik yazılır',
+    options:shuffle(['Ayrı yazılır','Bitişik yazılır']),
+    explain:`Doğrusu: ${it.d}\n\n💡 ${it.k}\n\n📌 Kolay yol: "de/da" cümleden ÇIKARILDIĞINDA anlam bozulmuyorsa AYRI, bozuluyorsa BİTİŞİK yazılır.`
+  };
+}
+
+// ---- Kİ ----
+const KI=[
+ {c:'Duydum ___ çok çalışmışsın.',       d:'Duydum ki çok çalışmışsın.',      ayri:true, k:'Bağlaç olan "ki" AYRI yazılır. İki cümleyi birbirine bağlar.'},
+ {c:'Kalemlerden benim___ masada.',      d:'Kalemlerden benimki masada.',     ayri:false,k:'"Benimki" = benim olan. İlgi eki "-ki" BİTİŞİK yazılır.'},
+ {c:'Öyle yoruldum ___ hemen uyudum.',   d:'Öyle yoruldum ki hemen uyudum.',  ayri:true, k:'Bağlaç "ki", AYRI yazılır.'},
+ {c:'Sabah___ tren çoktan kalktı.',      d:'Sabahki tren çoktan kalktı.',     ayri:false,k:'"Sabahki" = sabah olan. Sıfat yapan "-ki" BİTİŞİK.'},
+ {c:'Sanırım ___ yarın yağmur yağacak.', d:'Sanırım ki yarın yağmur yağacak.',ayri:true, k:'Bağlaç "ki", AYRI yazılır.'},
+ {c:'Dün___ maçı izledin mi?',           d:'Dünkü maçı izledin mi?',          ayri:false,k:'"Dünkü" = düne ait. Ek olan "-ki", ünlü uyumu nedeniyle "-kü" olur ve BİTİŞİK yazılır.'},
+ {c:'Bilmiyordum ___ sen de geleceksin.',d:'Bilmiyordum ki sen de geleceksin.',ayri:true,k:'Bağlaç "ki", AYRI yazılır.'},
+ {c:'Masanın üstünde___ kitap kimin?',   d:'Masanın üstündeki kitap kimin?',  ayri:false,k:'"Üstündeki" = üstünde bulunan. Ek "-ki" BİTİŞİK yazılır.'}
+];
+function genKi(){
+  const it=pick(KI);
+  return{
+    text:'Aşağıdaki cümlede "ki" nasıl yazılmalıdır?',
+    readDisplay:it.c,
+    answer:it.ayri?'Ayrı yazılır':'Bitişik yazılır',
+    options:shuffle(['Ayrı yazılır','Bitişik yazılır']),
+    explain:`Doğrusu: ${it.d}\n\n💡 ${it.k}\n\n📌 Kolay yol: "ki" iki cümleyi bağlıyorsa AYRI; bir kelimeye "olan / ait" anlamı katıyorsa BİTİŞİK yazılır.`
+  };
+}
+
+// ---- Mİ ----
+const MI=[
+ {d:'Ödevini bitirdin mi?',   y:['Ödevini bitirdinmi?','Ödevini bitirdin mi.','Ödevini bitirdinmi.']},
+ {d:'Bu kitabı okudun mu?',   y:['Bu kitabı okudunmu?','Bu kitabı okudun mu.','Bu kitabı okudunmu.']},
+ {d:'Yarın gelecek mi?',      y:['Yarın gelecekmi?','Yarın gelecek mi.','Yarın gelecekmi.']},
+ {d:'Hava güzel mi?',         y:['Hava güzelmi?','Hava güzel mi.','Hava güzelmi.']},
+ {d:'Beni duyuyor mu?',       y:['Beni duyuyormu?','Beni duyuyor mu.','Beni duyuyormu.']},
+ {d:'Seni gördü mü?',         y:['Seni gördümü?','Seni gördü mü.','Seni gördümü.']},
+ {d:'Bunu sen mi yaptın?',    y:['Bunu senmi yaptın?','Bunu sen mi yaptın.','Bunu senmi yaptın.']}
+];
+function genMi(){
+  const it=pick(MI);
+  return{
+    text:'Aşağıdaki cümlenin DOĞRU yazılışı hangisidir?',
+    answer:it.d,
+    options:shuffle([it.d,...it.y]),
+    explain:`Doğrusu: ${it.d}\n\n💡 Soru eki mi / mı / mu / mü HER ZAMAN ayrı yazılır.\nSoru cümlesinin sonuna soru işareti konur.\n\n📌 Kendinden sonra gelen ekler soru ekine bitişik yazılır: "geliyor musun?"`
+  };
+}
+
+// ---- YAZIM YANLIŞINI BUL (en zor) ----
+const YAZIM=[
+ {y:'yalnız',d:'yalnız',ok:true},
+ {y:'yanlız',d:'yalnız',ok:false},
+ {y:'herkes',d:'herkes',ok:true},
+ {y:'herkez',d:'herkes',ok:false},
+ {y:'yanlış',d:'yanlış',ok:true},
+ {y:'yalnış',d:'yanlış',ok:false},
+ {y:'kirpik',d:'kirpik',ok:true},
+ {y:'kiprik',d:'kirpik',ok:false},
+ {y:'süpriz',d:'sürpriz',ok:false},
+ {y:'sürpriz',d:'sürpriz',ok:true},
+ {y:'eşşek',d:'eşek',ok:false},
+ {y:'eşek',d:'eşek',ok:true},
+ {y:'şoför',d:'şoför',ok:true},
+ {y:'şöför',d:'şoför',ok:false},
+ {y:'makine',d:'makine',ok:true},
+ {y:'makina',d:'makine',ok:false},
+ {y:'orijinal',d:'orijinal',ok:true},
+ {y:'orjinal',d:'orijinal',ok:false}
+];
+function genYazim(){
+  const yanlislar=YAZIM.filter(x=>!x.ok);
+  const it=pick(yanlislar);
+  const dogrular=YAZIM.filter(x=>x.ok&&x.d!==it.d).map(x=>x.y);
+  const w=distractors(it.y,()=>pick(dogrular));
+  return{
+    text:'Aşağıdaki kelimelerden hangisi YANLIŞ yazılmıştır?',
+    answer:it.y,
+    options:shuffle([it.y,...w]),
+    explain:`Yanlış: "${it.y}"\nDoğrusu: "${it.d}"\n\n💡 Bu kelime sık karıştırılır. Doğru yazımı aklında tut: ${it.d}`
+  };
+}
+
+initGame([
+  {name:'Büyük Harf',gen:genBuyuk},
+  {name:'de / da',gen:genDeDa},
+  {name:'ki',gen:genKi},
+  {name:'mi Soru Eki',gen:genMi},
+  {name:'Yazım Yanlışı',gen:genYazim}
+],{c1:'#5E35B1',c2:'#9575CD',shadow:'rgba(94,53,177,.35)',boxBg:'linear-gradient(135deg,#f7f4fd 0%,#f2edfb 100%)',boxBorder:'#d1c4e9'});
+</script>
+</body>
+</html>
