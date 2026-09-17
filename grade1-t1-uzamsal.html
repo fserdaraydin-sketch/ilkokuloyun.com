@@ -454,7 +454,158 @@ function etkOda(){
   };
 }
 
-initEtkinlik([etkKonum,etkTers,etkYakinUzak,etkArasinda,etkSira,etkRaf,etkOda],
+// ==================== OTURMA ODASI (zengin sahne) ====================
+// Tek bir oda sahnesi çiziliyor, üzerinden farklı ilişkiler soruluyor.
+// Koltuk ve televizyon rastgele yer değiştiriyor ki çocuk ezberlemesin.
+
+function cizOtuma(duzen){
+  const{c,ctx,W,H}=sahne(290,180);
+  const koltukSolda = duzen.koltukSolda;
+  const kx = koltukSolda ? 42 : W-42;      // koltuk
+  const tx = koltukSolda ? W-46 : 46;      // televizyon (karşısında)
+
+  // --- Duvar ve zemin ---
+  ctx.fillStyle='#FBF2E0'; ctx.fillRect(0,0,W,H*0.50);
+  ctx.fillStyle='#E8D9BE'; ctx.fillRect(0,H*0.50,W,H*0.50);
+  ctx.strokeStyle='#D8C7A5'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(0,H*0.50); ctx.lineTo(W,H*0.50); ctx.stroke();
+
+  // --- Pencere (KOLTUĞUN ARKASINDAKİ duvarda) ---
+  const px=(koltukSolda?42:W-42)-26;
+  ctx.fillStyle='#BFE3F5'; ctx.fillRect(px,16,52,38);
+  ctx.strokeStyle='#5A8FA8'; ctx.lineWidth=3;
+  ctx.strokeRect(px,16,52,38);
+  ctx.beginPath();
+  ctx.moveTo(px+26,16); ctx.lineTo(px+26,54);
+  ctx.moveTo(px,35);    ctx.lineTo(px+52,35);
+  ctx.stroke();
+
+  // --- Duvar saati (televizyonun üstünde) ---
+  ctx.fillStyle='#FFF8E7';
+  ctx.beginPath(); ctx.arc(tx,30,14,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#8D6E52'; ctx.lineWidth=3; ctx.stroke();
+  ctx.strokeStyle='#5D4632'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(tx,30); ctx.lineTo(tx,22);
+  ctx.moveTo(tx,30); ctx.lineTo(tx+7,30); ctx.stroke();
+
+  // --- Halı (zeminde, ortada) ---
+  ctx.fillStyle='#E3B9A8';
+  ctx.beginPath(); ctx.ellipse(W/2,H*0.80,72,22,0,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#C08B76'; ctx.lineWidth=2.5; ctx.stroke();
+
+  // --- KOLTUK ---
+  (function(){
+    const g=52, y=H*0.62;
+    ctx.fillStyle='#7E9E8C';                       // sırtlık
+    ctx.fillRect(kx-g/2,y-34,g,30);
+    ctx.strokeStyle='#4F6B5C'; ctx.lineWidth=2.5;
+    ctx.strokeRect(kx-g/2,y-34,g,30);
+    ctx.fillStyle='#9BBCA8';                       // oturak
+    ctx.fillRect(kx-g/2,y-6,g,16);
+    ctx.strokeRect(kx-g/2,y-6,g,16);
+    ctx.fillStyle='#6E8C7C';                       // kolçaklar
+    ctx.fillRect(kx-g/2-7,y-14,8,24); ctx.strokeRect(kx-g/2-7,y-14,8,24);
+    ctx.fillRect(kx+g/2-1,y-14,8,24); ctx.strokeRect(kx+g/2-1,y-14,8,24);
+    ctx.fillStyle='#4F6B5C';                       // ayaklar
+    ctx.fillRect(kx-g/2+3,y+10,6,9); ctx.fillRect(kx+g/2-9,y+10,6,9);
+  })();
+
+  // --- TELEVİZYON (koltuğun karşısında) ---
+  (function(){
+    const g=54, y=H*0.60;
+    ctx.fillStyle='#8D6E52';                       // tv sehpası
+    ctx.fillRect(tx-g/2,y+12,g,10);
+    ctx.strokeStyle='#5D4632'; ctx.lineWidth=2.5;
+    ctx.strokeRect(tx-g/2,y+12,g,10);
+    ctx.fillRect(tx-g/2+4,y+22,5,10); ctx.fillRect(tx+g/2-9,y+22,5,10);
+    ctx.fillStyle='#37474F';                       // ekran çerçevesi
+    ctx.fillRect(tx-g/2+2,y-24,g-4,34);
+    ctx.strokeStyle='#1C262B'; ctx.strokeRect(tx-g/2+2,y-24,g-4,34);
+    ctx.fillStyle='#6FB6D6';                       // ekran
+    ctx.fillRect(tx-g/2+6,y-20,g-12,26);
+    ctx.fillStyle='#9AD3EA';
+    ctx.beginPath(); ctx.moveTo(tx-g/2+6,y+6); ctx.lineTo(tx+g/2-6,y-20);
+    ctx.lineTo(tx+g/2-6,y+6); ctx.closePath(); ctx.fill();
+  })();
+
+  // --- SEHPA (koltuk ile televizyon arasında) + ÜSTÜNDE ÇİÇEK ---
+  const sx=W/2;
+  (function(){
+    const g=46, y=H*0.76;
+    ctx.fillStyle='#C89B6A';                       // tabla
+    ctx.beginPath();
+    ctx.moveTo(sx-g/2+9,y-8); ctx.lineTo(sx+g/2+9,y-8);
+    ctx.lineTo(sx+g/2,y);     ctx.lineTo(sx-g/2,y);
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle='#7A5530'; ctx.lineWidth=2.5; ctx.stroke();
+    ctx.fillStyle='#A87C4F';
+    ctx.fillRect(sx-g/2,y,g,6); ctx.strokeRect(sx-g/2,y,g,6);
+    ctx.fillStyle='#7A5530';
+    ctx.fillRect(sx-g/2+4,y+6,5,14); ctx.fillRect(sx+g/2-9,y+6,5,14);
+  })();
+  emoji(ctx,'🌷',sx+4,H*0.76-22,26);               // sehpanın üstünde çiçek
+
+  return c;
+}
+
+const ODA_SORULARI=[
+  {s:'Pencere nerede?',       c:'Duvarda',
+   y:['Halının üstünde','Sehpanın altında','Koltuğun içinde'],
+   ip:'Pencereler duvarda olur, yerde değil.'},
+  {s:'Pencere koltuğun neresindedir?', c:'Arkasında',
+   y:['Önünde','Altında','İçinde'],
+   ip:'Koltuk pencerenin önünde duruyor; pencere onun arkasında kalıyor.'},
+  {s:'Duvar saati nerededir?', c:'Televizyonun üstünde',
+   y:['Sehpanın altında','Halının üstünde','Koltuğun içinde'],
+   ip:'Saate bak: hangi eşyanın yukarısında duruyor?'},
+  {s:'Çiçek ile halıdan hangisi daha yukarıdadır?', c:'Çiçek',
+   y:['Halı','İkisi de aynı yükseklikte','Sehpa'],
+   ip:'Halı yerde, çiçek sehpanın üstünde. Hangisi daha yüksekte?'},
+  {s:'Çiçek nerede?',         c:'Sehpanın üstünde',
+   y:['Sehpanın altında','Televizyonun üstünde','Koltuğun arkasında'],
+   ip:'Çiçeğe bak: hangi eşyanın üzerinde duruyor?'},
+  {s:'Televizyon koltuğun neresindedir?', c:'Karşısında',
+   y:['Üstünde','Altında','İçinde'],
+   ip:'Koltukta oturan kişi televizyona bakar; ikisi karşı karşıyadır.'},
+  {s:'Sehpa nerededir?',      c:'Koltuk ile televizyonun arasında',
+   y:['Koltuğun üstünde','Televizyonun arkasında','Pencerenin önünde'],
+   ip:'Sehpa tam ortada, iki eşyanın arasında duruyor.'},
+  {s:'Halı nerededir?',       c:'Yerde',
+   y:['Duvarda','Sehpanın üstünde','Koltuğun içinde'],
+   ip:'Halılar yere serilir.'},
+  {s:'Çiçek ile televizyondan hangisi daha yukarıdadır?', c:'Televizyon',
+   y:['Çiçek','İkisi de aynı yükseklikte','Halı'],
+   ip:'Televizyonun ekranı sehpadan daha yüksekte duruyor.'}
+];
+function etkOturmaOdasi(){
+  const duzen={koltukSolda:rnd(0,1)===0};
+  const q=pick(ODA_SORULARI);
+  const buyuk=cizOtuma(duzen);
+  buyuk.style.width='272px'; buyuk.style.height='169px';
+  return{
+    yonerge:q.s+' Resme bak ve doğru cevabı seç.',
+    secenek:shuffle([q.c,...shuffle(q.y).slice(0,2)]),
+    dogru:q.c,
+    ustGorsel:buyuk,
+    ciz:t=>{
+      const{c,ctx,W,H}=sahne(148,88);
+      ctx.save(); ctx.fillStyle='#4E4E4E';
+      ctx.font='600 15px Fredoka,Arial'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      // Uzun metni iki satıra böl
+      const kelimeler=t.split(' ');
+      if(t.length>16 && kelimeler.length>1){
+        const orta=Math.ceil(kelimeler.length/2);
+        ctx.fillText(kelimeler.slice(0,orta).join(' '),W/2,H/2-10);
+        ctx.fillText(kelimeler.slice(orta).join(' '),W/2,H/2+10);
+      }else ctx.fillText(t,W/2,H/2);
+      ctx.restore();
+      return c;
+    },
+    ipucu:q.ip
+  };
+}
+
+initEtkinlik([etkKonum,etkTers,etkYakinUzak,etkArasinda,etkSira,etkRaf,etkOda,etkOturmaOdasi],
   {ad:'Uzamsal İlişkiler',c1:'#a8edea',c2:'#fed6e3',koyu:'#00796B',orta:'#4DB6AC',acik:'#E0F2F1'});
 </script>
 </body>
