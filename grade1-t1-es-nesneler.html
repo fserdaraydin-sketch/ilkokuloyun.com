@@ -133,7 +133,7 @@ function etkKacEs(){
 
   const w=distractors(String(adet),()=>String(rnd(1,6)));
   return{
-    yonerge:'Yukarıdaki şekilden kaç tane var? Doğru sayıyı seç.',
+    yonerge:'Yukarıdaki şeklin TIPATIP AYNISINDAN kaç tane var? Sayıp doğru rakamı seç.',
     secenek:shuffle([String(adet),...w.slice(0,2)]), dogru:String(adet),
     ustGorsel:(()=>{ const d=document.createElement('div');
       d.style.cssText='display:flex;flex-direction:column;align-items:center;gap:8px';

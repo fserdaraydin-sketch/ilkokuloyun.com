@@ -27,6 +27,8 @@
 <script src="grade1-engine.js"></script>
 <script>
 const NESNE=['🍎','⚽','🌷','🐠','🦋','🍓','⭐','🧸'];
+// Ritmik sayma adımlarının Türkçe okunuşu — "10'er" yerine "onar"
+const RITIM={1:'birer birer',2:'ikişer ikişer',3:'üçer üçer',5:'beşer beşer',10:'onar onar'};
 const SEKIL_RENK=[['🔴','🔵'],['🟢','🟡'],['🟣','🟠'],['❤️','💙']];
 
 function sayiKarti(t,b){
@@ -62,7 +64,7 @@ function etkIleri(){
   const g=seritCiz(dizi,268); g.style.width='252px';
   const w=distractors(String(dogru),()=>String(dogru+pick([-adim,adim,-1,1])));
   return{
-    yonerge:adim+'\u2019er '+adim+'\u2019er ileriye sayalım. Boşluğa hangi sayı gelmeli?',
+    yonerge:RITIM[adim]+' ileriye sayalım. Boşluğa hangi sayı gelmeli?',
     secenek:shuffle([String(dogru),...w.slice(0,2)]), dogru:String(dogru),
     ustGorsel:g, ciz:t=>sayiKarti(t),
     ipucu:'Her adımda '+adim+' ekleniyor. Son sayıya '+adim+' ekle.'
@@ -78,7 +80,7 @@ function etkGeri(){
   const g=seritCiz(dizi,268); g.style.width='252px';
   const w=distractors(String(dogru),()=>String(Math.max(0,dogru+pick([-adim,adim,-1,1]))));
   return{
-    yonerge:adim+'\u2019er '+adim+'\u2019er geriye sayalım. Boşluğa hangi sayı gelmeli?',
+    yonerge:RITIM[adim]+' geriye sayalım. Boşluğa hangi sayı gelmeli?',
     secenek:shuffle([String(dogru),...w.slice(0,2)]), dogru:String(dogru),
     ustGorsel:g, ciz:t=>sayiKarti(t),
     ipucu:'Geriye sayarken her adımda '+adim+' çıkarılır.'

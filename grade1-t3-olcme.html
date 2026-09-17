@@ -113,33 +113,39 @@ function etkEnUzun(){
 
 // ETKİNLİK 4: Terazi — hangisi daha ağır / hafif
 function cizTerazi(solAgir,chSol,chSag,denge){
-  const{c,ctx,W,H}=sahne(258,126);
-  const mx=W/2, my=40;
-  // Direk
-  ctx.fillStyle='#8D6E63'; ctx.fillRect(mx-5,my,10,62);
-  ctx.fillStyle='#6D4C41'; ctx.beginPath();
-  ctx.moveTo(mx-30,H-10); ctx.lineTo(mx+30,H-10); ctx.lineTo(mx+18,H-22); ctx.lineTo(mx-18,H-22);
+  const{c,ctx,W,H}=sahne(258,130);
+  const mx=W/2, my=38, kol=86;
+  // Direk ve ayak
+  ctx.fillStyle='#8D6E63'; ctx.fillRect(mx-5,my,10,66);
+  ctx.fillStyle='#6D4C41';
+  ctx.beginPath();
+  ctx.moveTo(mx-32,H-8); ctx.lineTo(mx+32,H-8);
+  ctx.lineTo(mx+18,H-24); ctx.lineTo(mx-18,H-24);
   ctx.closePath(); ctx.fill();
-  // Kol
-  const egim = denge?0:(solAgir?14:-14);
-  ctx.save(); ctx.translate(mx,my); ctx.rotate(Math.atan2(egim,90));
+
+  // Kol açısı — kefe konumları bu açıdan HESAPLANIR ki nesneler kefede dursun
+  // AĞIR olan kefe AŞAĞI iner: sol ağırsa kol sola doğru alçalmalı
+  const aci = denge ? 0 : (solAgir ? -0.16 : 0.16);
+  const cosA=Math.cos(aci), sinA=Math.sin(aci);
+  const solK={x:mx-kol*cosA, y:my-kol*sinA};
+  const sagK={x:mx+kol*cosA, y:my+kol*sinA};
+
   ctx.strokeStyle='#5D4037'; ctx.lineWidth=5; ctx.lineCap='round';
-  ctx.beginPath(); ctx.moveTo(-90,0); ctx.lineTo(90,0); ctx.stroke();
-  // Kefeler
-  [-90,90].forEach((x,i)=>{
+  ctx.beginPath(); ctx.moveTo(solK.x,solK.y); ctx.lineTo(sagK.x,sagK.y); ctx.stroke();
+
+  // Kefeler: askı + tabla + üstünde nesne
+  [[solK,chSol],[sagK,chSag]].forEach(([k,ch])=>{
     ctx.strokeStyle='#8D6E63'; ctx.lineWidth=2;
-    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,22); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(k.x,k.y); ctx.lineTo(k.x,k.y+24); ctx.stroke();
+    // Nesne tablanın ÜSTÜNDE
+    emoji(ctx,ch,k.x,k.y+8,26);
     ctx.fillStyle='#BCAAA4';
-    ctx.beginPath(); ctx.ellipse(x,26,26,7,0,0,Math.PI*2); ctx.fill();
-    ctx.strokeStyle='#795548'; ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(k.x,k.y+26,27,7,0,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='#795548'; ctx.lineWidth=2; ctx.stroke();
   });
-  ctx.restore();
-  // Nesneler (kefelerin üstünde)
-  const solY=my+(denge?26:(solAgir?40:12)), sagY=my+(denge?26:(solAgir?12:40));
-  emoji(ctx,chSol,mx-90,solY-6,28);
-  emoji(ctx,chSag,mx+90,sagY-6,28);
   return c;
 }
+
 function etkTerazi(){
   const AGIR=['🍉','🎃','🪨','🧱'], HAFIF=['🪶','🎈','🍓','🍬'];
   const solAgir=rnd(0,1)===0;
