@@ -201,8 +201,92 @@ function genProblem(){
     explain:s.e+'\n\n💡 Birimlere dikkat et! Cevap hangi birimde isteniyor?'};
 }
 
+// ==================== VERİ, TABLO VE SÜTUN GRAFİĞİ ====================
+const VERI_SETLERI=[
+  {baslik:'Sınıfların Topladığı Kitap Sayısı',birim:'kitap',
+   etiket:['4-A','4-B','4-C','4-D'],uret:()=>[rnd(20,60),rnd(20,60),rnd(20,60),rnd(20,60)]},
+  {baslik:'Günlere Göre Satılan Ekmek Sayısı',birim:'ekmek',
+   etiket:['Pzt','Sal','Çar','Per'],uret:()=>[rnd(30,90),rnd(30,90),rnd(30,90),rnd(30,90)]},
+  {baslik:'Öğrencilerin Sevdiği Meyveler',birim:'öğrenci',
+   etiket:['Elma','Muz','Çilek','Kiraz'],uret:()=>[rnd(5,25),rnd(5,25),rnd(5,25),rnd(5,25)]},
+  {baslik:'Aylara Göre Yağan Yağmur Miktarı',birim:'mm',
+   etiket:['Ocak','Şubat','Mart','Nisan'],uret:()=>[rnd(20,80),rnd(20,80),rnd(20,80),rnd(20,80)]}
+];
+
+function drawSutun(etiket,deger,baslik){
+  const{c,ctx,W,H}=newCanvas(1,.68,420);
+  const sol=48, alt=H-40, ust=34, sag=W-16;
+  const enBuyuk=Math.max(...deger);
+  const birim=Math.ceil(enBuyuk/4/5)*5;          // düzgün ölçek
+  const tepe=birim*5;
+  const yh=(alt-ust)/tepe;
+  const gen=(sag-sol)/deger.length;
+
+  ctx.fillStyle='#37474F';ctx.font='700 13px Fredoka,Arial';ctx.textAlign='center';
+  ctx.textBaseline='top';ctx.fillText(baslik,W/2,6);
+
+  // Yatay ızgara + eksen değerleri
+  ctx.font='600 11px Fredoka,Arial';ctx.textAlign='right';ctx.textBaseline='middle';
+  for(let v=0;v<=tepe;v+=birim){
+    const y=alt-v*yh;
+    ctx.strokeStyle='#E0E6EC';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(sol,y);ctx.lineTo(sag,y);ctx.stroke();
+    ctx.fillStyle='#78909C';ctx.fillText(v,sol-6,y);
+  }
+  // Sütunlar
+  const renkler=['#26A69A','#42A5F5','#FFA726','#EC407A'];
+  deger.forEach((d,i)=>{
+    const x=sol+i*gen+gen*0.22, w=gen*0.56, y=alt-d*yh;
+    ctx.fillStyle=renkler[i%renkler.length];
+    ctx.fillRect(x,y,w,alt-y);
+    ctx.fillStyle='#263238';ctx.font='700 12px Fredoka,Arial';
+    ctx.textAlign='center';ctx.textBaseline='bottom';
+    ctx.fillText(d,x+w/2,y-3);
+    ctx.textBaseline='top';ctx.font='600 12px Fredoka,Arial';
+    ctx.fillText(etiket[i],x+w/2,alt+5);
+  });
+  // Eksenler
+  ctx.strokeStyle='#546E7A';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(sol,ust-6);ctx.lineTo(sol,alt);ctx.lineTo(sag,alt);ctx.stroke();
+  return c;
+}
+
+function genVeri(){
+  const set=pick(VERI_SETLERI);
+  const deger=set.uret();
+  const toplam=deger.reduce((a,b)=>a+b,0);
+  const enB=Math.max(...deger), enK=Math.min(...deger);
+  const iB=deger.indexOf(enB), iK=deger.indexOf(enK);
+
+  const sorular=[
+    {s:`Grafiğe göre en çok hangisinde ${set.birim} vardır?`,c:set.etiket[iB],
+     o:set.etiket, e:`En yüksek sütun ${set.etiket[iB]} → ${enB} ${set.birim}`},
+    {s:`Grafiğe göre en az hangisinde ${set.birim} vardır?`,c:set.etiket[iK],
+     o:set.etiket, e:`En kısa sütun ${set.etiket[iK]} → ${enK} ${set.birim}`},
+    {s:`Grafikteki toplam ${set.birim} sayısı kaçtır?`,c:String(toplam),
+     o:null, e:`${deger.join(' + ')} = ${toplam}`},
+    {s:`En çok ile en az arasındaki fark kaç ${set.birim}tir?`,c:String(enB-enK),
+     o:null, e:`${enB} − ${enK} = ${enB-enK}`},
+    {s:`${set.etiket[0]} ile ${set.etiket[1]} toplamı kaçtır?`,c:String(deger[0]+deger[1]),
+     o:null, e:`${deger[0]} + ${deger[1]} = ${deger[0]+deger[1]}`}
+  ];
+  const q=pick(sorular);
+  const secenekler = q.o
+    ? shuffle([...q.o])
+    : shuffle([q.c, ...distractors(q.c,()=>String(+q.c+pick([-20,-10,-5,5,10,20])))]);
+
+  return{
+    text:q.s,
+    visual:()=>drawSutun(set.etiket,deger,set.baslik),
+    answer:q.c,
+    options:secenekler,
+    explain:`${q.e}\n\n💡 Sütun grafiğinde sütunun YÜKSEKLİĞİ miktarı gösterir.\nSoldaki sayı ekseninden değeri okursun.`
+  };
+}
+
 initGame([
   {name:'Birim Çevirme',gen:genConvert},
+  {name:'Veri ve Grafik',gen:genVeri},
   {name:'Çevre Hesabı',gen:genPerimeter},
   {name:'Alan Hesabı',gen:genArea},
   {name:'Karışık Birimler',gen:genMixed},

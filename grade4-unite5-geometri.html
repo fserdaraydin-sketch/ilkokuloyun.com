@@ -404,8 +404,200 @@ function genPattern(){
   };
 }
 
+// ==================== AÇILAR (GÖRSEL) ====================
+function drawAci(derece,etiketli){
+  const{c,ctx,W,H}=newCanvas(1,.6,360);
+  const ox=W*0.24, oy=H*0.74, uzun=Math.min(W*0.52,H*0.62);
+  ctx.lineCap='round';
+
+  // Kenarlar (ışınlar)
+  ctx.strokeStyle='#5E35B1';ctx.lineWidth=5;
+  ctx.beginPath();ctx.moveTo(ox,oy);ctx.lineTo(ox+uzun,oy);ctx.stroke();
+  const rad=derece*Math.PI/180;
+  const bx=ox+uzun*Math.cos(rad), by=oy-uzun*Math.sin(rad);
+  ctx.beginPath();ctx.moveTo(ox,oy);ctx.lineTo(bx,by);ctx.stroke();
+
+  // Açı yayı — dik açıda kare işareti
+  if(Math.abs(derece-90)<0.5){
+    ctx.strokeStyle='#E53935';ctx.lineWidth=3;
+    ctx.strokeRect(ox,oy-24,24,24);
+  }else{
+    ctx.strokeStyle='#E53935';ctx.lineWidth=3;
+    ctx.beginPath();ctx.arc(ox,oy,32,-rad,0);ctx.stroke();
+  }
+
+  // Köşe noktası
+  ctx.fillStyle='#311B92';ctx.beginPath();ctx.arc(ox,oy,5,0,Math.PI*2);ctx.fill();
+
+  if(etiketli){
+    ctx.fillStyle='#311B92';ctx.font='700 15px Fredoka,Arial';
+    ctx.textAlign='right';ctx.textBaseline='top';
+    ctx.fillText('A',ox-8,oy-4);                       // köşe
+    ctx.textAlign='left';ctx.textBaseline='middle';
+    ctx.fillText('B',ox+uzun+8,oy);                    // yatay kenar ucu
+    ctx.fillText('C',bx+8,by-4);                       // eğik kenar ucu
+  }
+  return c;
+}
+
+const ACI_TIP=d=>d<90?'Dar açı':d>90?'Geniş açı':'Dik açı';
+
+function genAci(){
+  const tip=rnd(0,3);
+
+  // 1) Görselden açı türü
+  if(tip===0){
+    const d=pick([25,35,48,62,78, 90, 105,120,138,155,168]);
+    return{
+      text:'Aşağıda verilen açı hangi türdendir?',
+      visual:()=>drawAci(d,false),
+      answer:ACI_TIP(d),
+      options:shuffle(['Dar açı','Dik açı','Geniş açı']),
+      explain:`Bu açı ${d}°'dir → ${ACI_TIP(d).toUpperCase()}\n\n💡 DAR açı: 90°'den KÜÇÜK\n💡 DİK açı: tam 90° (köşesinde küçük kare ile gösterilir)\n💡 GENİŞ açı: 90°'den BÜYÜK, 180°'den küçük`
+    };
+  }
+
+  // 2) Açının elemanları
+  if(tip===1){
+    const d=pick([40,55,70,110,130]);
+    const dogrular=[
+      {t:'Kenarları AB ışını ve AC ışınıdır.',d:true},
+      {t:'Köşesi A noktasıdır.',d:true},
+      {t:`Bu bir ${ACI_TIP(d).toLowerCase()}dır.`,d:true},
+      {t:'Sembolle BAC açısı olarak gösterilir.',d:true},
+      {t:'Köşesi B noktasıdır.',d:false},
+      {t:'Sembolle ABC açısı olarak gösterilir.',d:false},
+      {t:`Bu bir ${ACI_TIP(d)==='Dar açı'?'geniş açı':'dar açı'}dır.`,d:false}
+    ];
+    const yanlis=pick(dogrular.filter(x=>!x.d));
+    const w=shuffle(dogrular.filter(x=>x.d)).slice(0,3).map(x=>x.t);
+    return{
+      text:'Aşağıdaki açı ile ilgili hangisi SÖYLENEMEZ?',
+      visual:()=>drawAci(d,true),
+      answer:yanlis.t,
+      options:shuffle([yanlis.t,...w]),
+      explain:`Açının KÖŞESİ ortadaki harftir: A\nKENARLARI köşeden çıkan iki ışındır: AB ve AC\nSembolle gösterimde köşe ORTADA yazılır: BAC açısı\nBu açı ${d}° → ${ACI_TIP(d)}\n\n💡 "ABC açısı" deseydik köşe B olurdu — yanlış olurdu.`
+    };
+  }
+
+  // 3) Saatteki açı
+  if(tip===2){
+    const saatler=[
+      {s:'03.00',d:90, t:'Dik açı'},  {s:'09.00',d:90, t:'Dik açı'},
+      {s:'01.00',d:30, t:'Dar açı'},  {s:'02.00',d:60, t:'Dar açı'},
+      {s:'04.00',d:120,t:'Geniş açı'},{s:'05.00',d:150,t:'Geniş açı'},
+      {s:'10.00',d:60, t:'Dar açı'},  {s:'08.00',d:120,t:'Geniş açı'}
+    ];
+    const it=pick(saatler);
+    return{
+      text:`Saat ${it.s}'da akrep ile yelkovan arasındaki açı hangi türdendir?`,
+      numberDisplay:it.s,
+      answer:it.t,
+      options:shuffle(['Dar açı','Dik açı','Geniş açı']),
+      explain:`Saat ${it.s}'da açı ${it.d}° → ${it.t.toUpperCase()}\n\n💡 Saatte her rakam arası 30°'dir (360° ÷ 12 = 30°).\nAkrep ile yelkovan arasında kaç rakam varsa × 30 yaparsın.`
+    };
+  }
+
+  // 4) Günlük hayattan dik açı
+  const ornekler=[
+    {n:'Kitap sayfasının köşesi',t:'Dik açı'},
+    {n:'Kare şeklindeki bir fayansın köşesi',t:'Dik açı'},
+    {n:'Duvar ile tavanın birleştiği yer',t:'Dik açı'},
+    {n:'Yarı açılmış bir makasın kolları',t:'Dar açı'},
+    {n:'Neredeyse tamamen açılmış bir yelpaze',t:'Geniş açı'},
+    {n:'Pizzanın ince bir diliminin ucu',t:'Dar açı'}
+  ];
+  const it=pick(ornekler);
+  return{
+    text:'Aşağıdaki durumda oluşan açı hangi türdendir?',
+    readDisplay:it.n,
+    answer:it.t,
+    options:shuffle(['Dar açı','Dik açı','Geniş açı']),
+    explain:`${it.n} → ${it.t}\n\n💡 Dik açıyı tanımanın kolay yolu: kâğıdın köşesini tutup karşılaştır.`
+  };
+}
+
+// ==================== ÜÇGEN ÇEŞİTLERİ ====================
+function drawUcgen(a,b,c2){
+  const{c,ctx,W,H}=newCanvas(1,.58,340);
+  // Kenarlardan üçgeni kur (kosinüs teoremi ile üçüncü köşe)
+  const olcek=Math.min((W-90)/Math.max(a,b,c2), (H-70)/Math.max(a,b,c2))*0.9;
+  const A=a*olcek,B=b*olcek,C=c2*olcek;
+  const x1=(W-A)/2, y1=H*0.78, x2=x1+A;
+  const cosA=(A*A+C*C-B*B)/(2*A*C);
+  const x3=x1+C*cosA, y3=y1-C*Math.sqrt(Math.max(0,1-cosA*cosA));
+
+  ctx.fillStyle='#E1BEE7';ctx.strokeStyle='#6A1B9A';ctx.lineWidth=4;ctx.lineJoin='round';
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y1);ctx.lineTo(x3,y3);ctx.closePath();
+  ctx.fill();ctx.stroke();
+
+  ctx.fillStyle='#4A148C';ctx.font='700 14px Fredoka,Arial';
+  ctx.textAlign='center';ctx.textBaseline='top';
+  ctx.fillText(a+' cm',(x1+x2)/2,y1+8);
+  ctx.textBaseline='bottom';ctx.textAlign='right';
+  ctx.fillText(c2+' cm',(x1+x3)/2-6,(y1+y3)/2);
+  ctx.textAlign='left';
+  ctx.fillText(b+' cm',(x2+x3)/2+6,(y1+y3)/2);
+  return c;
+}
+
+function ucgenTuru(a,b,c){
+  if(a===b&&b===c) return 'Eşkenar üçgen';
+  if(a===b||b===c||a===c) return 'İkizkenar üçgen';
+  return 'Çeşitkenar üçgen';
+}
+
+function genUcgen(){
+  const tip=rnd(0,2);
+
+  // 1) Görselden tür
+  if(tip===0){
+    const setler=[[6,6,6],[8,8,8],[5,5,8],[7,7,4],[9,9,5],[5,6,7],[4,6,8],[6,8,9],[5,5,5]];
+    const [a,b,c]=pick(setler);
+    const t=ucgenTuru(a,b,c);
+    return{
+      text:'Aşağıdaki üçgen kenar uzunluklarına göre hangi türdendir?',
+      visual:()=>drawUcgen(a,b,c),
+      answer:t,
+      options:shuffle(['Eşkenar üçgen','İkizkenar üçgen','Çeşitkenar üçgen']),
+      explain:`Kenarlar: ${a} cm, ${b} cm, ${c} cm → ${t.toUpperCase()}\n\n💡 EŞKENAR: üç kenarı da eşit\n💡 İKİZKENAR: iki kenarı eşit\n💡 ÇEŞİTKENAR: üç kenarı da farklı`
+    };
+  }
+
+  // 2) Tanımdan tür
+  if(tip===1){
+    const tanimlar=[
+      {t:'Eşkenar üçgen',d:'Üç kenarının uzunluğu da birbirine eşittir.'},
+      {t:'İkizkenar üçgen',d:'Yalnızca iki kenarının uzunluğu birbirine eşittir.'},
+      {t:'Çeşitkenar üçgen',d:'Üç kenarının uzunluğu da birbirinden farklıdır.'}
+    ];
+    const it=pick(tanimlar);
+    return{
+      text:'Aşağıda özelliği verilen üçgen hangisidir?',
+      readDisplay:it.d,
+      answer:it.t,
+      options:shuffle(tanimlar.map(x=>x.t)),
+      explain:`${it.t}: ${it.d}\n\n💡 Üçgenler kenar uzunluklarına göre üçe ayrılır:\neşkenar (3 eşit) · ikizkenar (2 eşit) · çeşitkenar (hepsi farklı)`
+    };
+  }
+
+  // 3) Üçgen eşitsizliği — hangi kenarlar üçgen oluşturur?
+  const olur=[[5,6,7],[8,8,8],[4,5,6],[7,7,9],[3,4,5],[6,8,10]];
+  const olmaz=[[2,3,9],[1,2,8],[3,3,10],[2,5,12],[4,4,11]];
+  const dogru=pick(olur), yanlis=shuffle([...olmaz]).slice(0,3);
+  const f=x=>x.join(' cm, ')+' cm';
+  return{
+    text:'Aşağıdaki uzunluklardan hangisi bir ÜÇGEN oluşturabilir?',
+    answer:f(dogru),
+    options:shuffle([f(dogru),...yanlis.map(f)]),
+    explain:`${f(dogru)} → üçgen olur ✓\n${dogru[0]} + ${dogru[1]} = ${dogru[0]+dogru[1]} > ${dogru[2]} ✓\n\n💡 KURAL: İki kısa kenarın toplamı, en uzun kenardan BÜYÜK olmalıdır.\nÖrnek: ${yanlis[0][0]} + ${yanlis[0][1]} = ${yanlis[0][0]+yanlis[0][1]} < ${yanlis[0][2]} → üçgen olmaz ✗`
+  };
+}
+
 initGame([
+  {name:'Açılar',gen:genAci},
   {name:'Şekilleri Tanı',gen:genShapeId},
+  {name:'Üçgen Çeşitleri',gen:genUcgen},
   {name:'Küp Sayma',gen:genCubeCount},
   {name:'Simetri',gen:genSymmetry},
   {name:'Küp Açınımı',gen:genCubeNet},

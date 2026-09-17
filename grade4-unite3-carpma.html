@@ -150,11 +150,92 @@ function genProblem(){
     explain:s.e+'\n\n💡 Önce ne soruluyor bul, sonra hangi işlem gerektiğini düşün.'};
 }
 
+// ==================== ASAL SAYILAR, ÇARPAN VE KAT ====================
+const ASALLAR=[2,3,5,7,11,13,17,19,23,29,31,37,41,43,47];
+const asalMi=n=>{ if(n<2)return false; for(let i=2;i*i<=n;i++) if(n%i===0)return false; return true; };
+function carpanlar(n){const c=[];for(let i=1;i<=n;i++) if(n%i===0)c.push(i);return c;}
+
+function genAsal(){
+  const tip=rnd(0,3);
+
+  // 1) Asal mı değil mi
+  if(tip===0){
+    const n=rnd(2,50);
+    return{
+      text:`${n} sayısı asal sayı mıdır?`,
+      numberDisplay:String(n),
+      answer:asalMi(n)?'Evet, asaldır':'Hayır, asal değildir',
+      options:shuffle(['Evet, asaldır','Hayır, asal değildir']),
+      explain:asalMi(n)
+        ? `${n} ASALDIR.\nÇarpanları sadece 1 ve ${n}: ${carpanlar(n).join(', ')}\n\n💡 ASAL SAYI: 1 ve kendisinden başka çarpanı olmayan sayı.\n📌 1 asal DEĞİLDİR. En küçük asal sayı 2'dir ve tek çift asal sayıdır.`
+        : `${n} asal DEĞİLDİR.\nÇarpanları: ${carpanlar(n).join(', ')}\nYani 1 ve ${n} dışında da çarpanı var.\n\n💡 ASAL SAYI: sadece 1 ve kendisine bölünebilen sayı.`
+    };
+  }
+
+  // 2) Hangisi asal
+  if(tip===1){
+    const dogru=pick(ASALLAR);
+    const w=distractors(String(dogru),()=>{let x;do{x=rnd(4,50);}while(asalMi(x));return String(x);});
+    return{
+      text:'Aşağıdaki sayılardan hangisi ASAL SAYIDIR?',
+      answer:String(dogru),
+      options:shuffle([String(dogru),...w]),
+      explain:`${dogru} asaldır: çarpanları sadece 1 ve ${dogru}.\n\nDiğerleri:\n`+
+        w.map(x=>`${x} → çarpanları: ${carpanlar(+x).join(', ')}`).join('\n')+
+        `\n\n💡 50'ye kadar asal sayılar:\n2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47`
+    };
+  }
+
+  // 3) Çarpanları
+  if(tip===2){
+    const n=pick([12,18,20,24,28,30,36,40,45,48]);
+    const c=carpanlar(n);
+    const dogru=c.join(', ');
+    const w=new Set(); let g=0;
+    while(w.size<3&&g++<60){
+      const m=pick([12,18,20,24,28,30,36,40,45,48,16,32]);
+      if(m!==n) w.add(carpanlar(m).join(', '));
+    }
+    return{
+      text:`${n} sayısının bütün çarpanları hangileridir?`,
+      numberDisplay:String(n),
+      answer:dogru,
+      options:shuffle([dogru,...[...w]]),
+      explain:`${n} sayısının çarpanları: ${dogru}\nToplam ${c.length} çarpanı var.\n\n💡 ÇARPAN: bir sayıyı kalansız bölen sayıdır.\n1'den başlayıp sırayla dene: ${n} ÷ 1, ${n} ÷ 2, ${n} ÷ 3 ...`
+    };
+  }
+
+  // 4) Kat mı, çarpan mı
+  const n=pick([3,4,5,6,7,8,9]);
+  const kat=n*rnd(2,9);
+  const soruKat=rnd(0,1)===0;
+  if(soruKat){
+    const w=distractors(String(kat),()=>{let x;do{x=rnd(10,80);}while(x%n===0);return String(x);});
+    return{
+      text:`Aşağıdakilerden hangisi ${n} sayısının KATIDIR?`,
+      answer:String(kat),
+      options:shuffle([String(kat),...w]),
+      explain:`${kat} = ${n} × ${kat/n} → ${n}'in katıdır ✓\n\n💡 KAT: bir sayının 1, 2, 3... ile çarpımından elde edilen sayılardır.\n${n}'in katları: ${[1,2,3,4,5].map(i=>n*i).join(', ')} ...\n📌 Çarpan sayıyı BÖLER, kat sayıdan BÜYÜKtür (ya da eşittir).`
+    };
+  }
+  const c=carpanlar(kat).filter(x=>x!==1&&x!==kat);
+  const dogru=String(pick(c.length?c:[1]));
+  const w=distractors(dogru,()=>{let x;do{x=rnd(2,20);}while(kat%x===0);return String(x);});
+  return{
+    text:`Aşağıdakilerden hangisi ${kat} sayısının ÇARPANIDIR?`,
+    numberDisplay:String(kat),
+    answer:dogru,
+    options:shuffle([dogru,...w]),
+    explain:`${kat} ÷ ${dogru} = ${kat/+dogru} (kalansız) → ${dogru} bir çarpandır ✓\n\n💡 ÇARPAN: sayıyı KALANSIZ bölen sayı.\n${kat} sayısının çarpanları: ${carpanlar(kat).join(', ')}`
+  };
+}
+
 initGame([
   {name:'10 / 100 ile Çarpma',gen:genByTen},
   {name:'Çarpma İşlemi',gen:genMultiply},
   {name:'Bölme İşlemi',gen:genDivide},
   {name:'Kalanlı Bölme',gen:genDivideRem},
+  {name:'Asal Sayı & Çarpan',gen:genAsal},
   {name:'Problem Çöz',gen:genProblem}
 ],{c1:'#11998e',c2:'#38ef7d',shadow:'rgba(17,153,142,.35)',boxBg:'linear-gradient(135deg,#f0fdf9 0%,#ecfdf5 100%)',boxBorder:'#a7f3d0'});
 </script>

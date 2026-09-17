@@ -195,11 +195,122 @@ function genFracProblem(){
     explain:s.e+'\n\n💡 Önce bütünü paydaya böl (1 parça bul), sonra pay ile çarp.'};
 }
 
+// ==================== BİRİM VE DENK KESİR ====================
+function genKesirTur(){
+  const tip=rnd(0,2);
+
+  // 1) Birim kesir
+  if(tip===0){
+    const q=pick([3,4,5,6,8,10]);
+    const dogru=frac(1,q);
+    const w=distractors(dogru,()=>{const q2=pick([2,3,4,5,6,8]);const p2=rnd(2,q2);return frac(p2,q2);});
+    return{
+      text:'Aşağıdakilerden hangisi BİRİM KESİRDİR?',
+      answer:dogru,
+      options:shuffle([dogru,...w]),
+      explain:`${dogru} bir birim kesirdir.\n\n💡 BİRİM KESİR: payı 1 olan kesirdir.\n1/2, 1/3, 1/4, 1/5 ... hepsi birim kesirdir.\n📌 Bütün, payda kadar eş parçaya bölündüğünde parçalardan BİRİ birim kesirdir.`
+    };
+  }
+
+  // 2) Denk kesir
+  if(tip===1){
+    const q=pick([2,3,4,5]);
+    const p=rnd(1,q-1);
+    const kat=rnd(2,4);
+    const dogru=frac(p*kat,q*kat);
+    const w=new Set(); let g=0;
+    while(w.size<3&&g++<60){
+      const q2=pick([2,3,4,5,6,8,9,10,12]); const p2=rnd(1,q2-1);
+      if(Math.abs(p2/q2-p/q)>0.02) w.add(frac(p2,q2));
+    }
+    return{
+      text:`${frac(p,q)} kesrine DENK olan kesir hangisidir?`,
+      numberDisplay:frac(p,q),
+      answer:dogru,
+      options:shuffle([dogru,...[...w]]),
+      explain:`${frac(p,q)} = ${dogru}\nPay ve payda aynı sayıyla (${kat}) çarpıldı:\n${p} × ${kat} = ${p*kat}  ve  ${q} × ${kat} = ${q*kat}\n\n💡 DENK KESİRLER: yazılışları farklı ama BÜYÜKLÜKLERİ aynı olan kesirlerdir.\nPay ve payda aynı sayıyla çarpılır ya da bölünürse kesrin değeri değişmez.`
+    };
+  }
+
+  // 3) Tam sayılı kesir
+  const tam=rnd(1,4), q=pick([2,3,4,5,6]), p=rnd(1,q-1);
+  const bilesikPay=tam*q+p;
+  const yon=rnd(0,1);
+  if(yon===0){
+    const dogru=`${tam} tam ${p}/${q}`;
+    const w=distractors(dogru,()=>`${rnd(1,5)} tam ${rnd(1,4)}/${pick([2,3,4,5,6])}`);
+    return{
+      text:`${frac(bilesikPay,q)} bileşik kesrinin tam sayılı hâli hangisidir?`,
+      numberDisplay:frac(bilesikPay,q),
+      answer:dogru,
+      options:shuffle([dogru,...w]),
+      explain:`${bilesikPay} ÷ ${q} = ${tam}, kalan ${p}\n→ ${tam} tam ${p}/${q}\n\n💡 Bileşik kesri tam sayılıya çevirirken:\nPayı paydaya BÖL. Bölüm tam kısım, KALAN yeni pay olur, payda değişmez.`
+    };
+  }
+  const dogru=frac(bilesikPay,q);
+  const w=distractors(dogru,()=>frac(rnd(3,20),pick([2,3,4,5,6])));
+  return{
+    text:`${tam} tam ${p}/${q} sayısının bileşik kesir hâli hangisidir?`,
+    numberDisplay:`${tam} tam ${p}/${q}`,
+    answer:dogru,
+    options:shuffle([dogru,...w]),
+    explain:`${tam} × ${q} = ${tam*q},  ${tam*q} + ${p} = ${bilesikPay}\n→ ${dogru}\n\n💡 Tam sayılıyı bileşik kesre çevirirken:\nTam kısmı paydayla ÇARP, payı EKLE. Payda değişmez.`
+  };
+}
+
+// ==================== SANİYE VE ZAMAN BİRİMLERİ ====================
+function genSaniye(){
+  const tip=rnd(0,2);
+
+  if(tip===0){
+    const cift=[
+      {s:'1 dakika kaç saniyedir?',c:'60 saniye',y:['30 saniye','100 saniye','24 saniye']},
+      {s:'1 saat kaç dakikadır?',c:'60 dakika',y:['30 dakika','100 dakika','24 dakika']},
+      {s:'1 saat kaç saniyedir?',c:'3600 saniye',y:['60 saniye','600 saniye','1200 saniye']},
+      {s:'1 gün kaç saattir?',c:'24 saat',y:['12 saat','60 saat','30 saat']},
+      {s:'1 hafta kaç gündür?',c:'7 gün',y:['5 gün','30 gün','10 gün']},
+      {s:'1 yıl kaç aydır?',c:'12 ay',y:['10 ay','7 ay','365 ay']},
+      {s:'Yarım dakika kaç saniyedir?',c:'30 saniye',y:['15 saniye','60 saniye','50 saniye']},
+      {s:'Çeyrek saat kaç dakikadır?',c:'15 dakika',y:['25 dakika','30 dakika','45 dakika']}
+    ];
+    const it=pick(cift);
+    return{text:it.s,answer:it.c,options:shuffle([it.c,...it.y]),
+      explain:`${it.s.replace('?','')} → ${it.c}\n\n💡 1 dakika = 60 saniye\n💡 1 saat = 60 dakika = 3600 saniye\n💡 1 gün = 24 saat`};
+  }
+
+  if(tip===1){
+    const dk=rnd(2,15), sn=rnd(1,59);
+    const toplam=dk*60+sn;
+    const w=distractors(String(toplam),()=>String(toplam+pick([-60,-10,10,60,100])));
+    return{
+      text:`${dk} dakika ${sn} saniye kaç saniyedir?`,
+      numberDisplay:`${dk} dk ${sn} sn`,
+      answer:String(toplam),
+      options:shuffle([String(toplam),...w]),
+      explain:`${dk} dakika = ${dk} × 60 = ${dk*60} saniye\n${dk*60} + ${sn} = ${toplam} saniye\n\n💡 Dakikayı saniyeye çevirmek için 60 ile ÇARP.`
+    };
+  }
+
+  const toplamSn=rnd(70,900);
+  const d=Math.floor(toplamSn/60), s2=toplamSn%60;
+  const dogru=`${d} dakika ${s2} saniye`;
+  const w=distractors(dogru,()=>`${rnd(1,16)} dakika ${rnd(0,59)} saniye`);
+  return{
+    text:`${toplamSn} saniye kaç dakika kaç saniyedir?`,
+    numberDisplay:`${toplamSn} saniye`,
+    answer:dogru,
+    options:shuffle([dogru,...w]),
+    explain:`${toplamSn} ÷ 60 = ${d}, kalan ${s2}\n→ ${dogru}\n\n💡 Saniyeyi dakikaya çevirmek için 60'a BÖL. Kalan saniye olur.`
+  };
+}
+
 initGame([
   {name:'Kesir Modeli',gen:genFracModel},
   {name:'Kesir Çeşitleri',gen:genFracCompare},
+  {name:'Birim & Denk Kesir',gen:genKesirTur},
   {name:'Saat Okuma',gen:genClockRead},
   {name:'Süre Hesabı',gen:genDuration},
+  {name:'Saniye ve Zaman',gen:genSaniye},
   {name:'Kesir Problemi',gen:genFracProblem}
 ],{c1:'#f77f00',c2:'#fcbf49',shadow:'rgba(247,127,0,.35)',boxBg:'linear-gradient(135deg,#fffbf0 0%,#fff8e7 100%)',boxBorder:'#fcd9a0'});
 </script>
