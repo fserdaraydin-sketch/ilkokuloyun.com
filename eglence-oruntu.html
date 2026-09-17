@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Örüntü Stüdyosu - İlkokulOyun.com</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Fredoka',Arial,sans-serif;background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%);display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:12px}
+.container{background:rgba(255,255,255,.96);border-radius:28px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.2);max-width:760px;width:100%}
+.header{text-align:center;margin-bottom:14px}
+.header h1{font-size:26px;font-weight:700;background:linear-gradient(135deg,#f5576c,#f093fb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.header p{color:#9E9E9E;font-size:14px;font-weight:500}
+
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.tab{padding:14px;border:2px solid #FBD9E3;border-radius:16px;background:#fff;font-family:inherit;font-weight:600;font-size:15px;color:#666;cursor:pointer;transition:all .2s}
+.tab:hover{border-color:#f5576c}
+.tab.on{background:linear-gradient(135deg,#f5576c,#f093fb);color:#fff;border-color:#f5576c;box-shadow:0 4px 14px rgba(245,87,108,.3)}
+
+.panel{display:none}
+.panel.on{display:block}
+
+.section-t{font-size:12px;color:#999;font-weight:600;letter-spacing:1px;margin:14px 0 8px;text-align:center}
+
+.board{background:#fff;border:3px solid #FBD9E3;border-radius:18px;padding:14px;overflow:hidden}
+canvas{display:block;max-width:100%;border-radius:10px;touch-action:manipulation}
+
+.cells{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.cell{width:62px;height:62px;border:3px dashed #E9C9D6;border-radius:14px;background:#fff;cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;padding:0}
+.cell:hover{border-color:#f5576c;transform:translateY(-2px)}
+.cell.sel{border-style:solid;border-color:#f5576c;box-shadow:0 0 0 4px rgba(245,87,108,.18)}
+
+.len{display:flex;justify-content:center;gap:8px}
+.lenb{width:48px;height:44px;border:2px solid #FBD9E3;border-radius:12px;background:#fff;font-family:inherit;font-weight:700;font-size:16px;color:#777;cursor:pointer;transition:all .18s}
+.lenb:hover{border-color:#f5576c}
+.lenb.on{background:linear-gradient(135deg,#f5576c,#f093fb);color:#fff;border-color:#f5576c}
+
+.palette{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+.pit{aspect-ratio:1;border:2px solid #EEE;border-radius:12px;background:#fff;cursor:pointer;transition:all .15s;padding:5px}
+.pit:hover{transform:scale(1.07)}
+.pit.on{border-color:#f5576c;box-shadow:0 0 0 3px rgba(245,87,108,.2)}
+
+.colors{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-top:8px}
+.col{aspect-ratio:1;border:3px solid #fff;border-radius:50%;cursor:pointer;transition:all .15s;box-shadow:0 2px 6px rgba(0,0,0,.14)}
+.col:hover{transform:scale(1.12)}
+.col.on{box-shadow:0 0 0 4px rgba(245,87,108,.45)}
+
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.btn{padding:14px;border:none;border-radius:16px;font-family:inherit;font-weight:600;font-size:15px;cursor:pointer;transition:all .2s}
+.btn:active{transform:scale(.96)}
+.btn-a{background:linear-gradient(135deg,#f5576c,#f093fb);color:#fff;box-shadow:0 4px 14px rgba(245,87,108,.3)}
+.btn-b{background:#F1F3F5;color:#555}
+.btn-wide{grid-column:1/-1}
+.btn-back{width:100%;padding:13px;background:transparent;color:#999;border:2px solid #E0E0E0;border-radius:16px;font-family:inherit;font-weight:600;font-size:15px;cursor:pointer;margin-top:10px}
+.btn-back:hover{border-color:#f5576c;color:#f5576c}
+
+.options{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:14px}
+.opt{aspect-ratio:1;border:3px solid #EEE;border-radius:16px;background:#fff;cursor:pointer;transition:all .15s;padding:7px}
+.opt:hover:not(:disabled){border-color:#f5576c;transform:translateY(-3px)}
+.opt.correct{border-color:#10b981;background:#d1fae5}
+.opt.wrong{border-color:#ef4444;background:#fee2e2}
+.opt:disabled{cursor:default}
+
+.msg{text-align:center;font-size:18px;font-weight:600;min-height:28px;margin:14px 0}
+.msg.ok{color:#10b981;animation:pop .4s ease}
+.msg.no{color:#f97316;animation:shake .4s ease}
+@keyframes pop{0%{transform:scale(.5);opacity:0}70%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+.stats{display:flex;justify-content:center;gap:10px;margin-bottom:6px}
+.st{background:#FDF2F6;border-radius:14px;padding:9px 20px;text-align:center}
+.st-l{font-size:10px;color:#999;font-weight:600;letter-spacing:.6px}
+.st-v{font-size:20px;font-weight:700;color:#f5576c}
+
+.tip{background:#fffbeb;border:2px solid #fcd34d;border-radius:14px;padding:12px 15px;margin-top:14px;font-size:13.5px;color:#78350f;line-height:1.6}
+
+.confetti{position:fixed;width:12px;height:12px;top:-20px;z-index:999;animation:fall linear forwards;border-radius:3px}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:.3}}
+
+@media(max-width:600px){
+.container{padding:15px}
+.header h1{font-size:21px}
+.cell{width:52px;height:52px}
+.palette{grid-template-columns:repeat(5,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🎨 Örüntü Stüdyosu</h1>
+    <p>Kendi örüntünü tasarla ya da kuralı keşfet</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab on" id="tabA" onclick="setTab('design')">🎨 Tasarla</button>
+    <button class="tab" id="tabB" onclick="setTab('guess')">🔍 Bil Bakalım</button>
+  </div>
+
+  <!-- ============ TASARLA ============ -->
+  <div class="panel on" id="pDesign">
+    <div class="section-t">ÖRÜNTÜNÜN ÇEKİRDEĞİ — KAÇ PARÇA?</div>
+    <div class="len" id="lenBox"></div>
+
+    <div class="section-t">PARÇALARA DOKUN, ŞEKİL VE RENK SEÇ</div>
+    <div class="cells" id="cellBox"></div>
+
+    <div class="section-t">ŞEKİL</div>
+    <div class="palette" id="shapeBox"></div>
+    <div class="colors" id="colorBox"></div>
+
+    <div class="section-t">ÖRÜNTÜN</div>
+    <div class="board"><canvas id="stripC"></canvas></div>
+
+    <div class="btns">
+      <button class="btn btn-b" onclick="randomCore()">🎲 Karıştır</button>
+      <button class="btn btn-a" onclick="toggleCarpet()" id="carpetBtn">🧶 Halı Yap</button>
+      <button class="btn btn-b btn-wide" onclick="clearCore()">🗑️ Temizle</button>
+    </div>
+
+    <div class="board" id="carpetBox" style="margin-top:12px;display:none">
+      <canvas id="carpetC"></canvas>
+    </div>
+
+    <div class="tip" id="tipD">💡 Bir örüntü, kendini tekrar eden parçalardan oluşur. Çekirdeğini değiştir, şeridin nasıl değiştiğini izle!</div>
+  </div>
+
+  <!-- ============ BİL BAKALIM ============ -->
+  <div class="panel" id="pGuess">
+    <div class="stats">
+      <div class="st"><div class="st-l">PUAN</div><div class="st-v" id="score">0</div></div>
+      <div class="st"><div class="st-l">DOĞRU</div><div class="st-v" id="ok">0</div></div>
+      <div class="st"><div class="st-l">SORU</div><div class="st-v" id="total">0</div></div>
+    </div>
+
+    <div class="section-t" id="qLabel">SIRADA HANGİSİ GELMELİ?</div>
+    <div class="board"><canvas id="quizC"></canvas></div>
+
+    <div class="msg" id="msg"></div>
+    <div class="options" id="optBox"></div>
+
+    <div class="btns">
+      <button class="btn btn-a btn-wide" onclick="newQuiz()">Yeni Soru ➜</button>
+    </div>
+
+    <div class="tip" id="tipG">💡 Önce kaç parçada bir tekrar ettiğini bul. Sonra o parçayı say, sıradakini tahmin et.</div>
+  </div>
+
+  <button class="btn-back" onclick="location.href='eglence-index.html'">← Geri Dön</button>
+</div>
+
+<script>
+// ===== ORTAK =====
+const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+
+const COLORS=['#F5576C','#FF9800','#FDD835','#43A047','#29B6F6','#8E24AA'];
+const SHAPES=['circle','square','triangle','star','heart','diamond'];
+
+// ---- ŞEKİL ÇİZİCİ ----
+function drawShape(ctx,kind,cx,cy,r,color){
+  ctx.save();
+  ctx.fillStyle=color;
+  ctx.strokeStyle='rgba(0,0,0,.18)';
+  ctx.lineWidth=Math.max(1.5,r*.08);
+  ctx.beginPath();
+  if(kind==='circle'){
+    ctx.arc(cx,cy,r,0,Math.PI*2);
+  }else if(kind==='square'){
+    const s=r*1.72;
+    roundRect(ctx,cx-s/2,cy-s/2,s,s,r*.22);
+  }else if(kind==='triangle'){
+    const h=r*1.78;
+    ctx.moveTo(cx,cy-h*.58);
+    ctx.lineTo(cx+h*.55,cy+h*.42);
+    ctx.lineTo(cx-h*.55,cy+h*.42);
+    ctx.closePath();
+  }else if(kind==='star'){
+    for(let i=0;i<10;i++){
+      const a=-Math.PI/2+i*Math.PI/5;
+      const rr=i%2===0?r:r*.46;
+      const x=cx+rr*Math.cos(a), y=cy+rr*Math.sin(a);
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+  }else if(kind==='heart'){
+    const s=r*1.1;
+    ctx.moveTo(cx,cy+s*.75);
+    ctx.bezierCurveTo(cx-s*1.5,cy-s*.25,cx-s*.55,cy-s*1.15,cx,cy-s*.42);
+    ctx.bezierCurveTo(cx+s*.55,cy-s*1.15,cx+s*1.5,cy-s*.25,cx,cy+s*.75);
+    ctx.closePath();
+  }else if(kind==='diamond'){
+    ctx.moveTo(cx,cy-r);
+    ctx.lineTo(cx+r*.78,cy);
+    ctx.lineTo(cx,cy+r);
+    ctx.lineTo(cx-r*.78,cy);
+    ctx.closePath();
+  }
+  ctx.fill();ctx.stroke();
+  ctx.restore();
+}
+function roundRect(ctx,x,y,w,h,r){
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);
+}
+
+function confetti(n){
+  for(let i=0;i<n;i++){
+    const c=document.createElement('div');c.className='confetti';
+    c.style.left=Math.random()*100+'vw';
+    c.style.background=pick(COLORS);
+    c.style.animationDuration=(1.2+Math.random()*1.3)+'s';
+    document.body.appendChild(c);setTimeout(()=>c.remove(),3000);
+  }
+}
+
+// ===== SEKMELER =====
+function setTab(t){
+  const d=t==='design';
+  document.getElementById('tabA').classList.toggle('on',d);
+  document.getElementById('tabB').classList.toggle('on',!d);
+  document.getElementById('pDesign').classList.toggle('on',d);
+  document.getElementById('pGuess').classList.toggle('on',!d);
+  if(d) drawStrip(); else drawQuiz();
+}
+
+// ============================================================
+//  TASARLA
+// ============================================================
+let coreLen=3, selIdx=0, carpetOn=false;
+let core=[
+  {shape:'circle',color:COLORS[0]},
+  {shape:'star',  color:COLORS[2]},
+  {shape:'square',color:COLORS[4]}
+];
+
+function buildLenButtons(){
+  const box=document.getElementById('lenBox');box.innerHTML='';
+  [2,3,4,5].forEach(n=>{
+    const b=document.createElement('button');
+    b.className='lenb'+(n===coreLen?' on':'');
+    b.textContent=n;
+    b.onclick=()=>setCoreLen(n);
+    box.appendChild(b);
+  });
+}
+
+function setCoreLen(n){
+  if(n>coreLen){
+    for(let i=coreLen;i<n;i++)
+      core.push({shape:pick(SHAPES),color:pick(COLORS)});
+  }else{
+    core=core.slice(0,n);
+  }
+  coreLen=n;
+  if(selIdx>=n) selIdx=n-1;
+  buildLenButtons();buildCells();drawStrip();if(carpetOn)drawCarpet();
+}
+
+function buildCells(){
+  const box=document.getElementById('cellBox');box.innerHTML='';
+  core.forEach((c,i)=>{
+    const b=document.createElement('button');
+    b.className='cell'+(i===selIdx?' sel':'');
+    const cv=document.createElement('canvas');
+    cv.width=48;cv.height=48;cv.style.width='48px';cv.style.height='48px';
+    drawShape(cv.getContext('2d'),c.shape,24,24,18,c.color);
+    b.appendChild(cv);
+    b.onclick=()=>{selIdx=i;buildCells();};
+    box.appendChild(b);
+  });
+}
+
+function buildPalette(){
+  const sb=document.getElementById('shapeBox');sb.innerHTML='';
+  SHAPES.slice(0,5).forEach(s=>{
+    const b=document.createElement('button');
+    b.className='pit'+(core[selIdx]&&core[selIdx].shape===s?' on':'');
+    b.dataset.shape=s;
+    const cv=document.createElement('canvas');
+    cv.width=44;cv.height=44;cv.style.width='100%';cv.style.height='auto';
+    drawShape(cv.getContext('2d'),s,22,22,16,'#9E9E9E');
+    b.appendChild(cv);
+    b.onclick=()=>{core[selIdx].shape=s;refreshDesign();};
+    sb.appendChild(b);
+  });
+
+  const cb=document.getElementById('colorBox');cb.innerHTML='';
+  COLORS.forEach(c=>{
+    const b=document.createElement('button');
+    b.className='col'+(core[selIdx]&&core[selIdx].color===c?' on':'');
+    b.style.background=c;
+    b.onclick=()=>{core[selIdx].color=c;refreshDesign();};
+    cb.appendChild(b);
+  });
+}
+
+function refreshDesign(){
+  buildCells();buildPalette();drawStrip();
+  if(carpetOn)drawCarpet();
+  hintD();
+}
+
+function drawStrip(){
+  const c=document.getElementById('stripC');
+  const W=Math.min(690,document.querySelector('.container').clientWidth-72);
+  const n=Math.max(8,Math.min(14,Math.floor(W/46)));
+  const cell=W/n, H=cell+14;
+  c.width=W;c.height=H;c.style.width=W+'px';
+  const ctx=c.getContext('2d');
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
+
+  for(let i=0;i<n;i++){
+    const it=core[i%coreLen];
+    const cx=cell*i+cell/2, cy=H/2;
+    // çekirdeğin ilk turunu hafif arka planla vurgula
+    if(i<coreLen){
+      ctx.fillStyle='#FDF2F6';
+      ctx.fillRect(cell*i,0,cell,H);
+    }
+    drawShape(ctx,it.shape,cx,cy,cell*.33,it.color);
+  }
+  // çekirdek çerçevesi
+  ctx.strokeStyle='#F5576C';ctx.lineWidth=2.5;ctx.setLineDash([6,4]);
+  ctx.strokeRect(1.5,1.5,cell*coreLen-3,H-3);
+  ctx.setLineDash([]);
+  ctx.fillStyle='#F5576C';ctx.font='700 11px Fredoka,Arial';ctx.textAlign='left';
+  ctx.fillText('ÇEKİRDEK',5,12);
+}
+
+function drawCarpet(){
+  const c=document.getElementById('carpetC');
+  const W=Math.min(690,document.querySelector('.container').clientWidth-72);
+  const cols=Math.max(7,Math.min(12,Math.floor(W/52)));
+  const cell=W/cols, rows=7;
+  c.width=W;c.height=cell*rows;c.style.width=W+'px';
+  const ctx=c.getContext('2d');
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);
+  for(let r=0;r<rows;r++)for(let i=0;i<cols;i++){
+    const it=core[(i+r)%coreLen];   // her satır bir kaydırılır → dokuma etkisi
+    drawShape(ctx,it.shape,cell*i+cell/2,cell*r+cell/2,cell*.34,it.color);
+  }
+}
+
+function toggleCarpet(){
+  carpetOn=!carpetOn;
+  document.getElementById('carpetBox').style.display=carpetOn?'block':'none';
+  document.getElementById('carpetBtn').textContent=carpetOn?'🧶 Halıyı Gizle':'🧶 Halı Yap';
+  if(carpetOn){drawCarpet();confetti(12);}
+}
+
+function randomCore(){
+  core=Array.from({length:coreLen},()=>({shape:pick(SHAPES),color:pick(COLORS)}));
+  refreshDesign();
+}
+function clearCore(){
+  core=Array.from({length:coreLen},()=>({shape:'circle',color:'#E0E0E0'}));
+  refreshDesign();
+}
+
+const TIPS_D=[
+  '💡 Bir örüntü, kendini tekrar eden parçalardan oluşur. Çekirdeğini değiştir, şeridin nasıl değiştiğini izle!',
+  '💡 Çekirdek 2 parçaysa örüntü daha hızlı tekrar eder, 5 parçaysa daha geç.',
+  '💡 Sadece rengi değiştirip şekli aynı bırakırsan renk örüntüsü olur.',
+  '💡 🧶 Halı Yap düğmesine bas! Her satır bir kayarak dokuma deseni oluşur.',
+  '💡 Aynı şekli farklı renklerle sırala — göz onu bir ritim gibi algılar.'
+];
+let tdi=0,tdt=0;
+function hintD(){
+  if(Date.now()-tdt<6000)return;
+  tdt=Date.now();tdi=(tdi+1)%TIPS_D.length;
+  document.getElementById('tipD').textContent=TIPS_D[tdi];
+}
+
+// ============================================================
+//  BİL BAKALIM
+// ============================================================
+let qScore=0,qOk=0,qTotal=0,qAnswered=false,qCore=[],qLen=3,qSeq=[],qAnswer=null,qMode='next';
+
+function newQuiz(){
+  qAnswered=false;
+  document.getElementById('msg').textContent='';
+  document.getElementById('msg').className='msg';
+
+  qLen=rnd(2,4);
+  // örüntü tipi: karışık | sadece renk | sadece şekil
+  const type=rnd(0,2);
+  if(type===0){
+    qCore=Array.from({length:qLen},()=>({shape:pick(SHAPES),color:pick(COLORS)}));
+  }else if(type===1){
+    const s=pick(SHAPES);
+    const cols=[];while(cols.length<qLen){const c=pick(COLORS);if(!cols.includes(c))cols.push(c);}
+    qCore=cols.map(c=>({shape:s,color:c}));
+  }else{
+    const c=pick(COLORS);
+    const shs=[];while(shs.length<qLen){const s=pick(SHAPES);if(!shs.includes(s))shs.push(s);}
+    qCore=shs.map(s=>({shape:s,color:c}));
+  }
+
+  qMode=rnd(0,1)===0?'next':'missing';
+  const total=qLen*2+rnd(1,qLen);
+  qSeq=[];
+  for(let i=0;i<total;i++) qSeq.push({...qCore[i%qLen]});
+
+  let holeIdx;
+  if(qMode==='next'){
+    holeIdx=total;                    // sonuna ekleme
+    qAnswer={...qCore[total%qLen]};
+    document.getElementById('qLabel').textContent='SIRADA HANGİSİ GELMELİ?';
+  }else{
+    holeIdx=rnd(qLen*2,total-1);      // en az 2 tam tur göründükten sonra boşluk
+    qAnswer={...qSeq[holeIdx]};
+    qSeq[holeIdx]=null;
+    document.getElementById('qLabel').textContent='BOŞLUĞA HANGİSİ GELMELİ?';
+  }
+  qSeq.holeIdx=holeIdx;
+
+  buildOptions();
+  drawQuiz();
+}
+
+function buildOptions(){
+  // 3 benzer ama yanlış seçenek
+  const opts=[{...qAnswer}];
+  let guard=0;
+  while(opts.length<4&&guard++<200){
+    let cand;
+    const r=rnd(0,2);
+    if(r===0) cand={shape:qAnswer.shape,color:pick(COLORS)};
+    else if(r===1) cand={shape:pick(SHAPES),color:qAnswer.color};
+    else cand={shape:pick(SHAPES),color:pick(COLORS)};
+    if(!opts.some(o=>o.shape===cand.shape&&o.color===cand.color)) opts.push(cand);
+  }
+  opts.sort(()=>Math.random()-.5);
+
+  const box=document.getElementById('optBox');box.innerHTML='';
+  opts.forEach(o=>{
+    const b=document.createElement('button');
+    b.className='opt';
+    const cv=document.createElement('canvas');
+    cv.width=64;cv.height=64;cv.style.width='100%';cv.style.height='auto';
+    drawShape(cv.getContext('2d'),o.shape,32,32,24,o.color);
+    b.appendChild(cv);
+    b.dataset.key=o.shape+'|'+o.color;
+    b.onclick=()=>checkQuiz(b,o);
+    box.appendChild(b);
+  });
+}
+
+function drawQuiz(){
+  const c=document.getElementById('quizC');
+  const W=Math.min(690,document.querySelector('.container').clientWidth-72);
+  const n=qSeq.length+(qMode==='next'?1:0);
+  const cell=Math.min(W/n,58), H=cell+16;
+  c.width=cell*n;c.height=H;c.style.width=(cell*n)+'px';
+  const ctx=c.getContext('2d');
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,H);
+
+  for(let i=0;i<n;i++){
+    const cx=cell*i+cell/2, cy=H/2;
+    const it=qSeq[i];
+    if(it===null||i===qSeq.length){
+      // boşluk kutusu
+      ctx.strokeStyle='#F5576C';ctx.lineWidth=2.5;ctx.setLineDash([6,4]);
+      const s=cell*.76;
+      ctx.strokeRect(cx-s/2,cy-s/2,s,s);
+      ctx.setLineDash([]);
+      ctx.fillStyle='#F5576C';ctx.font='700 '+Math.round(cell*.42)+'px Fredoka,Arial';
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('?',cx,cy+1);
+    }else{
+      drawShape(ctx,it.shape,cx,cy,cell*.32,it.color);
+    }
+  }
+}
+
+function checkQuiz(btn,choice){
+  if(qAnswered)return;qAnswered=true;qTotal++;
+  const correct=choice.shape===qAnswer.shape&&choice.color===qAnswer.color;
+
+  document.querySelectorAll('#optBox .opt').forEach(b=>b.disabled=true);
+  const msg=document.getElementById('msg');
+
+  // doğru seçeneği her durumda yeşille göster
+  const key=qAnswer.shape+'|'+qAnswer.color;
+  document.querySelectorAll('#optBox .opt').forEach(b=>{
+    if(b.dataset.key===key) b.classList.add('correct');
+  });
+
+  if(correct){
+    qOk++;qScore+=100;
+    msg.textContent='🌟 Doğru! Kuralı buldun!';msg.className='msg ok';
+    confetti(14);
+    if(qMode==='missing') qSeq[qSeq.holeIdx]=qAnswer; else qSeq.push(qAnswer);
+    qMode='done';drawQuiz();
+  }else{
+    btn.classList.add('wrong');
+    msg.textContent='💪 Örüntü '+qLen+' parçada bir tekrar ediyor.';msg.className='msg no';
+  }
+  document.getElementById('score').textContent=qScore;
+  document.getElementById('ok').textContent=qOk;
+  document.getElementById('total').textContent=qTotal;
+  hintG();
+}
+
+const TIPS_G=[
+  '💡 Önce kaç parçada bir tekrar ettiğini bul. Sonra o parçayı say, sıradakini tahmin et.',
+  '💡 Bazen sadece renk değişir, şekil hep aynı kalır. İkisine de bak!',
+  '💡 Parmağınla baştan sayarak ilerle: 1, 2, 3... sonra tekrar 1.',
+  '💡 Boşluktan önceki ve sonraki parçalara bak, ikisi arasında ne olmalı?'
+];
+let tgi=0;
+function hintG(){
+  tgi=(tgi+1)%TIPS_G.length;
+  document.getElementById('tipG').textContent=TIPS_G[tgi];
+}
+
+// ===== BAŞLAT =====
+buildLenButtons();buildCells();buildPalette();drawStrip();
+newQuiz();
+window.addEventListener('resize',()=>{drawStrip();if(carpetOn)drawCarpet();drawQuiz();});
+</script>
+</body>
+</html>
