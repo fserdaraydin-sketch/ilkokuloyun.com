@@ -185,11 +185,68 @@ function genSozluk(){
   };
 }
 
+// ==================== SES OLAYLARI VE KÖK-EK ====================
+const YUMUSAMA=[['kitap','kitabı'],['ağaç','ağacı'],['kanat','kanadı'],['ekmek','ekmeği'],
+ ['çocuk','çocuğu'],['kâğıt','kâğıdı'],['dolap','dolabı'],['sokak','sokağı'],
+ ['uç','ucu'],['yurt','yurdu'],['araç','aracı'],['bardak','bardağı']];
+const DUSME=[['burun','burnu'],['ağız','ağzı'],['şehir','şehri'],['oğul','oğlu'],
+ ['karın','karnı'],['boyun','boynu'],['gönül','gönlü'],['akıl','aklı'],['fikir','fikri']];
+const KOKEK=[
+ {kelime:'kitaplık',kok:'kitap',ek:'-lık'},{kelime:'gözlük',kok:'göz',ek:'-lük'},
+ {kelime:'balıkçı',kok:'balık',ek:'-çı'}, {kelime:'sevgi',kok:'sev',ek:'-gi'},
+ {kelime:'yazar',kok:'yaz',ek:'-ar'},     {kelime:'tuzluk',kok:'tuz',ek:'-luk'},
+ {kelime:'demirci',kok:'demir',ek:'-ci'}, {kelime:'başlangıç',kok:'başla',ek:'-ngıç'},
+ {kelime:'okul',kok:'oku',ek:'-l'},       {kelime:'susuz',kok:'su',ek:'-suz'}
+];
+function genSesOlay(){
+  const tip=rnd(0,2);
+
+  if(tip===0){
+    const yum=rnd(0,1)===0;
+    const it=pick(yum?YUMUSAMA:DUSME);
+    return{
+      text:`"${it[0]}" kelimesi "${it[1]}" hâline geldiğinde hangi ses olayı görülür?`,
+      readDisplay:`${it[0]}  →  ${it[1]}`,
+      answer:yum?'Ünsüz yumuşaması':'Ünlü düşmesi',
+      options:shuffle(['Ünsüz yumuşaması','Ünlü düşmesi']),
+      explain:yum
+        ? `${it[0]} → ${it[1]}\nSondaki sert ünsüz yumuşadı.\n\n💡 ÜNSÜZ YUMUŞAMASI: p → b, ç → c, t → d, k → ğ\nSonu bu harflerle biten kelimeye ünlüyle başlayan ek gelince yumuşar.`
+        : `${it[0]} → ${it[1]}\nİkinci hecedeki ünlü düştü.\n\n💡 ÜNLÜ DÜŞMESİ: iki heceli bazı kelimelere ünlüyle başlayan ek gelince ikinci hecedeki dar ünlü düşer.\nburun + u → burnu (u düştü)`
+    };
+  }
+
+  if(tip===1){
+    const it=pick(KOKEK);
+    const w=distractors(it.kok,()=>pick(KOKEK).kok);
+    return{
+      text:`"${it.kelime}" kelimesinin KÖKÜ hangisidir?`,
+      numberDisplay:it.kelime,
+      answer:it.kok,
+      options:shuffle([it.kok,...w]),
+      explain:`${it.kelime} = ${it.kok} + ${it.ek}\nKök: ${it.kok}\n\n💡 KÖK, bir kelimenin anlamlı en küçük parçasıdır. Daha fazla bölünemez.\nKökü bulmak için ekleri tek tek çıkar, geriye kalan anlamlı parça köktür.`
+    };
+  }
+
+  const it=pick(YUMUSAMA);
+  const harfCift={'p':'b','ç':'c','t':'d','k':'ğ'};
+  const son=it[0][it[0].length-1];
+  const dogru=son+' → '+(harfCift[son]||'?');
+  const tumu=Object.entries(harfCift).map(([a,b])=>a+' → '+b);
+  return{
+    text:`"${it[0]}" kelimesine ünlüyle başlayan bir ek geldiğinde hangi harf değişimi olur?`,
+    readDisplay:`${it[0]} + ı/i/u/ü  →  ${it[1]}`,
+    answer:dogru,
+    options:shuffle([dogru,...shuffle(tumu.filter(x=>x!==dogru)).slice(0,3)]),
+    explain:`${it[0]} → ${it[1]}  (${dogru})\n\n💡 Ünsüz yumuşamasında dört değişim vardır:\np → b   ç → c   t → d   k → ğ\n📌 Akılda tutma: "Fıstıkçı Şahap" harfleri (sert ünsüzler) yumuşar.\n📌 İstisna: "nk" ile biten kelimelerde k → g olur: renk → rengi`
+  };
+}
+
 initGame([
   {name:'Ünlü / Ünsüz',gen:genSesSayisi},
   {name:'Hece Sayısı',gen:genHeceSayisi},
   {name:'Hecelere Ayır',gen:genHeceBol},
   {name:'Alfabetik Sıra',gen:genAlfabe},
+  {name:'Ses Olayları & Kök',gen:genSesOlay},
   {name:'Sözlük Sırası',gen:genSozluk}
 ],{c1:'#0277BD',c2:'#4FC3F7',shadow:'rgba(2,119,189,.35)',boxBg:'linear-gradient(135deg,#f0f9ff 0%,#e8f5fe 100%)',boxBorder:'#b3e0f5'});
 </script>

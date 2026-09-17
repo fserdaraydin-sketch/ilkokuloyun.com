@@ -241,11 +241,38 @@ function drawPattern(key,rows,cols){
   return c;
 }
 
+// ==================== TERİM ANLAM ====================
+const TERIM_C=[
+ {c:'Öğretmenimiz tahtaya bir ÜÇGEN çizdi.',w:'üçgen',t:'Terim',a:'Matematik terimi: üç kenarlı geometrik şekil.'},
+ {c:'Maçta hakem FAUL çaldı.',w:'faul',t:'Terim',a:'Spor terimi: kurallara aykırı hareket.'},
+ {c:'Cümlenin YÜKLEMİNİ bulalım.',w:'yüklem',t:'Terim',a:'Dil bilgisi terimi: cümlede işi bildiren öge.'},
+ {c:'Bitkinin KÖKÜ toprağın altındadır.',w:'kökü',t:'Terim',a:'Fen terimi: bitkinin topraktan su alan bölümü.'},
+ {c:'Şarkının NAKARAT bölümünü hep birlikte söyledik.',w:'nakarat',t:'Terim',a:'Müzik terimi: tekrar edilen bölüm.'},
+ {c:'Bu sayının KAREKÖKÜNÜ bulunuz.',w:'karekökünü',t:'Terim',a:'Matematik terimi.'},
+ {c:'Ağacın altında gölgede oturduk.',w:'gölge',t:'Gerçek',a:'Kelime sözlükteki ilk anlamıyla kullanılmış.'},
+ {c:'Bugün hava çok sıcak.',w:'sıcak',t:'Gerçek',a:'Isı anlamında, gerçek anlamıyla kullanılmış.'},
+ {c:'Dedem bize masal anlattı.',w:'masal',t:'Gerçek',a:'Gerçek anlamıyla kullanılmış.'},
+ {c:'Babamın kalbi çok temizdir.',w:'temiz',t:'Mecaz',a:'İyi niyetli anlamında, benzetme yoluyla kullanılmış.'},
+ {c:'Bu haber içimi ısıttı.',w:'ısıttı',t:'Mecaz',a:'Mutlu etti anlamında, mecaz.'},
+ {c:'Öğretmenimiz çok tatlı bir insandır.',w:'tatlı',t:'Mecaz',a:'Sevecen anlamında, mecaz.'}
+];
+function genTerimAnlam(){
+  const it=pick(TERIM_C);
+  return{
+    text:'Aşağıdaki cümlede altı çizili kelime hangi anlamda kullanılmıştır?',
+    readDisplay:it.c.replace(new RegExp(it.w,'i'),'⟨'+it.w+'⟩'),
+    answer:it.t+' anlam',
+    options:shuffle(['Gerçek anlam','Mecaz anlam','Terim anlam']),
+    explain:`${it.a}\n\n💡 GERÇEK anlam: sözlükteki ilk, bilinen anlam\n💡 MECAZ anlam: benzetme yoluyla kazanılan yeni anlam\n💡 TERİM anlam: bir bilim, sanat ya da meslek dalına ait özel anlam`
+  };
+}
+
 initGame([
   {name:'Eş Anlamlı',gen:genEs},
   {name:'Zıt Anlamlı',gen:genZit},
   {name:'Eş Sesli',gen:genSestes},
   {name:'Gerçek / Mecaz',gen:genMecaz},
+  {name:'Terim Anlam',gen:genTerimAnlam},
   {name:'Kelime Izgarası',gen:genGrid}
 ],{c1:'#EF6C00',c2:'#FFA726',shadow:'rgba(239,108,0,.35)',boxBg:'linear-gradient(135deg,#fffaf3 0%,#fff5e8 100%)',boxBorder:'#ffd9a0'});
 </script>

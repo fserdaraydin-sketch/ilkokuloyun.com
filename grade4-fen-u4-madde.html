@@ -123,6 +123,13 @@ const KARISIM=[
  {ad:'meyve salatası',saf:false,tur:'Karışım',not:'Farklı meyvelerin karışımıdır, elle ayrılabilir.'}
 ];
 const AYIRMA=[
+ {s:'Un ve bulgur karışımı nasıl ayrılır?',c:'Eleme ile',y:['Mıknatısla','Buharlaştırarak','Süzerek'],
+  e:'Tanecik büyüklükleri farklı katı karışımlar ELEK ile ayrılır. Un elekten geçer, bulgur üstte kalır.'},
+ {s:'Çakıl ve kum karışımı nasıl ayrılır?',c:'Eleme ile',y:['Mıknatısla','Süzerek','Buharlaştırarak'],
+  e:'İkisi de katıdır ama tanecikleri farklı büyüklüktedir; elek kullanılır.'},
+ {s:'Eleme ile süzme arasındaki fark nedir?',c:'Eleme katı-katı, süzme katı-sıvı karışımlarda kullanılır',
+  y:['Aynı şeydir','Eleme sadece sıvılarda kullanılır','Süzme sadece gazlarda kullanılır'],
+  e:'ELEME: iki katıyı tanecik büyüklüğüne göre ayırır (un-bulgur).\nSÜZME: sıvı içindeki çözünmemiş katıyı ayırır (su-kum).'},
  {s:'Su ve kum karışımı nasıl ayrılır?',c:'Süzme (filtreleme) ile',y:['Mıknatısla','Buharlaştırarak','Elle ayıklayarak'],
   e:'Kum suda çözünmez, süzgeçten geçirilerek ayrılır.'},
  {s:'Tuzlu sudan tuz nasıl elde edilir?',c:'Suyu buharlaştırarak',y:['Süzerek','Mıknatısla','Elle ayıklayarak'],
@@ -149,7 +156,7 @@ function genKarisim(){
     text:it.s,
     answer:it.c,
     options:shuffle([it.c,...it.y]),
-    explain:`${it.e}\n\n💡 Ayırma yöntemleri:\n• Elle ayıklama (iri taneler)\n• Süzme (çözünmeyen katı + sıvı)\n• Mıknatısla ayırma (demir içerenler)\n• Buharlaştırma (çözünmüş katı + sıvı)`
+    explain:`${it.e}\n\n💡 Ayırma yöntemleri:\n• Elle ayıklama — iri taneli katılar (fasulye-nohut)\n• Eleme — farklı büyüklükte katılar (un-bulgur)\n• Süzme — sıvı içindeki çözünmeyen katı (su-kum)\n• Mıknatısla ayırma — demir içerenler\n• Buharlaştırma — sıvıda çözünmüş katı (tuzlu su)`
   };
 }
 

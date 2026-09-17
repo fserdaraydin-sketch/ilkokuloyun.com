@@ -150,7 +150,47 @@ function genDeney(){
   };
 }
 
+// ==================== İTME VE ÇEKME KUVVETİ ====================
+const ITME_CEKME=[
+ {o:'Kapıyı açmak için koluna bastırmak',t:'İtme'},
+ {o:'Çekmeceyi açmak',t:'Çekme'},
+ {o:'Alışveriş arabasını önümüzde sürmek',t:'İtme'},
+ {o:'Halat çekme oyunu oynamak',t:'Çekme'},
+ {o:'Salıncağı arkadan sallamak',t:'İtme'},
+ {o:'Perdeyi kendine doğru açmak',t:'Çekme'},
+ {o:'Futbol topuna vurmak',t:'İtme'},
+ {o:'Oltayla balık çekmek',t:'Çekme'},
+ {o:'Bisiklet pedalına basmak',t:'İtme'},
+ {o:'Kuyudan kova çıkarmak',t:'Çekme'},
+ {o:'Mıknatısın demir çiviyi kendine yaklaştırması',t:'Çekme'},
+ {o:'Aynı kutupların birbirinden uzaklaşması',t:'İtme'}
+];
+function genItmeCekme(){
+  const tip=rnd(0,1);
+  if(tip===0){
+    const it=pick(ITME_CEKME);
+    return{
+      text:'Aşağıdaki durumda uygulanan kuvvet hangisidir?',
+      readDisplay:it.o,
+      answer:it.t+' kuvveti',
+      options:shuffle(['İtme kuvveti','Çekme kuvveti']),
+      explain:`${it.o} → ${it.t.toUpperCase()} kuvveti\n\n💡 İTME: cismi kendimizden UZAKLAŞTIRAN kuvvet\n💡 ÇEKME: cismi kendimize YAKLAŞTIRAN kuvvet\n📌 İkisi de birer kuvvettir; cisimleri hareket ettirir, durdurur ya da şeklini değiştirir.`
+    };
+  }
+  const sorular=[
+    {s:'Kuvvet hangi araçla ölçülür?',c:'Dinamometre',y:['Termometre','Terazi','Cetvel'],
+     e:'Kuvvet dinamometre ile ölçülür. Dinamometrenin içinde bir yay bulunur.'},
+    {s:'Dinamometrenin çalışma prensibi nedir?',c:'İçindeki yayın esnemesi',y:['İçindeki suyun ısınması','Mıknatısın çekmesi','Pilin çalışması'],
+     e:'Uygulanan kuvvet arttıkça yay daha çok uzar. Bu uzama kuvvetin büyüklüğünü gösterir.'},
+    {s:'Aşağıdakilerden hangisi kuvvet DEĞİLDİR?',c:'Bir cismin rengi',y:['İtme','Çekme','Mıknatısın çekimi'],
+     e:'Renk bir özelliktir, kuvvet değildir. Kuvvet cisimleri hareket ettirebilen etkidir.'}
+  ];
+  const it=pick(sorular);
+  return{text:it.s,answer:it.c,options:shuffle([it.c,...it.y]),explain:it.e};
+}
+
 initGame([
+  {name:'İtme ve Çekme',gen:genItmeCekme},
   {name:'Kuvvetin Etkileri',gen:genEtki},
   {name:'Esnek Cisimler',gen:genEsnek},
   {name:'Mıknatıs Çeker mi',gen:genMiknatis},

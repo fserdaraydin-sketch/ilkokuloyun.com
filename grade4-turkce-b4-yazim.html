@@ -152,11 +152,75 @@ function genYazim(){
   };
 }
 
+// ==================== KISALTMALAR ====================
+const KISALTMA=[
+ {a:'Türkiye Büyük Millet Meclisi',k:'TBMM'},
+ {a:'Milli Eğitim Bakanlığı',k:'MEB'},
+ {a:'Türk Dil Kurumu',k:'TDK'},
+ {a:'Türkiye Cumhuriyeti',k:'T.C.'},
+ {a:'santimetre',k:'cm'},
+ {a:'kilogram',k:'kg'},
+ {a:'metre',k:'m'},
+ {a:'kilometre',k:'km'},
+ {a:'litre',k:'L'},
+ {a:'doktor',k:'Dr.'},
+ {a:'profesör',k:'Prof.'},
+ {a:'sayfa',k:'s.'},
+ {a:'caddesi',k:'Cad.'},
+ {a:'sokağı',k:'Sok.'},
+ {a:'numara',k:'No.'}
+];
+function genKisaltma(){
+  const tip=rnd(0,2);
+  const it=pick(KISALTMA);
+
+  if(tip===0){
+    const w=distractors(it.k,()=>pick(KISALTMA).k);
+    return{
+      text:`"${it.a}" ifadesinin kısaltması hangisidir?`,
+      numberDisplay:it.a,
+      answer:it.k,
+      options:shuffle([it.k,...w]),
+      explain:`${it.a} → ${it.k}\n\n💡 Kurum adları büyük harfle ve NOKTASIZ kısaltılır: TBMM, MEB, TDK\n💡 Ölçü birimleri küçük harfle ve noktasız yazılır: cm, kg, km\n💡 Unvanlar ve bazı sözcükler NOKTALI kısaltılır: Dr., Prof., s.`
+    };
+  }
+
+  if(tip===1){
+    const w=distractors(it.a,()=>pick(KISALTMA).a);
+    return{
+      text:`"${it.k}" kısaltması neyin yerine kullanılır?`,
+      numberDisplay:it.k,
+      answer:it.a,
+      options:shuffle([it.a,...w]),
+      explain:`${it.k} = ${it.a}`
+    };
+  }
+
+  const kurallar=[
+    {s:'Ölçü birimleri nasıl kısaltılır?',c:'Küçük harfle ve nokta konmadan',
+     y:['Büyük harfle ve noktalı','Küçük harfle ve noktalı','Büyük harfle ve noktasız'],
+     e:'cm, kg, km, m, L gibi ölçü birimlerinden sonra NOKTA KONMAZ.'},
+    {s:'Kurum adları nasıl kısaltılır?',c:'Büyük harflerle ve nokta konmadan',
+     y:['Küçük harflerle','Her harften sonra nokta koyarak','Büyük harfle ama noktalı'],
+     e:'TBMM, MEB, TDK, PTT gibi kurum kısaltmalarında nokta kullanılmaz.'},
+    {s:'Aşağıdaki kısaltmalardan hangisi YANLIŞ yazılmıştır?',c:'kg.',
+     y:['cm','TDK','Dr.'],
+     e:'Ölçü birimi kısaltmalarından sonra nokta konmaz. Doğrusu: kg'},
+    {s:'Aşağıdaki kısaltmalardan hangisi YANLIŞ yazılmıştır?',c:'T.D.K.',
+     y:['TBMM','Prof.','km'],
+     e:'Kurum kısaltmalarında araya nokta konmaz. Doğrusu: TDK'}
+  ];
+  const q=pick(kurallar);
+  return{text:q.s,answer:q.c,options:shuffle([q.c,...q.y]),
+    explain:`${q.e}\n\n💡 Kurum: TBMM (noktasız) | Ölçü: kg (noktasız) | Unvan: Dr. (noktalı)`};
+}
+
 initGame([
   {name:'Büyük Harf',gen:genBuyuk},
   {name:'de / da',gen:genDeDa},
   {name:'ki',gen:genKi},
   {name:'mi Soru Eki',gen:genMi},
+  {name:'Kısaltmalar',gen:genKisaltma},
   {name:'Yazım Yanlışı',gen:genYazim}
 ],{c1:'#5E35B1',c2:'#9575CD',shadow:'rgba(94,53,177,.35)',boxBg:'linear-gradient(135deg,#f7f4fd 0%,#f2edfb 100%)',boxBorder:'#d1c4e9'});
 </script>

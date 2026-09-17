@@ -145,11 +145,51 @@ function genYorumF(){
   };
 }
 
+// ==================== SAĞLIĞIMIZI KORUMA ====================
+const ZARARLI=[
+ {s:'Sigara dumanı vücudumuzun hangi organına en çok zarar verir?',
+  c:'Akciğerlere',y:['Kemiklere','Saçlara','Tırnaklara'],
+  e:'Sigara dumanı solunum yoluyla akciğerlere gider ve akciğerlere ciddi zarar verir.'},
+ {s:'Sigara içilen bir ortamda bulunmak zararlı mıdır?',
+  c:'Evet, dumanı solumak da zararlıdır',y:['Hayır, sadece içene zarar verir','Sadece çok içilirse','Pencere açıksa zararsızdır'],
+  e:'Sigara içilen ortamda bulunanlar da dumanı solur. Buna pasif içicilik denir ve sağlığa zararlıdır.'},
+ {s:'Sigaranın sporcular üzerindeki etkisi nedir?',
+  c:'Nefes kapasitesini düşürür, çabuk yorulurlar',y:['Daha hızlı koşarlar','Hiçbir etkisi yoktur','Kasları güçlendirir'],
+  e:'Akciğerler yeterince oksijen alamadığı için kişi çabuk yorulur ve dayanıklılığı azalır.'},
+ {s:'Alkol vücudumuzda en çok hangi organa zarar verir?',
+  c:'Karaciğere',y:['Gözlere','Kulaklara','Dişlere'],
+  e:'Alkolü vücuttan temizlemeye çalışan karaciğer zamanla zarar görür.'},
+ {s:'Alkol kullanan bir kişinin dikkatine ne olur?',
+  c:'Dikkati ve tepki hızı azalır',y:['Dikkati artar','Hiç değişmez','Daha hızlı düşünür'],
+  e:'Alkol beyni etkiler; dikkat, denge ve tepki hızı azalır. Bu yüzden alkollü araç kullanmak yasaktır.'},
+ {s:'Aşırı ve dengesiz beslenme sonucu ortaya çıkan, vücutta aşırı yağ birikmesi durumuna ne denir?',
+  c:'Obezite',y:['Anemi','Grip','Alerji'],
+  e:'Obezite, fazla ve dengesiz beslenme ile hareketsizlik sonucu oluşur. Kalp ve şeker hastalıklarına yol açabilir.'},
+ {s:'Obeziteden korunmak için ne yapmalıyız?',
+  c:'Dengeli beslenmeli ve düzenli hareket etmeliyiz',y:['Hiç yemek yememeliyiz','Sadece meyve yemeliyiz','Sürekli oturmalıyız'],
+  e:'Korunmanın yolu: dengeli beslenme + düzenli spor + yeterli uyku. Aç kalmak çözüm DEĞİLDİR, sağlığa zarar verir.'},
+ {s:'Aşağıdakilerden hangisi sağlıklı bir yaşam alışkanlığıdır?',
+  c:'Her gün düzenli hareket etmek',y:['Öğün atlamak','Uzun süre ekran karşısında kalmak','Gece geç saatlere kadar uyanık kalmak'],
+  e:'Düzenli hareket kalbi güçlendirir, kilo dengesini korur, uykuyu düzenler.'},
+ {s:'Günde kaç saat uyku çocuklar için uygundur?',
+  c:'9-11 saat',y:['3-4 saat','5-6 saat','15-16 saat'],
+  e:'Okul çağındaki çocuklar için günde 9-11 saat uyku önerilir. Uyku büyümeyi ve öğrenmeyi destekler.'},
+ {s:'Zararlı bir madde kullanmaya zorlandığımızda ne yapmalıyız?',
+  c:'Kesinlikle hayır deyip güvendiğimiz bir büyüğe anlatmalıyız',y:['Bir kez denemeliyiz','Kimseye söylememeliyiz','Arkadaşımızı kırmamak için kabul etmeliyiz'],
+  e:'Zararlı maddelere HAYIR demek bir haktır. Böyle bir durumda anne-baba ya da öğretmene mutlaka anlatılmalıdır.'}
+];
+function genZararli(){
+  const it=pick(ZARARLI);
+  return{text:it.s,answer:it.c,options:shuffle([it.c,...it.y]),
+    explain:`${it.e}\n\n💡 Sağlığımızı korumak bizim elimizde: dengeli beslenme, düzenli hareket, yeterli uyku ve zararlı maddelerden uzak durmak.`};
+}
+
 initGame([
   {name:'Besin İçerikleri',gen:genGorev},
   {name:'Hangi Besinde Var',gen:genBesin},
   {name:'Sağlıklı Beslenme',gen:genSaglik},
   {name:'Diş ve Besin Güvenliği',gen:genDis},
+  {name:'Sağlığımızı Koruma',gen:genZararli},
   {name:'Yorum Soruları',gen:genYorumF}
 ],{c1:'#2E7D32',c2:'#66BB6A',shadow:'rgba(46,125,50,.35)',boxBg:'linear-gradient(135deg,#f1f9f2 0%,#e9f6ec 100%)',boxBorder:'#b9e0bf'});
 </script>

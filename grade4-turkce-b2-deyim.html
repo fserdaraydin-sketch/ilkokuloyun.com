@@ -152,12 +152,72 @@ function genAyirt(){
   };
 }
 
+// ==================== İKİLEME VE PEKİŞTİRME ====================
+const IKILEME=[
+ {k:'yavaş yavaş',t:'Aynı kelimenin tekrarı'},{k:'koşa koşa',t:'Aynı kelimenin tekrarı'},
+ {k:'tek tek',t:'Aynı kelimenin tekrarı'},   {k:'ağır ağır',t:'Aynı kelimenin tekrarı'},
+ {k:'irili ufaklı',t:'Zıt anlamlı kelimelerle'},{k:'aşağı yukarı',t:'Zıt anlamlı kelimelerle'},
+ {k:'er geç',t:'Zıt anlamlı kelimelerle'},   {k:'ileri geri',t:'Zıt anlamlı kelimelerle'},
+ {k:'eş dost',t:'Yakın anlamlı kelimelerle'},{k:'doğru dürüst',t:'Yakın anlamlı kelimelerle'},
+ {k:'ses seda',t:'Yakın anlamlı kelimelerle'},
+ {k:'eğri büğrü',t:'Anlamsız kelimeyle'},    {k:'çoluk çocuk',t:'Anlamsız kelimeyle'},
+ {k:'yarım yamalak',t:'Anlamsız kelimeyle'}
+];
+const PEKISTIRME=[
+ ['mavi','masmavi'],['sarı','sapsarı'],['kırmızı','kıpkırmızı'],['yeşil','yemyeşil'],
+ ['siyah','simsiyah'],['beyaz','bembeyaz'],['temiz','tertemiz'],['yeni','yepyeni'],
+ ['doğru','dosdoğru'],['dolu','dopdolu'],['kuru','kupkuru'],['sıcak','sımsıcak'],
+ ['güzel','güpgüzel'],['boş','bomboş'],['dar','dapdar'],['uzun','upuzun']
+];
+function genIkileme(){
+  const tip=rnd(0,2);
+
+  if(tip===0){
+    const it=pick(PEKISTIRME);
+    const w=distractors(it[1],()=>pick(PEKISTIRME)[1]);
+    return{
+      text:`"${it[0]}" kelimesinin PEKİŞTİRİLMİŞ hâli hangisidir?`,
+      numberDisplay:it[0],
+      answer:it[1],
+      options:shuffle([it[1],...w]),
+      explain:`${it[0]} → ${it[1]}\n\n💡 PEKİŞTİRME, bir sözcüğün anlamını GÜÇLENDİRİR.\nKelimenin ilk hecesi alınır, sonuna m, p, r, s harflerinden biri eklenir ve başa getirilir:\n${it[0]} → ${it[1].slice(0,it[1].length-it[0].length)} + ${it[0]} = ${it[1]}\n📌 Pekiştirilmiş sözcükler BİTİŞİK yazılır.`
+    };
+  }
+
+  if(tip===1){
+    const it=pick(IKILEME);
+    const w=distractors(it.t,()=>pick(IKILEME).t);
+    return{
+      text:`"${it.k}" ikilemesi nasıl oluşmuştur?`,
+      numberDisplay:it.k,
+      answer:it.t,
+      options:shuffle([it.t,...w]),
+      explain:`"${it.k}" → ${it.t}\n\n💡 İKİLEMELER şu yollarla oluşur:\n• Aynı kelimenin tekrarı: yavaş yavaş\n• Zıt anlamlı kelimeler: aşağı yukarı\n• Yakın anlamlı kelimeler: eş dost\n• Anlamsız kelimeyle: eğri büğrü\n📌 İkilemeler AYRI yazılır, araya noktalama konmaz.`
+    };
+  }
+
+  const it=pick(IKILEME);
+  const pk=pick(PEKISTIRME);
+  const ikilemeMi=rnd(0,1)===0;
+  const soz=ikilemeMi?it.k:pk[1];
+  return{
+    text:`"${soz}" sözcüğü için aşağıdakilerden hangisi doğrudur?`,
+    numberDisplay:soz,
+    answer:ikilemeMi?'İkilemedir, ayrı yazılır':'Pekiştirmedir, bitişik yazılır',
+    options:shuffle(['İkilemedir, ayrı yazılır','Pekiştirmedir, bitişik yazılır']),
+    explain:ikilemeMi
+      ? `"${soz}" bir İKİLEMEDİR, iki ayrı sözcükten oluşur ve AYRI yazılır.\n\n💡 Pekiştirme tek sözcüktür ve bitişik yazılır: ${pk[1]}`
+      : `"${soz}" bir PEKİŞTİRMEDİR, tek sözcüktür ve BİTİŞİK yazılır.\n\n💡 İkileme iki sözcükten oluşur ve ayrı yazılır: ${it.k}`
+  };
+}
+
 initGame([
   {name:'Deyimin Anlamı',gen:genDeyimAnlam},
   {name:'Cümleye Deyim',gen:genDeyimCumle},
   {name:'Atasözü Anlamı',gen:genAtaAnlam},
   {name:'Atasözünü Tamamla',gen:genAtaTamamla},
-  {name:'Deyim mi Atasözü mü',gen:genAyirt}
+  {name:'Deyim mi Atasözü mü',gen:genAyirt},
+  {name:'İkileme & Pekiştirme',gen:genIkileme}
 ],{c1:'#C2185B',c2:'#F06292',shadow:'rgba(194,24,91,.35)',boxBg:'linear-gradient(135deg,#fff5f8 0%,#fff0f5 100%)',boxBorder:'#f8bbd0'});
 </script>
 </body>

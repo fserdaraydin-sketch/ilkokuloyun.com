@@ -127,6 +127,10 @@ function genKesme(){
 
 // ---- DİĞER İŞARETLER ----
 const DIGER=[
+ {c:'Bugün pazara gittim ___ elma, armut ve üzüm aldım.',i:'Noktalı virgül ( ; )',k:'Cümleler arasında anlam bağı varsa, virgülle ayrılmış bölümler arasına noktalı virgül konur.'},
+ {c:'Onu kaç kez aradım ___ ama hiç açmadı.',i:'Virgül ( , )',k:'Bağlaçtan önce virgül kullanılabilir.'},
+ {c:'Düşündüm, düşündüm ___ bir türlü hatırlayamadım.',i:'Üç nokta ( ... )',k:'Tamamlanmamış, sürüp giden düşünceleri göstermek için üç nokta kullanılır.'},
+ {c:'Çantada kalem, silgi, defter ___ vardı.',i:'Üç nokta ( ... )',k:'Sıralamanın devam ettiğini göstermek için üç nokta konur.'},
  {c:'Annem şöyle dedi ___ "Erken yat."',i:'İki nokta ( : )',k:'Bir açıklama veya alıntı yapılacaksa öncesine iki nokta konur.'},
  {c:'Çantada şunlar vardı ___ kalem, defter, silgi.',i:'İki nokta ( : )',k:'Sıralama veya açıklama yapılacaksa öncesine iki nokta konur.'},
  {c:'Öğretmen ___ Ödevinizi getirdiniz mi ___ diye sordu.',i:'Tırnak ( " " )',k:'Başkasının sözü aynen aktarılırken tırnak içine alınır.'},
@@ -140,7 +144,7 @@ function genDiger(){
     text:'Aşağıdaki cümlede boş bırakılan yere hangi noktalama işareti gelmelidir?',
     readDisplay:it.c,
     answer:it.i,
-    options:shuffle(['İki nokta ( : )','Tırnak ( " " )','Kısa çizgi ( - )','Virgül ( , )']),
+    options:shuffle([it.i,...shuffle(['İki nokta ( : )','Tırnak ( " " )','Kısa çizgi ( - )','Virgül ( , )','Üç nokta ( ... )','Noktalı virgül ( ; )'].filter(x=>x!==it.i)).slice(0,3)]),
     explain:`Doğru işaret: ${it.i}\n\n💡 ${it.k}`
   };
 }

@@ -218,8 +218,66 @@ function genYorumE(){
   return{text:it.s,answer:it.c,options:shuffle([it.c,...it.y]),explain:it.e};
 }
 
+// ==================== DEVRE SEMBOLLERİ (GÖRSEL) ====================
+const SEMBOL=[
+ {ad:'Pil',ciz:(ctx,x,y)=>{
+   ctx.beginPath();ctx.moveTo(x-14,y-16);ctx.lineTo(x-14,y+16);ctx.stroke();   // uzun
+   ctx.beginPath();ctx.moveTo(x+2,y-8);ctx.lineTo(x+2,y+8);ctx.stroke();       // kısa
+   ctx.beginPath();ctx.moveTo(x-40,y);ctx.lineTo(x-14,y);
+   ctx.moveTo(x+2,y);ctx.lineTo(x+40,y);ctx.stroke();}},
+ {ad:'Ampul',ciz:(ctx,x,y)=>{
+   ctx.beginPath();ctx.arc(x,y,16,0,Math.PI*2);ctx.stroke();
+   ctx.beginPath();ctx.moveTo(x-11,y-11);ctx.lineTo(x+11,y+11);
+   ctx.moveTo(x+11,y-11);ctx.lineTo(x-11,y+11);ctx.stroke();
+   ctx.beginPath();ctx.moveTo(x-40,y);ctx.lineTo(x-16,y);
+   ctx.moveTo(x+16,y);ctx.lineTo(x+40,y);ctx.stroke();}},
+ {ad:'Açık anahtar',ciz:(ctx,x,y)=>{
+   ctx.beginPath();ctx.moveTo(x-40,y);ctx.lineTo(x-14,y);ctx.stroke();
+   ctx.beginPath();ctx.moveTo(x-14,y);ctx.lineTo(x+10,y-18);ctx.stroke();
+   ctx.beginPath();ctx.moveTo(x+14,y);ctx.lineTo(x+40,y);ctx.stroke();
+   ctx.beginPath();ctx.arc(x-14,y,3.5,0,Math.PI*2);ctx.fill();
+   ctx.beginPath();ctx.arc(x+14,y,3.5,0,Math.PI*2);ctx.fill();}},
+ {ad:'Kapalı anahtar',ciz:(ctx,x,y)=>{
+   ctx.beginPath();ctx.moveTo(x-40,y);ctx.lineTo(x+40,y);ctx.stroke();
+   ctx.beginPath();ctx.arc(x-14,y,3.5,0,Math.PI*2);ctx.fill();
+   ctx.beginPath();ctx.arc(x+14,y,3.5,0,Math.PI*2);ctx.fill();}},
+ {ad:'Bağlantı kablosu',ciz:(ctx,x,y)=>{
+   ctx.beginPath();ctx.moveTo(x-44,y);ctx.lineTo(x+44,y);ctx.stroke();}}
+];
+function drawSembol(i){
+  const{c,ctx,W,H}=newCanvas(1,.42,300);
+  ctx.strokeStyle='#37474F';ctx.fillStyle='#37474F';
+  ctx.lineWidth=3.5;ctx.lineCap='round';
+  SEMBOL[i].ciz(ctx,W/2,H/2);
+  return c;
+}
+function genSembol(){
+  const i=rnd(0,SEMBOL.length-1);
+  const yon=rnd(0,1);
+  if(yon===0){
+    const w=distractors(SEMBOL[i].ad,()=>pick(SEMBOL).ad);
+    return{
+      text:'Aşağıdaki devre sembolü hangi devre elemanını gösterir?',
+      visual:()=>drawSembol(i),
+      answer:SEMBOL[i].ad,
+      options:shuffle([SEMBOL[i].ad,...w]),
+      explain:`Bu sembol: ${SEMBOL[i].ad}\n\n💡 Devre şemasında elemanlar resim yerine SEMBOLLE gösterilir:\n• Pil: biri uzun biri kısa iki çizgi\n• Ampul: içinde çarpı olan daire\n• Anahtar: açıksa kalkık, kapalıysa düz çizgi\n• Kablo: düz çizgi`
+    };
+  }
+  const w=distractors(String(i),()=>String(rnd(0,SEMBOL.length-1)));
+  return{
+    text:`"${SEMBOL[i].ad}" devre şemasında nasıl gösterilir?`,
+    numberDisplay:SEMBOL[i].ad,
+    answer:String(i),
+    options:shuffle([String(i),...w]),
+    optionVisuals:(k)=>drawSembol(+k),
+    explain:`${SEMBOL[i].ad} sembolü yukarıda işaretlidir.\n\n💡 Devre şeması çizmek, devreyi resim çizmekten daha hızlı ve nettir.\nBütün bilim insanları aynı sembolleri kullanır.`
+  };
+}
+
 initGame([
   {name:'Devre Elemanları',gen:genEleman},
+  {name:'Devre Sembolleri',gen:genSembol},
   {name:'Ampul Yanar mı',gen:genDevre},
   {name:'Elektrik Kaynakları',gen:genKaynakE},
   {name:'Elektrik Güvenliği',gen:genGuvenlik},

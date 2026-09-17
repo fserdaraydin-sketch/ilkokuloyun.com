@@ -165,11 +165,115 @@ function genHikaye(){
   };
 }
 
+// ==================== ŞİİR BİLGİSİ ====================
+const SIIR_TERIM=[
+ {t:'Mısra (dize)',d:'Şiirin her bir satırına verilen ad'},
+ {t:'Kıta (dörtlük)',d:'Şiirde anlamca bir bütün oluşturan dize topluluğu'},
+ {t:'Uyak (kafiye)',d:'Dize sonlarındaki ses benzerliği'},
+ {t:'Redif',d:'Dize sonlarında tekrar eden aynı ek ya da kelime'},
+ {t:'Nakarat',d:'Şiirde ya da şarkıda tekrar eden bölüm'},
+ {t:'Ana duygu',d:'Şiirin okuyanda uyandırdığı temel his'}
+];
+const SIIR_ORNEK=[
+ {metin:'Küçük bir kuş gördüm dalda\nKanatları rengârenk\nÖtüyordu sabah erken\nSesi ne kadar da denk',
+  dize:4, kita:1, konu:'Bir kuşun güzelliği'},
+ {metin:'Bahçemizde açtı güller\nKoştu oynadı çocuklar\nGüneş vurdu pencereme\nSevindi bütün insanlar',
+  dize:4, kita:1, konu:'Baharın gelişi'}
+];
+function genSiir(){
+  const tip=rnd(0,2);
+
+  if(tip===0){
+    const it=pick(SIIR_TERIM);
+    const w=distractors(it.d,()=>pick(SIIR_TERIM).d);
+    return{
+      text:`Şiirde "${it.t}" ne demektir?`,
+      numberDisplay:it.t,
+      answer:it.d,
+      options:shuffle([it.d,...w]),
+      explain:`${it.t}: ${it.d}\n\n💡 Şiir MISRALARDAN (dizelerden) oluşur.\nDört dizelik bölüme DÖRTLÜK (kıta) denir.\nDize sonlarındaki ses benzerliğine UYAK denir.`
+    };
+  }
+
+  if(tip===1){
+    const it=pick(SIIR_TERIM);
+    const w=distractors(it.t,()=>pick(SIIR_TERIM).t);
+    return{
+      text:'Aşağıda açıklaması verilen şiir terimi hangisidir?',
+      readDisplay:it.d,
+      answer:it.t,
+      options:shuffle([it.t,...w]),
+      explain:`${it.t}: ${it.d}`
+    };
+  }
+
+  const it=pick(SIIR_ORNEK);
+  const sorular=[
+    {s:'Bu şiir kaç dizeden oluşmaktadır?',c:String(it.dize),
+     o:['2','3',String(it.dize),'6'],e:`Her satır bir dizedir. Bu şiirde ${it.dize} satır var.`},
+    {s:'Bu şiir kaç dörtlükten oluşmaktadır?',c:String(it.kita),
+     o:[String(it.kita),'2','3','4'],e:`Dört dizelik bölüme dörtlük denir. Bu şiirde ${it.dize} dize var, yani ${it.kita} dörtlük.`},
+    {s:'Bu şiirin konusu nedir?',c:it.konu,
+     o:null,e:`Şiir ${it.konu.toLowerCase()} üzerine yazılmış.`}
+  ];
+  const q=pick(sorular);
+  const secenek = q.o ? [...new Set(q.o)] :
+    shuffle([it.konu,...SIIR_ORNEK.filter(x=>x!==it).map(x=>x.konu),'Bir yolculuğun anlatımı','Okulun ilk günü']).slice(0,4);
+  if(!secenek.includes(q.c)) secenek[0]=q.c;
+  return{
+    text:q.s,
+    readDisplay:it.metin,
+    answer:q.c,
+    options:shuffle(secenek),
+    explain:`${q.e}\n\n💡 Şiirde her SATIR bir dizedir. Dört dize bir DÖRTLÜK oluşturur.`
+  };
+}
+
+// ==================== İSİM (VARLIK ADI) TÜRLERİ ====================
+const ISIMLER=[
+ {k:'Ankara',ozel:true,c:'tekil'},{k:'Ayşe',ozel:true,c:'tekil'},
+ {k:'Türkiye',ozel:true,c:'tekil'},{k:'Kızılırmak',ozel:true,c:'tekil'},
+ {k:'Atatürk',ozel:true,c:'tekil'},{k:'Karadeniz',ozel:true,c:'tekil'},
+ {k:'kitap',ozel:false,c:'tekil'},{k:'kalemler',ozel:false,c:'çoğul'},
+ {k:'öğrenci',ozel:false,c:'tekil'},{k:'çocuklar',ozel:false,c:'çoğul'},
+ {k:'ağaç',ozel:false,c:'tekil'},{k:'kuşlar',ozel:false,c:'çoğul'},
+ {k:'şehir',ozel:false,c:'tekil'},{k:'evler',ozel:false,c:'çoğul'},
+ {k:'sınıf',ozel:false,c:'tekil'},{k:'defterler',ozel:false,c:'çoğul'}
+];
+function genIsim(){
+  const tip=rnd(0,1);
+  const it=pick(ISIMLER);
+
+  if(tip===0){
+    return{
+      text:`"${it.k}" özel isim midir, cins isim midir?`,
+      numberDisplay:it.k,
+      answer:it.ozel?'Özel isim':'Cins isim',
+      options:shuffle(['Özel isim','Cins isim']),
+      explain:it.ozel
+        ? `"${it.k}" ÖZEL İSİMDİR.\nTek bir varlığa verilen addır, her zaman BÜYÜK harfle başlar.\n\n💡 Kişi, ülke, şehir, nehir, dağ adları özel isimdir.\n📌 Özel isimlere gelen ekler kesme işaretiyle ayrılır: ${it.k}'ya`
+        : `"${it.k}" CİNS İSİMDİR.\nAynı türden bütün varlıkların ortak adıdır, küçük harfle başlar.\n\n💡 kitap, ağaç, çocuk, şehir... hepsi cins isimdir.`
+    };
+  }
+
+  return{
+    text:`"${it.k}" tekil isim midir, çoğul isim midir?`,
+    numberDisplay:it.k,
+    answer:it.c==='tekil'?'Tekil isim':'Çoğul isim',
+    options:shuffle(['Tekil isim','Çoğul isim']),
+    explain:it.c==='tekil'
+      ? `"${it.k}" TEKİL isimdir, tek bir varlığı anlatır.\n\n💡 Çoğul yapmak için -ler / -lar eki getirilir: ${it.k}${'aıou'.includes(it.k.slice(-1))||'aıou'.split('').some(v=>it.k.includes(v))?'lar':'ler'}`
+      : `"${it.k}" ÇOĞUL isimdir, birden çok varlığı anlatır.\nSonundaki -ler / -lar eki çoğul ekidir.\n\n💡 Çoğul eki atılınca tekil hâli kalır.`
+  };
+}
+
 initGame([
   {name:'Olumlu / Olumsuz',gen:genOlumlu},
   {name:'Kurallı / Devrik',gen:genKurali},
   {name:'5N1K',gen:gen5N1K},
   {name:'Ana Fikir',gen:genAnaFikir},
+  {name:'İsim Türleri',gen:genIsim},
+  {name:'Şiir Bilgisi',gen:genSiir},
   {name:'Hikâye Unsurları',gen:genHikaye}
 ],{c1:'#D84315',c2:'#FF8A65',shadow:'rgba(216,67,21,.35)',boxBg:'linear-gradient(135deg,#fff6f3 0%,#fff0eb 100%)',boxBorder:'#ffccbc'});
 </script>
