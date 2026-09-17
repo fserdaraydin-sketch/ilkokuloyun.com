@@ -72,10 +72,36 @@ function newQuestion(){
   if(q.readDisplay){const d=document.createElement('div');d.className='read-display';d.textContent=q.readDisplay;vis.appendChild(d);}
 
   const ob=document.getElementById('options');ob.innerHTML='';
-  q.options.forEach(o=>{
-    const b=document.createElement('button');b.className='opt';b.textContent=o;
-    b.onclick=()=>checkAnswer(b,o,q.explain);ob.appendChild(b);
-  });
+  if(q.interactive){
+    // İnteraktif soru: şık yerine kendi arayüzünü kurar
+    ob.style.display='block';
+    q.mount(ob,{
+      done:(ok,explain)=>finishInteractive(ok,explain)
+    });
+  }else{
+    ob.style.display='';
+    q.options.forEach(o=>{
+      const b=document.createElement('button');b.className='opt';b.textContent=o;
+      b.onclick=()=>checkAnswer(b,o,q.explain);ob.appendChild(b);
+    });
+  }
+}
+
+// İnteraktif sorular için sonuç bildirimi
+function finishInteractive(ok,explain){
+  if(answered)return;answered=true;totalCount++;
+  const fb=document.getElementById('feedback');
+  if(ok){
+    correctCount++;score+=100;
+    fb.textContent='🌟 Doğru! Harikasın!';fb.className='feedback ok';confetti(14);
+  }else{
+    fb.textContent='💪 Olmadı, doğrusu gösteriliyor.';fb.className='feedback no';
+  }
+  const ex=document.getElementById('explain');
+  ex.textContent='📖 Çözüm:\n'+explain;ex.className='explain show';
+  document.getElementById('score').textContent=score;
+  document.getElementById('correct').textContent=correctCount;
+  document.getElementById('total').textContent=totalCount;
 }
 
 function checkAnswer(btn,choice,explain){
