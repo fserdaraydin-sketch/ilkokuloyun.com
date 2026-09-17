@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gece ve Gündüz - İlkokulOyun.com</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script defer src="analytics.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Fredoka',Arial,sans-serif;background:linear-gradient(135deg,#0f2027 0%,#203a43 50%,#2c5364 100%);display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:12px}
+.container{background:rgba(255,255,255,.96);border-radius:28px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.25);max-width:760px;width:100%}
+.header{text-align:center;margin-bottom:14px}
+.header h1{font-size:26px;font-weight:700;background:linear-gradient(135deg,#1565C0,#FDD835);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.header p{color:#9E9E9E;font-size:14px;font-weight:500}
+
+.info{background:linear-gradient(135deg,#eef5fd 0%,#e8f1fb 100%);border:2px solid #c5ddf5;border-radius:16px;padding:12px 16px;margin-bottom:12px;font-size:13.5px;color:#1a3d66;line-height:1.55}
+
+#stage{position:relative;width:100%;height:340px;border-radius:20px;overflow:hidden;background:#060c16;border:3px solid #163050;touch-action:none}
+#fallback{position:absolute;inset:0;display:none;align-items:center;justify-content:center;text-align:center;padding:24px;color:#9fb3c8;font-size:15px;line-height:1.6}
+
+.cities{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.city{border-radius:16px;padding:12px;border:2px solid #E0E0E0;transition:all .3s ease}
+.city.gunduz{background:linear-gradient(135deg,#fffdf0,#fff8dc);border-color:#FDD835}
+.city.gece{background:linear-gradient(135deg,#eceff4,#e3e8f0);border-color:#7986CB}
+.city-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.city-ad{font-size:14px;font-weight:600;color:#37474F}
+.rozet{font-size:11px;font-weight:600;padding:3px 9px;border-radius:10px}
+.rozet.gunduz{background:#FDD835;color:#6d5200}
+.rozet.gece{background:#5C6BC0;color:#fff}
+.city-saat{font-size:30px;font-weight:700;color:#263238;text-align:center;letter-spacing:1px;line-height:1.1}
+.sky{height:42px;border-radius:10px;margin-top:8px;position:relative;overflow:hidden}
+.sky-gunes{position:absolute;width:20px;height:20px;border-radius:50%;background:#FDD835;box-shadow:0 0 14px rgba(253,216,53,.9);transition:none}
+
+.controls{margin-top:14px}
+.sl-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.sl-lab{font-size:12.5px;font-weight:600;color:#666;width:96px;flex-shrink:0}
+input[type=range]{flex:1;height:10px;border-radius:6px;background:#E3E8F0;outline:none;-webkit-appearance:none;appearance:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#1565C0,#42A5F5);cursor:pointer;border:4px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;background:#1565C0;cursor:pointer;border:4px solid #fff}
+
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.btn{padding:14px;border:none;border-radius:16px;font-family:inherit;font-weight:600;font-size:15px;cursor:pointer;transition:all .2s}
+.btn:active{transform:scale(.96)}
+.btn-a{background:linear-gradient(135deg,#1565C0,#42A5F5);color:#fff;box-shadow:0 4px 14px rgba(21,101,192,.35)}
+.btn-b{background:#F1F3F5;color:#555}
+.btn-back{width:100%;padding:13px;background:transparent;color:#999;border:2px solid #E0E0E0;border-radius:16px;font-family:inherit;font-weight:600;font-size:15px;cursor:pointer;margin-top:10px}
+.btn-back:hover{border-color:#1565C0;color:#1565C0}
+.tip{background:#fffbeb;border:2px solid #fcd34d;border-radius:14px;padding:12px 15px;margin-top:14px;font-size:13.5px;color:#78350f;line-height:1.6}
+
+@media(max-width:600px){
+.container{padding:15px}
+.header h1{font-size:21px}
+#stage{height:280px}
+.city-saat{font-size:25px}
+.sl-lab{width:74px;font-size:11.5px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🌍 Gece ve Gündüz</h1>
+    <p>Dünya döndükçe neresi aydınlanır?</p>
+  </div>
+
+  <div class="info">
+    👆 <strong>Saati kaydır</strong> ya da <strong>Oynat</strong>'a bas. Dünya döndükçe Türkiye ve New York sırayla aydınlanır. Saatlerin arasındaki farkı izle!
+  </div>
+
+  <div id="stage">
+    <div id="fallback">⏳ 3 boyutlu sahne yükleniyor...<br><span style="font-size:13px">İnternet bağlantını kontrol et ve sayfayı yenile.</span></div>
+  </div>
+
+  <div class="cities">
+    <div class="city" id="cityTR">
+      <div class="city-top">
+        <span class="city-ad">🇹🇷 Türkiye</span>
+        <span class="rozet" id="rozetTR">—</span>
+      </div>
+      <div class="city-saat" id="saatTR">--.--</div>
+      <div class="sky" id="skyTR"><div class="sky-gunes" id="gunesTR"></div></div>
+    </div>
+    <div class="city" id="cityUS">
+      <div class="city-top">
+        <span class="city-ad">🇺🇸 New York</span>
+        <span class="rozet" id="rozetUS">—</span>
+      </div>
+      <div class="city-saat" id="saatUS">--.--</div>
+      <div class="sky" id="skyUS"><div class="sky-gunes" id="gunesUS"></div></div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="sl-row">
+      <span class="sl-lab">🕐 Saat</span>
+      <input type="range" id="saat" min="0" max="1439" value="720">
+    </div>
+    <div class="sl-row">
+      <span class="sl-lab">⏩ Hız</span>
+      <input type="range" id="hiz" min="1" max="10" value="4">
+    </div>
+  </div>
+
+  <div class="btns">
+    <button class="btn btn-b" onclick="basaAl()">🔄 Başa Al</button>
+    <button class="btn btn-a" id="oynatBtn" onclick="oynatDurdur()">▶️ Oynat</button>
+  </div>
+
+  <div class="tip" id="tip">💡 Kırmızı çizgi gece ile gündüzü ayırır. Bir şehir bu çizgiyi geçtiğinde ya güneş doğar ya da batar.</div>
+
+  <button class="btn-back" onclick="location.href='eglence-index.html'">← Geri Dön</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const stage=document.getElementById('stage');
+let scene,camera,renderer,dunya,gunesMesh,terminator;
+let aci=0;            // Dünya'nın dönüş açısı (radyan)
+let oynuyor=false;
+let hiz=4;
+
+// Şehirler: enlem, boylam
+const SEHIR={
+  TR:{ad:'Türkiye', lat:39,  lon:35,   renk:0xE53935},
+  US:{ad:'New York',lat:40.7,lon:-74,  renk:0x42A5F5}
+};
+const pins={};
+
+// ===== DÜNYA DOKUSU (kaba kıtalar) =====
+const KITALAR=[
+  // Avrupa + Afrika
+  [[-10,36],[0,45],[15,46],[28,45],[36,36],[43,12],[51,12],[43,-2],[40,-16],[32,-26],[25,-34],[18,-34],[12,-18],[9,4],[-5,5],[-16,14],[-17,26],[-10,36]],
+  // Asya
+  [[28,45],[45,48],[60,52],[80,52],[100,53],[120,50],[135,45],[140,35],[122,30],[120,22],[106,10],[100,5],[92,20],[80,8],[72,20],[60,25],[50,30],[36,36],[28,45]],
+  // Kuzey Amerika
+  [[-125,50],[-110,52],[-95,50],[-80,46],[-66,46],[-72,40],[-80,32],[-90,29],[-97,26],[-105,23],[-115,32],[-124,40],[-125,50]],
+  // Orta + Güney Amerika
+  [[-90,15],[-78,8],[-60,5],[-50,-2],[-38,-6],[-40,-22],[-48,-28],[-58,-38],[-70,-45],[-72,-30],[-76,-14],[-80,-2],[-84,8],[-90,15]],
+  // Avustralya
+  [[114,-22],[130,-12],[142,-11],[150,-24],[146,-38],[136,-36],[120,-34],[114,-22]],
+  // Grönland
+  [[-50,60],[-30,70],[-20,78],[-40,82],[-58,76],[-56,66],[-50,60]]
+];
+
+function dunyaDokusu(){
+  const c=document.createElement('canvas');
+  c.width=1024;c.height=512;
+  const x=c.getContext('2d');
+  // Okyanus
+  x.fillStyle='#1B5E9E';x.fillRect(0,0,1024,512);
+  // Kutup buzulları
+  x.fillStyle='#E8F0F5';
+  x.fillRect(0,0,1024,26);x.fillRect(0,486,1024,26);
+  // Kıtalar
+  const px=(lon,lat)=>[(lon+180)/360*1024,(90-lat)/180*512];
+  x.fillStyle='#3E8B45';
+  KITALAR.forEach(k=>{
+    x.beginPath();
+    k.forEach((p,i)=>{const [a,b]=px(p[0],p[1]);i===0?x.moveTo(a,b):x.lineTo(a,b);});
+    x.closePath();x.fill();
+  });
+  const t=new THREE.CanvasTexture(c);
+  t.needsUpdate=true;
+  return t;
+}
+
+// Enlem/boylam -> 3B nokta (yarıçap r)
+function konum(lat,lon,r){
+  const phi=(90-lat)*Math.PI/180;
+  const theta=(lon+180)*Math.PI/180;
+  return new THREE.Vector3(
+    -r*Math.sin(phi)*Math.cos(theta),
+     r*Math.cos(phi),
+     r*Math.sin(phi)*Math.sin(theta)
+  );
+}
+
+function init(){
+  if(typeof THREE==='undefined'){document.getElementById('fallback').style.display='flex';return;}
+  scene=new THREE.Scene();
+  scene.background=new THREE.Color(0x060c16);
+
+  const w=stage.clientWidth,h=stage.clientHeight;
+  camera=new THREE.PerspectiveCamera(42,w/h,.1,200);
+  camera.position.set(2,6,20);
+  camera.lookAt(3,0,0);
+
+  renderer=new THREE.WebGLRenderer({antialias:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setSize(w,h);
+  stage.appendChild(renderer.domElement);
+
+  // Yıldızlar
+  const yg=new THREE.BufferGeometry();
+  const yp=[];
+  for(let i=0;i<420;i++){
+    const r=60+Math.random()*40;
+    const t1=Math.random()*Math.PI*2, t2=Math.acos(Math.random()*2-1);
+    yp.push(r*Math.sin(t2)*Math.cos(t1), r*Math.cos(t2), r*Math.sin(t2)*Math.sin(t1));
+  }
+  yg.setAttribute('position',new THREE.Float32BufferAttribute(yp,3));
+  scene.add(new THREE.Points(yg,new THREE.PointsMaterial({color:0xffffff,size:.5})));
+
+  // GÜNEŞ (solda, sabit)
+  const GX=-15;
+  gunesMesh=new THREE.Mesh(new THREE.SphereGeometry(3,28,28),
+    new THREE.MeshBasicMaterial({color:0xFFD54F}));
+  gunesMesh.position.set(GX,0,0);
+  scene.add(gunesMesh);
+  const hale=new THREE.Mesh(new THREE.SphereGeometry(4.1,24,24),
+    new THREE.MeshBasicMaterial({color:0xFFB300,transparent:true,opacity:.2}));
+  hale.position.set(GX,0,0);
+  scene.add(hale);
+
+  // Işık: Güneş'ten Dünya'ya
+  const isik=new THREE.DirectionalLight(0xffffff,1.25);
+  isik.position.set(GX,0,0);
+  scene.add(isik);
+  scene.add(new THREE.AmbientLight(0xffffff,.1));
+
+  // DÜNYA
+  dunya=new THREE.Group();
+  dunya.position.set(5,0,0);
+  scene.add(dunya);
+
+  const kure=new THREE.Mesh(
+    new THREE.SphereGeometry(4,48,48),
+    new THREE.MeshLambertMaterial({map:dunyaDokusu()})
+  );
+  dunya.add(kure);
+
+  // İşaretçiler (Dünya ile birlikte döner)
+  Object.entries(SEHIR).forEach(([k,s])=>{
+    const g=new THREE.Group();
+    const p=konum(s.lat,s.lon,4);
+    const nokta=new THREE.Mesh(new THREE.SphereGeometry(.26,16,16),
+      new THREE.MeshBasicMaterial({color:s.renk}));
+    nokta.position.copy(p);
+    // dikey iğne
+    const ucu=p.clone().multiplyScalar(1.28);
+    const cg=new THREE.BufferGeometry().setFromPoints([p,ucu]);
+    const cizgi=new THREE.Line(cg,new THREE.LineBasicMaterial({color:s.renk}));
+    const bas=new THREE.Mesh(new THREE.SphereGeometry(.34,16,16),
+      new THREE.MeshBasicMaterial({color:s.renk}));
+    bas.position.copy(ucu);
+    g.add(nokta);g.add(cizgi);g.add(bas);
+    dunya.add(g);
+    pins[k]={grup:g,yon:p.clone().normalize()};
+  });
+
+  // GECE-GÜNDÜZ ÇİZGİSİ (terminatör) — Dünya ile dönmez, sabit halka
+  const tg=new THREE.TorusGeometry(4.03,.035,8,64);
+  terminator=new THREE.Mesh(tg,new THREE.MeshBasicMaterial({color:0xE53935}));
+  terminator.position.set(5,0,0);
+  terminator.rotation.y=Math.PI/2;   // YZ düzlemi: Güneş yönüne dik
+  scene.add(terminator);
+
+  bagla();
+  guncelle();
+  animate();
+}
+
+function bagla(){
+  document.getElementById('saat').addEventListener('input',e=>{
+    if(oynuyor) oynatDurdur();
+    aci=(+e.target.value/1440)*Math.PI*2;
+    guncelle();ipucu();
+  });
+  document.getElementById('hiz').addEventListener('input',e=>{hiz=+e.target.value;});
+  window.addEventListener('resize',()=>{
+    const w=stage.clientWidth,h=stage.clientHeight;
+    camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);
+  });
+}
+
+const iki=n=>String(n).padStart(2,'0');
+
+function guncelle(){
+  // Dünya batıdan doğuya döner: doku eşlemesiyle uyumlu olması için -aci
+  dunya.rotation.y=-aci;
+
+  // Güneş yönü (Dünya'dan Güneş'e): -X
+  const gunesYon=new THREE.Vector3(-1,0,0);
+
+  Object.entries(SEHIR).forEach(([k,s])=>{
+    const yon=pins[k].yon.clone().applyAxisAngle(new THREE.Vector3(0,1,0),-aci);
+    const d=yon.dot(gunesYon);           // >0 ise Güneş'e bakıyor = gündüz
+    const gunduz=d>0;
+
+    // Yerel saat: Güneş'e tam bakınca 12.00
+    const yatay=new THREE.Vector3(yon.x,0,yon.z).normalize();
+    let a=Math.atan2(yatay.z,yatay.x) - Math.atan2(gunesYon.z,gunesYon.x);
+    while(a<0)a+=Math.PI*2;
+    while(a>=Math.PI*2)a-=Math.PI*2;
+    a=Math.PI*2-a;                       // doğudaki şehir saatte ileri olsun
+    if(a>=Math.PI*2)a-=Math.PI*2;
+    const dk=Math.round(((a/(Math.PI*2))*1440+720))%1440;
+    const saat=Math.floor(dk/60), dakika=dk%60;
+
+    document.getElementById('saat'+k).textContent=iki(saat)+'.'+iki(dakika);
+    const kart=document.getElementById('city'+k);
+    const rozet=document.getElementById('rozet'+k);
+    kart.className='city '+(gunduz?'gunduz':'gece');
+    rozet.className='rozet '+(gunduz?'gunduz':'gece');
+    rozet.textContent=gunduz?'☀️ Gündüz':'🌙 Gece';
+
+    // Mini gökyüzü: güneşin yüksekliği d (-1..1)
+    const sky=document.getElementById('sky'+k);
+    const gunes=document.getElementById('gunes'+k);
+    if(gunduz){
+      const y=Math.min(1,d);
+      const ust=`hsl(${205-y*15},${60+y*25}%,${55+y*28}%)`;
+      sky.style.background=`linear-gradient(180deg,${ust},#FFE9A8)`;
+      gunes.style.display='block';
+      const oran=Math.max(0,Math.min(1,(dk-360)/720));  // 06.00 -> 0, 18.00 -> 1
+      gunes.style.left=(oran*86+4)+'%';
+      gunes.style.bottom=(y*46+6)+'%';
+    }else{
+      sky.style.background='linear-gradient(180deg,#101a33,#25335c)';
+      gunes.style.display='none';
+    }
+  });
+}
+
+const IPUCLARI=[
+  '💡 Kırmızı çizgi gece ile gündüzü ayırır. Bir şehir bu çizgiyi geçtiğinde ya güneş doğar ya da batar.',
+  '💡 Türkiye ile New York arasında yaklaşık 7 saat fark var. Türkiye öğle yemeği yerken New York daha yeni uyanıyor.',
+  '💡 Dünya bir tam turunu 24 saatte tamamlar. Bu yüzden bir gün 24 saattir.',
+  '💡 Güneş hiç hareket etmiyor. Hareket eden Dünya!',
+  '💡 Dünya batıdan doğuya döner. Bu yüzden güneş bize doğudan doğuyor gibi görünür.',
+  '💡 Saat farkı bu yüzden var: her şehir Güneş’i farklı zamanda görür.'
+];
+let ipIdx=0,ipT=0;
+function ipucu(){
+  if(Date.now()-ipT<7000)return;
+  ipT=Date.now();ipIdx=(ipIdx+1)%IPUCLARI.length;
+  document.getElementById('tip').textContent=IPUCLARI[ipIdx];
+}
+
+function oynatDurdur(){
+  oynuyor=!oynuyor;
+  document.getElementById('oynatBtn').textContent=oynuyor?'⏸️ Durdur':'▶️ Oynat';
+  if(window.IO) IO.olay('gece-gunduz',{islem:oynuyor?'oynat':'durdur'});
+}
+function basaAl(){
+  aci=0;oynuyor=false;hiz=4;
+  document.getElementById('saat').value=720;
+  document.getElementById('hiz').value=4;
+  document.getElementById('oynatBtn').textContent='▶️ Oynat';
+  guncelle();
+}
+
+function animate(){
+  requestAnimationFrame(animate);
+  if(oynuyor){
+    aci+=0.0016*hiz;
+    if(aci>Math.PI*2)aci-=Math.PI*2;
+    document.getElementById('saat').value=Math.round((aci/(Math.PI*2))*1440);
+    guncelle();ipucu();
+  }
+  renderer.render(scene,camera);
+}
+
+if(typeof THREE!=='undefined') init();
+else window.addEventListener('load',()=>setTimeout(init,300));
+</script>
+</body>
+</html>
