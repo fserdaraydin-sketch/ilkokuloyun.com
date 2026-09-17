@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3. Ünite: Kuvvetin Etkileri - 4. Sınıf Fen Bilimleri</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade4-style.css">
+<script defer src="analytics.js"></script>
+</head>
+<body>
+<div class="container">
+  <div class="header"><h1>🧲 3. Ünite: Kuvvetin Etkileri</h1><p>Kolaydan zora 5 aşama</p></div>
+  <div class="levels" id="levels"></div>
+  <div class="stats">
+    <div class="stat"><div class="stat-l">PUAN</div><div class="stat-v" id="score">0</div></div>
+    <div class="stat"><div class="stat-l">DOĞRU</div><div class="stat-v" id="correct">0</div></div>
+    <div class="stat"><div class="stat-l">SORU</div><div class="stat-v" id="total">0</div></div>
+  </div>
+  <div class="question-box">
+    <div class="q-text" id="qText">Yükleniyor...</div>
+    <div id="qVisual"></div>
+    <div class="options" id="options"></div>
+  </div>
+  <div class="feedback" id="feedback"></div>
+  <div class="explain" id="explain"></div>
+  <button class="btn btn-next" onclick="newQuestion()">Yeni Soru ➜</button>
+  <button class="btn btn-back" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade4-engine.js"></script>
+<script>
+// A1: Kuvvetin etkileri
+const ETKI=[
+ {s:'Duran bir topa vurduğumuzda top harekete geçer.',c:'Duran cismi hareket ettirir',
+  e:'Kuvvet, duran bir cismi harekete geçirebilir.'},
+ {s:'Hareket eden bisikletin frenine basılır ve bisiklet durur.',c:'Hareketli cismi durdurur',
+  e:'Kuvvet, hareket eden bir cismi yavaşlatabilir veya durdurabilir.'},
+ {s:'Hamur elle bastırılınca yassılaşır.',c:'Cismin şeklini değiştirir',
+  e:'Kuvvet, cisimlerin şeklini değiştirebilir.'},
+ {s:'Yuvarlanan top bir duvara çarpıp yön değiştirir.',c:'Cismin hareket yönünü değiştirir',
+  e:'Kuvvet, hareket hâlindeki bir cismin yönünü değiştirebilir.'},
+ {s:'Yavaş giden arabaya gaz verilince hızlanır.',c:'Cismin hızını değiştirir',
+  e:'Kuvvet, hareketli bir cismi hızlandırabilir.'},
+ {s:'Yay çekilip bırakıldığında eski hâline döner.',c:'Cismin şeklini değiştirir',
+  e:'Yay esnek bir cisimdir; kuvvet şeklini değiştirir, kuvvet kalkınca eski hâline döner.'}
+];
+function genEtki(){
+  const it=pick(ETKI);
+  const TUM=['Duran cismi hareket ettirir','Hareketli cismi durdurur',
+             'Cismin şeklini değiştirir','Cismin hareket yönünü değiştirir',
+             'Cismin hızını değiştirir'];
+  const w=shuffle(TUM.filter(x=>x!==it.c)).slice(0,3);
+  return{
+    text:'Aşağıdaki olayda kuvvetin etkisi nedir?',
+    readDisplay:it.s,
+    answer:it.c,
+    options:shuffle([it.c,...w]),
+    explain:`${it.e}\n\n💡 Kuvvetin etkileri:\n• Duran cismi hareket ettirir\n• Hareketli cismi durdurur, yavaşlatır ya da hızlandırır\n• Hareket yönünü değiştirir\n• Cismin şeklini değiştirir`
+  };
+}
+
+// A2: Esnek / esnek olmayan
+const ESNEK=[
+ {ad:'lastik',e:true},{ad:'yay',e:true},{ad:'balon',e:true},{ad:'sünger',e:true},{ad:'plastik cetvel',e:true},
+ {ad:'cam bardak',e:false},{ad:'tahta kalem',e:false},{ad:'taş',e:false},{ad:'oyun hamuru',e:false},{ad:'kil',e:false}
+];
+function genEsnek(){
+  const it=pick(ESNEK);
+  return{
+    text:`"${it.ad}" esnek bir cisim midir?`,
+    numberDisplay:it.ad,
+    answer:it.e?'Evet, esnektir':'Hayır, esnek değildir',
+    options:shuffle(['Evet, esnektir','Hayır, esnek değildir']),
+    explain:it.e
+      ? `${it.ad} ESNEKTİR.\nKuvvet uygulanınca şekli değişir, kuvvet kalkınca ESKİ HÂLİNE DÖNER.\n\n💡 Esnek cisimler: lastik, yay, balon, sünger`
+      : `${it.ad} esnek DEĞİLDİR.\nKuvvet uygulanınca ya kırılır ya da şekli kalıcı olarak değişir, eski hâline dönmez.\n\n💡 Oyun hamuru ve kil şekil değiştirir ama geri dönmez, bu yüzden esnek sayılmaz.`
+  };
+}
+
+// A3: Mıknatıs - çeker mi çekmez mi
+const MADDE=[
+ {ad:'demir çivi',c:true},{ad:'toplu iğne',c:true},{ad:'çelik kaşık',c:true},{ad:'ataç',c:true},{ad:'nikel para',c:true},
+ {ad:'plastik kalem',c:false},{ad:'tahta cetvel',c:false},{ad:'cam bilye',c:false},{ad:'kâğıt',c:false},
+ {ad:'bakır tel',c:false},{ad:'alüminyum folyo',c:false},{ad:'silgi',c:false},{ad:'altın yüzük',c:false}
+];
+function genMiknatis(){
+  const it=pick(MADDE);
+  return{
+    text:`Mıknatıs "${it.ad}" cismini çeker mi?`,
+    numberDisplay:it.ad,
+    answer:it.c?'Evet, çeker':'Hayır, çekmez',
+    options:shuffle(['Evet, çeker','Hayır, çekmez']),
+    explain:it.c
+      ? `Mıknatıs ${it.ad} cismini ÇEKER.\n\n💡 Mıknatıs demir, nikel, kobalt ve çelik içeren maddeleri çeker.`
+      : `Mıknatıs ${it.ad} cismini ÇEKMEZ.\n\n💡 Plastik, tahta, cam, kâğıt, bakır, alüminyum ve altın mıknatıstan etkilenmez.\n📌 Dikkat: Bakır ve alüminyum metaldir ama mıknatıs onları çekmez!`
+  };
+}
+
+// A4: Mıknatısın kutupları ve kullanımı
+const MIK=[
+ {s:'Bir mıknatısın kaç kutbu vardır?',c:'2 (N ve S)',y:['1','3','4'],
+  e:'Her mıknatısın N (kuzey) ve S (güney) olmak üzere iki kutbu vardır.'},
+ {s:'İki mıknatısın AYNI kutupları birbirine yaklaştırılırsa ne olur?',c:'Birbirini iterler',y:['Birbirini çekerler','Hiçbir şey olmaz','Birleşirler'],
+  e:'Aynı kutuplar (N-N veya S-S) birbirini İTER.'},
+ {s:'İki mıknatısın ZIT kutupları birbirine yaklaştırılırsa ne olur?',c:'Birbirini çekerler',y:['Birbirini iterler','Hiçbir şey olmaz','Erirler'],
+  e:'Zıt kutuplar (N-S) birbirini ÇEKER.'},
+ {s:'Bir mıknatıs ortadan ikiye bölünürse ne olur?',c:'İki mıknatıs oluşur, her birinin yine N ve S kutbu olur',y:['Bir parça N, diğeri S olur','Mıknatıslık kaybolur','Sadece bir parça mıknatıs kalır'],
+  e:'Mıknatıs bölündüğünde her parça yeni bir mıknatıs olur ve iki kutbu da bulunur.'},
+ {s:'Pusulanın çalışma prensibi nedir?',c:'İğnesi mıknatıstır ve Dünya’nın manyetik alanıyla kuzeyi gösterir',y:['Güneş’e göre yön bulur','Pille çalışır','Rüzgârla döner'],
+  e:'Pusula iğnesi küçük bir mıknatıstır. Dünya büyük bir mıknatıs gibi davrandığı için iğne hep kuzeyi gösterir.'},
+ {s:'Aşağıdakilerden hangisinde mıknatıs kullanılmaz?',c:'Cam bardakta',y:['Buzdolabı kapağında','Hoparlörde','Pusulada'],
+  e:'Mıknatıs buzdolabı kapağında, hoparlörde, pusulada, hurda ayırma vinçlerinde kullanılır. Cam bardakta kullanılmaz.'}
+];
+function genMik(){
+  const it=pick(MIK);
+  return{
+    text:it.s,
+    answer:it.c,
+    options:shuffle([it.c,...it.y]),
+    explain:`${it.e}\n\n💡 Aynı kutuplar İTER, zıt kutuplar ÇEKER.`
+  };
+}
+
+// A5: Deney yorumu (en zor)
+function genDeney(){
+  const s=[
+ {s:'Bir öğrenci kâğıt üzerine demir tozu serpip altına mıknatıs tutuyor. Demir tozları belirli bir şekil alıyor.\n\nBu deney neyi gösterir?',
+  c:'Mıknatısın çevresinde manyetik alan olduğunu',y:['Kâğıdın mıknatıslandığını','Demir tozunun eridiğini','Havanın hareket ettiğini'],
+  e:'Demir tozları mıknatısın manyetik alan çizgileri boyunca dizilir. En yoğun olduğu yerler kutuplardır.'},
+ {s:'Bir kutuda plastik, demir, cam ve tahta parçaları karışık duruyor. Öğrenci bunları ayırmak için mıknatıs kullanıyor.\n\nMıknatıs hangilerini ayırır?',
+  c:'Sadece demir parçaları',y:['Demir ve cam parçaları','Hepsini','Hiçbirini'],
+  e:'Mıknatıs sadece demir, nikel, kobalt ve çelik içeren maddeleri çeker.'},
+ {s:'Aynı yaya önce 1 kg, sonra 3 kg ağırlık asılıyor.\n\n3 kg asıldığında yay ne olur?',
+  c:'Daha çok uzar',y:['Daha az uzar','Aynı kadar uzar','Kısalır'],
+  e:'Uygulanan kuvvet arttıkça esnek cismin şekil değişimi de artar.'},
+ {s:'İki mıknatıs masada birbirine yaklaştırılıyor ve kendiliğinden birbirinden uzaklaşıyor.\n\nBuna göre ne söylenebilir?',
+  c:'Birbirine bakan kutuplar aynı kutuplardır',y:['Birbirine bakan kutuplar zıttır','Mıknatıslar bozulmuştur','Masa kaygandır'],
+  e:'Aynı kutuplar (N-N veya S-S) birbirini iter. Bu yüzden uzaklaşırlar.'},
+ {s:'Bir cisim ne kadar zorlanırsa zorlansın şekli hiç değişmiyor, sonunda kırılıyor.\n\nBu cisim için ne söylenebilir?',
+  c:'Esnek değildir',y:['Çok esnektir','Mıknatıstır','Sıvıdır'],
+  e:'Esnek cisimler şekil değiştirip eski hâline döner. Bu cisim şekil değiştirmeden kırıldığı için esnek değildir.'}
+  ];
+  const it=pick(s);
+  return{
+    text:it.s,
+    answer:it.c,
+    options:shuffle([it.c,...it.y]),
+    explain:`${it.e}\n\n💡 Deney sorularında: ne yapıldı, ne gözlendi, bu hangi kuralla açıklanır?`
+  };
+}
+
+initGame([
+  {name:'Kuvvetin Etkileri',gen:genEtki},
+  {name:'Esnek Cisimler',gen:genEsnek},
+  {name:'Mıknatıs Çeker mi',gen:genMiknatis},
+  {name:'Mıknatısın Kutupları',gen:genMik},
+  {name:'Deney Yorumu',gen:genDeney}
+],{c1:'#C62828',c2:'#EF5350',shadow:'rgba(198,40,40,.35)',boxBg:'linear-gradient(135deg,#fff5f5 0%,#fdeeee 100%)',boxBorder:'#f5c6c6'});
+</script>
+</body>
+</html>

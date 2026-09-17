@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1. Ünite: Yer Kabuğu ve Dünyamız - 4. Sınıf Fen Bilimleri</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade4-style.css">
+<script defer src="analytics.js"></script>
+</head>
+<body>
+<div class="container">
+  <div class="header"><h1>🌍 1. Ünite: Yer Kabuğu ve Dünyamız</h1><p>Kolaydan zora 5 aşama</p></div>
+  <div class="levels" id="levels"></div>
+  <div class="stats">
+    <div class="stat"><div class="stat-l">PUAN</div><div class="stat-v" id="score">0</div></div>
+    <div class="stat"><div class="stat-l">DOĞRU</div><div class="stat-v" id="correct">0</div></div>
+    <div class="stat"><div class="stat-l">SORU</div><div class="stat-v" id="total">0</div></div>
+  </div>
+  <div class="question-box">
+    <div class="q-text" id="qText">Yükleniyor...</div>
+    <div id="qVisual"></div>
+    <div class="options" id="options"></div>
+  </div>
+  <div class="feedback" id="feedback"></div>
+  <div class="explain" id="explain"></div>
+  <button class="btn btn-next" onclick="newQuestion()">Yeni Soru ➜</button>
+  <button class="btn btn-back" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade4-engine.js"></script>
+<script>
+// A1: Dünya'nın katmanları
+const KATMAN=[
+ {ad:'Yer kabuğu',s:'En dıştaki, en ince katman. Üzerinde yaşadığımız yer.',sira:1},
+ {ad:'Manto',s:'Yer kabuğunun altındaki kalın katman. Sıcak ve akışkan magma içerir.',sira:2},
+ {ad:'Çekirdek',s:'Dünya’nın en iç ve en sıcak katmanı.',sira:3}
+];
+function genKatman(){
+  const kind=rnd(0,1);
+  if(kind===0){
+    const it=pick(KATMAN);
+    const w=distractors(it.ad,()=>pick(KATMAN).ad).concat(['Atmosfer']).slice(0,3);
+    return{
+      text:'Aşağıda özelliği verilen Dünya katmanı hangisidir?',
+      readDisplay:it.s,
+      answer:it.ad,
+      options:shuffle([it.ad,...w]),
+      explain:`${it.ad}: ${it.s}\n\n💡 Dünya dıştan içe doğru: 1) Yer kabuğu  2) Manto  3) Çekirdek`
+    };
+  }
+  const n=rnd(1,3);
+  const dogru=KATMAN.find(k=>k.sira===n).ad;
+  return{
+    text:`Dünya'nın dıştan içe doğru ${n}. katmanı hangisidir?`,
+    answer:dogru,
+    options:shuffle(['Yer kabuğu','Manto','Çekirdek','Atmosfer']),
+    explain:`Dıştan içe sıralama:\n1) Yer kabuğu (en ince)\n2) Manto (en kalın)\n3) Çekirdek (en sıcak)\n\n💡 Atmosfer bir katman değil, Dünya'yı saran hava tabakasıdır.`
+  };
+}
+
+// A2: Dönme ve dolanma
+const HAREKET=[
+ {s:'Dünya kendi ekseni etrafında bir tam dönüşünü kaç sürede tamamlar?',c:'24 saat',y:['365 gün','12 saat','30 gün'],
+  e:'Dünya kendi ekseni etrafındaki DÖNME hareketini 24 saatte (1 günde) tamamlar. Bu hareket gece ve gündüzü oluşturur.'},
+ {s:"Dünya'nın Güneş etrafındaki dolanımı kaç sürer?",c:'365 gün 6 saat',y:['24 saat','30 gün','100 gün'],
+  e:"Dünya, Güneş etrafındaki DOLANMA hareketini 365 gün 6 saatte tamamlar. Bu hareket mevsimleri oluşturur."},
+ {s:'Gece ve gündüzün oluşmasının sebebi nedir?',c:'Dünya’nın kendi ekseni etrafında dönmesi',y:['Dünya’nın Güneş etrafında dolanması','Ay’ın Dünya etrafında dönmesi','Güneş’in sönmesi'],
+  e:'Dünya dönerken bir yüzü Güneş’i görür (gündüz), diğer yüzü karanlıkta kalır (gece).'},
+ {s:'Mevsimlerin oluşmasının sebebi nedir?',c:'Dünya’nın Güneş etrafında dolanması',y:['Dünya’nın kendi ekseni etrafında dönmesi','Güneş’in hareket etmesi','Ay’ın evreleri'],
+  e:'Dünya eksen eğikliğiyle Güneş etrafında dolandığı için mevsimler oluşur.'},
+ {s:'Dünya hangi yönde döner?',c:'Batıdan doğuya',y:['Doğudan batıya','Kuzeyden güneye','Güneyden kuzeye'],
+  e:'Dünya batıdan doğuya döner. Bu yüzden Güneş bize doğudan doğuyor, batıdan batıyor gibi görünür.'},
+ {s:'Dünya dönmeyi bıraksaydı ne olurdu?',c:'Bir yüzü sürekli gündüz, diğer yüzü sürekli gece olurdu',y:['Mevsimler değişmezdi','Dünya soğurdu','Hiçbir şey değişmezdi'],
+  e:'Dönme hareketi gece-gündüzü oluşturur. Dönme dursa Güneş’e bakan yüz hep gündüz, diğer yüz hep gece kalırdı.'}
+];
+function genHareket(){
+  const it=pick(HAREKET);
+  return{
+    text:it.s,
+    answer:it.c,
+    options:shuffle([it.c,...it.y]),
+    explain:`${it.e}\n\n💡 DÖNME = kendi ekseni etrafında, 24 saat, gece-gündüz\n💡 DOLANMA = Güneş etrafında, 365 gün, mevsimler`
+  };
+}
+
+// A3: Kayaçlar
+const KAYAC=[
+ {ad:'Granit',tip:'Magmatik (katılaşım)',ozellik:'Sert, taneli yapıda. Mutfak tezgâhı ve bina cephelerinde kullanılır.'},
+ {ad:'Bazalt',tip:'Magmatik (katılaşım)',ozellik:'Koyu renkli, volkanik. Kaldırım taşı yapımında kullanılır.'},
+ {ad:'Kireç taşı',tip:'Tortul',ozellik:'Deniz canlılarının kabuklarından oluşur. İçinde fosil bulunabilir.'},
+ {ad:'Kum taşı',tip:'Tortul',ozellik:'Kum tanelerinin sıkışmasıyla oluşur.'},
+ {ad:'Mermer',tip:'Başkalaşım',ozellik:'Kireç taşının ısı ve basınçla değişmesiyle oluşur. Heykel ve zeminde kullanılır.'},
+ {ad:'Elmas',tip:'Maden',ozellik:'Doğadaki en sert madde. Takı ve kesici uçlarda kullanılır.'},
+ {ad:'Kömür',tip:'Maden',ozellik:'Bitki kalıntılarının milyonlarca yılda değişmesiyle oluşur. Yakıt olarak kullanılır.'}
+];
+function genKayac(){
+  const kind=rnd(0,1);
+  const it=pick(KAYAC);
+  if(kind===0){
+    const w=distractors(it.ad,()=>pick(KAYAC).ad);
+    return{
+      text:'Aşağıda özelliği verilen kayaç/maden hangisidir?',
+      readDisplay:it.ozellik,
+      answer:it.ad,
+      options:shuffle([it.ad,...w]),
+      explain:`${it.ad} → ${it.tip}\n${it.ozellik}\n\n💡 Kayaçlar oluşumuna göre üç gruba ayrılır:\n• Magmatik: magmanın soğuyup katılaşmasıyla\n• Tortul: tortuların üst üste birikip sıkışmasıyla\n• Başkalaşım: ısı ve basınçla değişerek`
+    };
+  }
+  return{
+    text:`"${it.ad}" hangi kayaç/maden türündendir?`,
+    numberDisplay:it.ad,
+    answer:it.tip,
+    options:shuffle(['Magmatik (katılaşım)','Tortul','Başkalaşım','Maden']),
+    explain:`${it.ad} → ${it.tip}\n${it.ozellik}`
+  };
+}
+
+// A4: Fosiller
+const FOSIL=[
+ {s:'Fosil nedir?',c:'Geçmişte yaşamış canlıların taşlaşmış kalıntıları',y:['Yeni oluşmuş kayaçlar','Yanardağ külü','Deniz kumu'],
+  e:'Fosil, çok eskiden yaşamış canlıların kalıntılarının ya da izlerinin taşlaşmış hâlidir.'},
+ {s:'Fosiller en çok hangi kayaç türünde bulunur?',c:'Tortul kayaçlarda',y:['Magmatik kayaçlarda','Başkalaşım kayaçlarında','Hiçbirinde'],
+  e:'Tortul kayaçlar tabaka tabaka birikerek oluşur ve canlı kalıntılarını arasında korur. Magmatik kayaçlar çok sıcak magmadan oluştuğu için fosil barındırmaz.'},
+ {s:'Fosiller bize ne hakkında bilgi verir?',c:'Geçmişte yaşamış canlılar ve o dönemin iklimi hakkında',y:['Gelecekteki hava durumu','Dünya’nın yaşı dışında hiçbir şey','Uzaydaki canlılar'],
+  e:'Bilim insanları fosillere bakarak hangi canlıların yaşadığını, nasıl bir ortamda yaşadıklarını öğrenir.'},
+ {s:'Bir dağın tepesinde deniz canlısı fosili bulunması ne anlama gelir?',c:'O bölge geçmişte deniz altındaydı',y:['Deniz canlısı dağa tırmanmıştır','Fosil rüzgârla taşınmıştır','Bir hata yapılmıştır'],
+  e:'Yer kabuğu hareketleriyle deniz tabanı yükselip kara hâline gelebilir. Bu yüzden dağlarda deniz canlısı fosili bulunur.'},
+ {s:'Fosiller nasıl oluşur?',c:'Canlı kalıntısının tortular altında kalıp uzun sürede taşlaşmasıyla',y:['Bir gecede aniden','Canlının dondurulmasıyla','Kayaların kırılmasıyla'],
+  e:'Ölen canlının üzeri tortularla örtülür, milyonlarca yıl boyunca basınç altında taşlaşır.'}
+];
+function genFosil(){
+  const it=pick(FOSIL);
+  return{
+    text:it.s,
+    answer:it.c,
+    options:shuffle([it.c,...it.y]),
+    explain:`${it.e}\n\n💡 Fosiller tortul kayaçlarda bulunur ve Dünya'nın geçmişine açılan bir penceredir.`
+  };
+}
+
+// A5: Karışık / yorum (en zor)
+function genYorum(){
+  const senaryolar=[
+ {s:'Bir öğrenci elindeki küreyi masa lambasının etrafında yavaşça dolaştırıyor ve aynı anda kürenin kendi etrafında da dönmesini sağlıyor.\n\nBu deney neyi göstermektedir?',
+  c:'Dünya’nın hem dönme hem dolanma hareketini',y:['Sadece gece ve gündüzü','Ay’ın evrelerini','Depremlerin oluşumunu'],
+  e:'Lamba Güneş’i, küre Dünya’yı temsil eder. Kendi etrafında dönmesi gece-gündüzü, lamba etrafında dolanması mevsimleri gösterir.'},
+ {s:'Kesilen bir kayaç tabaka tabaka görünüyor ve aralarında deniz kabuğu izleri var.\n\nBu kayaç hakkında ne söylenebilir?',
+  c:'Tortul bir kayaçtır ve fosil içermektedir',y:['Magmatik bir kayaçtır','Yeni oluşmuş bir kayaçtır','Başkalaşım kayacıdır'],
+  e:'Tabakalı yapı tortul kayacın işaretidir. İçindeki deniz kabuğu izleri fosildir.'},
+ {s:'Türkiye’de saat 12.00 iken, Dünya’nın diğer tarafındaki bir ülkede gece yarısıdır.\n\nBunun sebebi nedir?',
+  c:'Dünya kendi ekseni etrafında döndüğü için her yer aynı anda Güneş’i göremez',y:['O ülke Güneş’ten çok uzaktır','O ülkede Güneş hiç doğmaz','Dünya Güneş etrafında dolandığı için'],
+  e:'Dönme hareketi sırasında Dünya’nın sadece bir yüzü Güneş’i görür. Diğer yüz aynı anda karanlıktadır.'},
+ {s:'Bir bölgede kireç taşı, uzun süre yüksek ısı ve basınca maruz kalmıştır.\n\nBu kayaç neye dönüşür?',
+  c:'Mermere',y:['Granite','Kömüre','Kum taşına'],
+  e:'Kireç taşı (tortul), ısı ve basınç altında başkalaşıma uğrayarak MERMER olur.'}
+  ];
+  const it=pick(senaryolar);
+  return{
+    text:it.s,
+    answer:it.c,
+    options:shuffle([it.c,...it.y]),
+    explain:`${it.e}\n\n💡 Fen sorularında önce olayı anla, sonra hangi konuyla ilgili olduğunu bul.`
+  };
+}
+
+initGame([
+  {name:'Dünya’nın Katmanları',gen:genKatman},
+  {name:'Dönme ve Dolanma',gen:genHareket},
+  {name:'Kayaçlar',gen:genKayac},
+  {name:'Fosiller',gen:genFosil},
+  {name:'Yorum Soruları',gen:genYorum}
+],{c1:'#1565C0',c2:'#42A5F5',shadow:'rgba(21,101,192,.35)',boxBg:'linear-gradient(135deg,#f0f7ff 0%,#e8f3fe 100%)',boxBorder:'#bbdefb'});
+</script>
+</body>
+</html>

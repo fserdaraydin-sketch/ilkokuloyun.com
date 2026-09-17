@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>4. Ünite: Maddenin Özellikleri - 4. Sınıf Fen Bilimleri</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade4-style.css">
+<script defer src="analytics.js"></script>
+</head>
+<body>
+<div class="container">
+  <div class="header"><h1>🧪 4. Ünite: Maddenin Özellikleri</h1><p>Kolaydan zora 5 aşama</p></div>
+  <div class="levels" id="levels"></div>
+  <div class="stats">
+    <div class="stat"><div class="stat-l">PUAN</div><div class="stat-v" id="score">0</div></div>
+    <div class="stat"><div class="stat-l">DOĞRU</div><div class="stat-v" id="correct">0</div></div>
+    <div class="stat"><div class="stat-l">SORU</div><div class="stat-v" id="total">0</div></div>
+  </div>
+  <div class="question-box">
+    <div class="q-text" id="qText">Yükleniyor...</div>
+    <div id="qVisual"></div>
+    <div class="options" id="options"></div>
+  </div>
+  <div class="feedback" id="feedback"></div>
+  <div class="explain" id="explain"></div>
+  <button class="btn btn-next" onclick="newQuestion()">Yeni Soru ➜</button>
+  <button class="btn btn-back" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade4-engine.js"></script>
+<script>
+// A1: Maddenin halleri
+const HAL=[
+ {ad:'su',h:'Sıvı'},{ad:'buz',h:'Katı'},{ad:'su buharı',h:'Gaz'},{ad:'taş',h:'Katı'},
+ {ad:'süt',h:'Sıvı'},{ad:'hava',h:'Gaz'},{ad:'tahta',h:'Katı'},{ad:'zeytinyağı',h:'Sıvı'},
+ {ad:'oksijen',h:'Gaz'},{ad:'demir',h:'Katı'},{ad:'meyve suyu',h:'Sıvı'},{ad:'balon içindeki gaz',h:'Gaz'}
+];
+const HAL_OZ={
+ 'Katı':'Belirli şekli ve hacmi vardır. Konulduğu kabın şeklini almaz.',
+ 'Sıvı':'Belirli hacmi vardır ama şekli yoktur; konulduğu kabın şeklini alır.',
+ 'Gaz':'Belirli şekli ve hacmi yoktur; bulunduğu kabın her yerine yayılır.'
+};
+function genHal(){
+  const kind=rnd(0,1);
+  if(kind===0){
+    const it=pick(HAL);
+    return{
+      text:`"${it.ad}" maddesi hangi hâldedir?`,
+      numberDisplay:it.ad,
+      answer:it.h,
+      options:shuffle(['Katı','Sıvı','Gaz']),
+      explain:`${it.ad} → ${it.h}\n${HAL_OZ[it.h]}\n\n💡 Madde üç hâlde bulunur: katı, sıvı, gaz.`
+    };
+  }
+  const h=pick(['Katı','Sıvı','Gaz']);
+  return{
+    text:'Aşağıda özelliği verilen madde hâli hangisidir?',
+    readDisplay:HAL_OZ[h],
+    answer:h,
+    options:shuffle(['Katı','Sıvı','Gaz']),
+    explain:`${h}: ${HAL_OZ[h]}\n\n💡 Katı = şekli belli | Sıvı = kabın şeklini alır | Gaz = her yere yayılır`
+  };
+}
+
+// A2: Hal değişimleri
+const DEGISIM=[
+ {olay:'Buzun eriyip suya dönüşmesi',ad:'Erime',yon:'Katı → Sıvı',not:'Isı ALIR'},
+ {olay:'Suyun donup buz olması',ad:'Donma',yon:'Sıvı → Katı',not:'Isı VERİR'},
+ {olay:'Suyun kaynayıp buhara dönüşmesi',ad:'Buharlaşma',yon:'Sıvı → Gaz',not:'Isı ALIR'},
+ {olay:'Cam üzerinde su damlacıklarının oluşması',ad:'Yoğuşma',yon:'Gaz → Sıvı',not:'Isı VERİR'},
+ {olay:'Çamaşırların kuruması',ad:'Buharlaşma',yon:'Sıvı → Gaz',not:'Isı ALIR'},
+ {olay:'Dondurmanın sıcakta akması',ad:'Erime',yon:'Katı → Sıvı',not:'Isı ALIR'},
+ {olay:'Sabah çimlerde çiy tanelerinin oluşması',ad:'Yoğuşma',yon:'Gaz → Sıvı',not:'Isı VERİR'},
+ {olay:'Suyun buzlukta katılaşması',ad:'Donma',yon:'Sıvı → Katı',not:'Isı VERİR'}
+];
+function genDegisim(){
+  const it=pick(DEGISIM);
+  return{
+    text:'Aşağıdaki olay hangi hâl değişimidir?',
+    readDisplay:it.olay,
+    answer:it.ad,
+    options:shuffle(['Erime','Donma','Buharlaşma','Yoğuşma']),
+    explain:`${it.olay} → ${it.ad}\n${it.yon} (madde ısı ${it.not.includes('ALIR')?'alır':'verir'})\n\n💡 Isı ALAN değişimler: erime, buharlaşma\n💡 Isı VEREN değişimler: donma, yoğuşma`
+  };
+}
+
+// A3: Isı ve sıcaklık
+const ISI=[
+ {s:'Sıcaklık hangi araçla ölçülür?',c:'Termometre',y:['Terazi','Cetvel','Barometre'],
+  e:'Sıcaklık termometreyle ölçülür. Birimi °C (santigrat derece).'},
+ {s:'Sıcaklığın birimi nedir?',c:'°C (santigrat derece)',y:['Kilogram','Metre','Litre'],
+  e:'Sıcaklık °C ile ölçülür. Kilogram kütlenin, metre uzunluğun, litre hacmin birimidir.'},
+ {s:'Isı ile sıcaklık arasındaki fark nedir?',c:'Isı bir enerjidir, sıcaklık ise ölçülen bir değerdir',y:['Aynı şeydir','Isı termometreyle ölçülür','Sıcaklık bir enerjidir'],
+  e:'Isı bir enerji çeşididir ve sıcak cisimden soğuk cisme AKAR. Sıcaklık ise bu enerjinin ne düzeyde olduğunu gösteren ölçülebilir bir değerdir.'},
+ {s:'Sıcak çayın içine metal kaşık konduğunda kaşık ısınır. Isı nasıl hareket etmiştir?',c:'Çaydan kaşığa, yani sıcaktan soğuğa',y:['Kaşıktan çaya','Havadan kaşığa','Hiç hareket etmemiştir'],
+  e:'Isı her zaman SICAK cisimden SOĞUK cisme doğru akar.'},
+ {s:'Suyun kaynama sıcaklığı kaç derecedir?',c:'100 °C',y:['0 °C','50 °C','37 °C'],
+  e:'Deniz seviyesinde saf su 100 °C’de kaynar, 0 °C’de donar.'},
+ {s:'Suyun donma sıcaklığı kaç derecedir?',c:'0 °C',y:['100 °C','-100 °C','37 °C'],
+  e:'Saf su 0 °C’de donar (katılaşır).'}
+];
+function genIsi(){
+  const it=pick(ISI);
+  return{
+    text:it.s,
+    answer:it.c,
+    options:shuffle([it.c,...it.y]),
+    explain:`${it.e}\n\n💡 Isı = enerji (akar) | Sıcaklık = ölçülen değer (termometre, °C)`
+  };
+}
+
+// A4: Saf madde ve karışım
+const KARISIM=[
+ {ad:'şekerli su',saf:false,tur:'Karışım',not:'Su ve şekerin karışmasıyla oluşur, ayrıştırılabilir.'},
+ {ad:'saf su',saf:true,tur:'Saf madde',not:'Tek çeşit maddeden oluşur.'},
+ {ad:'ayran',saf:false,tur:'Karışım',not:'Yoğurt, su ve tuzun karışımıdır.'},
+ {ad:'hava',saf:false,tur:'Karışım',not:'Oksijen, azot ve diğer gazların karışımıdır.'},
+ {ad:'çorba',saf:false,tur:'Karışım',not:'Birden çok maddenin karışımıdır.'},
+ {ad:'demir',saf:true,tur:'Saf madde',not:'Tek çeşit maddeden oluşur.'},
+ {ad:'tuzlu su',saf:false,tur:'Karışım',not:'Tuz ve suyun karışımıdır, buharlaştırma ile ayrılabilir.'},
+ {ad:'altın külçe',saf:true,tur:'Saf madde',not:'Tek çeşit maddeden oluşur.'},
+ {ad:'meyve salatası',saf:false,tur:'Karışım',not:'Farklı meyvelerin karışımıdır, elle ayrılabilir.'}
+];
+const AYIRMA=[
+ {s:'Su ve kum karışımı nasıl ayrılır?',c:'Süzme (filtreleme) ile',y:['Mıknatısla','Buharlaştırarak','Elle ayıklayarak'],
+  e:'Kum suda çözünmez, süzgeçten geçirilerek ayrılır.'},
+ {s:'Tuzlu sudan tuz nasıl elde edilir?',c:'Suyu buharlaştırarak',y:['Süzerek','Mıknatısla','Elle ayıklayarak'],
+  e:'Su buharlaşınca geriye tuz kalır. Tuz gölleri bu yöntemle çalışır.'},
+ {s:'Demir tozu ve kum karışımı nasıl ayrılır?',c:'Mıknatısla',y:['Süzerek','Buharlaştırarak','Kaynatarak'],
+  e:'Mıknatıs demir tozunu çeker, kum geride kalır.'},
+ {s:'Fasulye ve nohut karışımı nasıl ayrılır?',c:'Elle ayıklayarak',y:['Mıknatısla','Buharlaştırarak','Süzerek'],
+  e:'Tanecikler gözle görülüp elle ayrılabilecek büyüklüktedir.'}
+];
+function genKarisim(){
+  const kind=rnd(0,1);
+  if(kind===0){
+    const it=pick(KARISIM);
+    return{
+      text:`"${it.ad}" saf madde midir, karışım mıdır?`,
+      numberDisplay:it.ad,
+      answer:it.tur,
+      options:shuffle(['Saf madde','Karışım']),
+      explain:`${it.ad} → ${it.tur}\n${it.not}\n\n💡 Saf madde tek çeşit maddeden oluşur.\n💡 Karışım birden çok maddenin bir araya gelmesidir ve ayrıştırılabilir.`
+    };
+  }
+  const it=pick(AYIRMA);
+  return{
+    text:it.s,
+    answer:it.c,
+    options:shuffle([it.c,...it.y]),
+    explain:`${it.e}\n\n💡 Ayırma yöntemleri:\n• Elle ayıklama (iri taneler)\n• Süzme (çözünmeyen katı + sıvı)\n• Mıknatısla ayırma (demir içerenler)\n• Buharlaştırma (çözünmüş katı + sıvı)`
+  };
+}
+
+// A5: Yorum (en zor)
+function genYorumM(){
+  const s=[
+ {s:'Bir bardak sıcak suyun üzeri tabakla kapatılıyor. Bir süre sonra tabağın altında su damlacıkları görülüyor.\n\nBu olay hangi hâl değişimidir?',
+  c:'Yoğuşma',y:['Erime','Donma','Buharlaşma'],
+  e:'Sudan buharlaşan su buharı, soğuk tabağa çarpınca tekrar sıvıya döner. Buna YOĞUŞMA denir.'},
+ {s:'Aynı miktarda su, biri geniş biri dar iki kaba konuyor ve güneşe bırakılıyor.\n\nHangi kaptaki su daha hızlı buharlaşır?',
+  c:'Geniş kaptaki',y:['Dar kaptaki','İkisi de aynı','Hiçbiri buharlaşmaz'],
+  e:'Yüzey alanı büyüdükçe buharlaşma hızlanır. Bu yüzden çamaşırlar asılarak (yayılarak) kurutulur.'},
+ {s:'Bir öğrenci suya tuz atıp karıştırıyor, tuz gözden kayboluyor.\n\nBu karışım nasıl ayrıştırılabilir?',
+  c:'Suyu buharlaştırarak',y:['Süzerek','Mıknatısla','Elle ayıklayarak'],
+  e:'Tuz suda çözündüğü için süzgeçten geçer. Su buharlaşınca tuz geride kalır.'},
+ {s:'Buzdolabından çıkarılan soğuk şişenin dışı terlemiştir.\n\nBu suyun kaynağı nedir?',
+  c:'Havadaki su buharının şişede yoğuşması',y:['Şişenin içindeki suyun sızması','Şişenin erimesi','Buzdolabından damlayan su'],
+  e:'Havadaki görünmez su buharı, soğuk yüzeye değince sıvıya döner (yoğuşma).'},
+ {s:'İki özdeş bardaktan birine sıcak, diğerine soğuk su konup içine şeker atılıyor.\n\nŞeker hangisinde daha hızlı çözünür?',
+  c:'Sıcak sudaki',y:['Soğuk sudaki','İkisi de aynı','Hiçbirinde çözünmez'],
+  e:'Sıcaklık arttıkça çözünme hızlanır. Bu yüzden şeker sıcak çayda daha çabuk erir.'},
+ {s:'Bir metal kaşık sıcak çorbaya konuyor, sapı da ısınıyor.\n\nBu olay ısının hangi özelliğini gösterir?',
+  c:'Isının sıcaktan soğuğa doğru yayılması',y:['Isının soğuktan sıcağa gitmesi','Kaşığın erimesi','Çorbanın soğuması'],
+  e:'Isı, sıcak çorbadan soğuk kaşığa doğru akar ve kaşık boyunca yayılır.'}
+  ];
+  const it=pick(s);
+  return{
+    text:it.s,
+    answer:it.c,
+    options:shuffle([it.c,...it.y]),
+    explain:`${it.e}`
+  };
+}
+
+initGame([
+  {name:'Maddenin Hâlleri',gen:genHal},
+  {name:'Hâl Değişimleri',gen:genDegisim},
+  {name:'Isı ve Sıcaklık',gen:genIsi},
+  {name:'Saf Madde / Karışım',gen:genKarisim},
+  {name:'Yorum Soruları',gen:genYorumM}
+],{c1:'#6A1B9A',c2:'#AB47BC',shadow:'rgba(106,27,154,.35)',boxBg:'linear-gradient(135deg,#faf5fd 0%,#f6eefa 100%)',boxBorder:'#e1bee7'});
+</script>
+</body>
+</html>

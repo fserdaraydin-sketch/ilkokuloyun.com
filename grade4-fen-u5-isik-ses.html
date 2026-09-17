@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5. Ünite: Aydınlatma ve Ses - 4. Sınıf Fen Bilimleri</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade4-style.css">
+<script defer src="analytics.js"></script>
+</head>
+<body>
+<div class="container">
+  <div class="header"><h1>💡 5. Ünite: Aydınlatma ve Ses</h1><p>Kolaydan zora 5 aşama</p></div>
+  <div class="levels" id="levels"></div>
+  <div class="stats">
+    <div class="stat"><div class="stat-l">PUAN</div><div class="stat-v" id="score">0</div></div>
+    <div class="stat"><div class="stat-l">DOĞRU</div><div class="stat-v" id="correct">0</div></div>
+    <div class="stat"><div class="stat-l">SORU</div><div class="stat-v" id="total">0</div></div>
+  </div>
+  <div class="question-box">
+    <div class="q-text" id="qText">Yükleniyor...</div>
+    <div id="qVisual"></div>
+    <div class="options" id="options"></div>
+  </div>
+  <div class="feedback" id="feedback"></div>
+  <div class="explain" id="explain"></div>
+  <button class="btn btn-next" onclick="newQuestion()">Yeni Soru ➜</button>
+  <button class="btn btn-back" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade4-engine.js"></script>
+<script>
+// A1: Işık kaynakları
+const KAYNAK=[
+ {ad:'Güneş',dogal:true},{ad:'yıldız',dogal:true},{ad:'ateş böceği',dogal:true},
+ {ad:'şimşek',dogal:true},{ad:'volkan lavı',dogal:true},
+ {ad:'ampul',dogal:false},{ad:'el feneri',dogal:false},{ad:'mum',dogal:false},
+ {ad:'sokak lambası',dogal:false},{ad:'telefon ekranı',dogal:false},{ad:'far',dogal:false}
+];
+function genKaynak(){
+  const kind=rnd(0,1);
+  if(kind===0){
+    const it=pick(KAYNAK);
+    return{
+      text:`"${it.ad}" doğal bir ışık kaynağı mıdır, yapay mı?`,
+      numberDisplay:it.ad,
+      answer:it.dogal?'Doğal ışık kaynağı':'Yapay ışık kaynağı',
+      options:shuffle(['Doğal ışık kaynağı','Yapay ışık kaynağı']),
+      explain:it.dogal
+        ? `${it.ad} DOĞAL bir ışık kaynağıdır.\n\n💡 Doğal kaynaklar kendiliğinden ışık verir: Güneş, yıldızlar, şimşek, ateş böceği.`
+        : `${it.ad} YAPAY bir ışık kaynağıdır.\n\n💡 Yapay kaynaklar insan yapımıdır: ampul, mum, el feneri, ekranlar.\n📌 Dikkat: Ay bir ışık kaynağı DEĞİLDİR, Güneş ışığını yansıtır.`
+    };
+  }
+  return{
+    text:'Aşağıdakilerden hangisi bir ışık kaynağı DEĞİLDİR?',
+    answer:'Ay',
+    options:shuffle(['Ay','Güneş','Mum','Ampul']),
+    explain:`Ay bir ışık kaynağı DEĞİLDİR.\nAy, Güneş’ten aldığı ışığı yansıtır, kendi ışığı yoktur.\n\n💡 Işık kaynağı = kendi ışığını üreten cisim.`
+  };
+}
+
+// A2: Işık ve ses kirliliği
+const KIRLILIK=[
+ {d:'Geceleri gökyüzüne doğru tutulan aşırı parlak reklam ışıkları',t:'Işık kirliliği',
+  e:'Gereksiz ve yanlış yöne çevrilmiş ışıklar gökyüzünü aydınlatır, yıldızları göremeyiz.'},
+ {d:'Gece boyunca yüksek sesle çalan müzik',t:'Ses kirliliği',
+  e:'İstenmeyen ve rahatsız edici yüksek sesler ses kirliliğidir.'},
+ {d:'İnşaat makinelerinin gürültüsü',t:'Ses kirliliği',e:'Sürekli ve yüksek gürültü işitme sağlığını bozar.'},
+ {d:'Sokak lambalarının ışığının yatak odasına dolması',t:'Işık kirliliği',e:'Gereksiz ışık uyku düzenini bozar.'},
+ {d:'Kornaların gereksiz yere çalınması',t:'Ses kirliliği',e:'Gereksiz korna trafikte ses kirliliği yaratır.'},
+ {d:'Stadyum ışıklarının bütün geceyi aydınlatması',t:'Işık kirliliği',e:'Gereksiz süre yanan güçlü ışıklar hem enerji israfı hem kirliliktir.'}
+];
+const ETKILER=[
+ {s:'Ses kirliliğinin insan sağlığına etkisi nedir?',c:'İşitme kaybı, stres ve uykusuzluk',y:['Görme bozukluğu','Diş çürümesi','Kemik erimesi'],
+  e:'Sürekli gürültü kulağa zarar verir, strese ve uyku sorunlarına yol açar.'},
+ {s:'Işık kirliliğinin etkisi nedir?',c:'Gökyüzünün görülememesi ve enerji israfı',y:['Su kirliliği','Toprak kayması','Ses artışı'],
+  e:'Aşırı ışık yıldızları görmemizi engeller, canlıların yaşam düzenini bozar, enerji israfına yol açar.'},
+ {s:'Hem ses hem ışık kirliliğinin ortak olumsuz etkisi nedir?',c:'Stres ve uyku düzeninin bozulması',y:['Göz yorgunluğu','İşitme kaybı','Diş çürüğü'],
+  e:'Hem gürültü hem gereksiz ışık insanı huzursuz eder, uykuyu böler, strese yol açar.'},
+ {s:'Ses kirliliğini azaltmak için ne yapılabilir?',c:'Gereksiz korna çalmamak, sesi kısık dinlemek',y:['Daha güçlü hoparlör almak','Pencereleri açmak','Daha çok araç kullanmak'],
+  e:'Gürültü kaynağını azaltmak, yalıtım yapmak ve sesi düşük tutmak en etkili yollardır.'},
+ {s:'Işık kirliliğini azaltmak için ne yapılabilir?',c:'Lambaları aşağı yönlendirmek ve gereksiz ışıkları kapatmak',y:['Daha parlak ampul kullanmak','Işıkları gökyüzüne çevirmek','Sürekli açık bırakmak'],
+  e:'Işığın yalnızca gereken yeri aydınlatması sağlanmalı, gereksiz ışıklar kapatılmalıdır.'}
+];
+function genKirlilik(){
+  const kind=rnd(0,1);
+  if(kind===0){
+    const it=pick(KIRLILIK);
+    return{
+      text:'Aşağıdaki durum hangi kirlilik türüne örnektir?',
+      readDisplay:it.d,
+      answer:it.t,
+      options:shuffle(['Işık kirliliği','Ses kirliliği']),
+      explain:`${it.d} → ${it.t}\n${it.e}`
+    };
+  }
+  const it=pick(ETKILER);
+  return{text:it.s,answer:it.c,options:shuffle([it.c,...it.y]),explain:it.e};
+}
+
+// A3: Sesin özellikleri
+const SES=[
+ {s:'Ses neyle oluşur?',c:'Titreşimle',y:['Işıkla','Isıyla','Renkle'],
+  e:'Cisimler titreştiğinde ses oluşur. Gitar teline dokunduğunuzda titreşimi hissedersiniz.'},
+ {s:'Ses hangi ortamda YAYILAMAZ?',c:'Boşlukta (uzayda)',y:['Havada','Suda','Katı cisimlerde'],
+  e:'Sesin yayılması için madde gerekir. Uzayda madde olmadığı için ses yayılmaz.'},
+ {s:'Ses en hızlı hangi ortamda yayılır?',c:'Katılarda',y:['Havada','Suda','Boşlukta'],
+  e:'Tanecikler birbirine ne kadar yakınsa ses o kadar hızlı yayılır: katı > sıvı > gaz.'},
+ {s:'Sesin şiddeti ne demektir?',c:'Sesin kuvvetli ya da zayıf olması',y:['Sesin ince ya da kalın olması','Sesin rengi','Sesin hızı'],
+  e:'Şiddet, sesin kuvvetiyle ilgilidir. Yüksek sesli müzik şiddetli, fısıltı zayıf bir sestir.'},
+ {s:'Sesin yüksekliği (ince-kalın olması) neye bağlıdır?',c:'Titreşim sayısına',y:['Sesin şiddetine','Işığa','Sıcaklığa'],
+  e:'Hızlı titreşim ince (tiz), yavaş titreşim kalın (pes) ses verir.'},
+ {s:'Ses kaynağından uzaklaştıkça sesin şiddeti nasıl değişir?',c:'Azalır',y:['Artar','Değişmez','Önce artar sonra azalır'],
+  e:'Ses yayıldıkça enerjisi dağılır, uzaklaştıkça daha zayıf duyulur.'},
+ {s:'Sesin bir engelden geri dönmesine ne denir?',c:'Yankı',y:['Gölge','Kırılma','Soğurma'],
+  e:'Ses sert bir yüzeye çarpıp geri döndüğünde yankı oluşur. Boş bir odada ya da vadide duyulur.'}
+];
+function genSes(){
+  const it=pick(SES);
+  return{text:it.s,answer:it.c,options:shuffle([it.c,...it.y]),
+    explain:`${it.e}\n\n💡 Ses titreşimle oluşur, madde ortamında yayılır, boşlukta yayılmaz.`};
+}
+
+// A4: Işığın özellikleri ve aydınlatma
+const ISIK=[
+ {s:'Işık nasıl yayılır?',c:'Doğrusal olarak (düz çizgiler hâlinde)',y:['Dalgalı olarak','Zikzak çizerek','Daire çizerek'],
+  e:'Işık kaynağından düz çizgiler hâlinde her yöne yayılır. Bu yüzden gölge oluşur.'},
+ {s:'Gölge nasıl oluşur?',c:'Işığın önüne saydam olmayan bir cisim girmesiyle',y:['Işığın artmasıyla','Sesin yansımasıyla','Havanın ısınmasıyla'],
+  e:'Işık doğrusal yayıldığı için önüne çıkan opak cismin arkasında karanlık bir bölge (gölge) kalır.'},
+ {s:'Cisim ışık kaynağına yaklaştırılırsa gölgesi nasıl değişir?',c:'Gölge büyür',y:['Gölge küçülür','Gölge kaybolur','Değişmez'],
+  e:'Cisim kaynağa yaklaştıkça daha çok ışığı engeller, gölge büyür.'},
+ {s:'Aşağıdakilerden hangisi saydam bir maddedir?',c:'Cam',y:['Tahta','Karton','Metal'],
+  e:'Saydam maddeler ışığın çoğunu geçirir: cam, temiz su, hava.'},
+ {s:'Yetersiz ışıkta ders çalışmak neye yol açar?',c:'Göz yorgunluğu ve görme bozukluğuna',y:['Kulak ağrısına','Diş çürüğüne','Kemik erimesine'],
+  e:'Az ışıkta göz zorlanır, uzun süre devam ederse görme sorunları oluşur.'},
+ {s:'Uygun aydınlatma nasıl olmalıdır?',c:'Gözü yormayacak, ne az ne fazla olmalı',y:['Mümkün olduğunca parlak','Mümkün olduğunca karanlık','Renkli ve yanıp sönen'],
+  e:'Aşırı parlak ışık da az ışık da gözü yorar. Dengeli aydınlatma gereklidir.'}
+];
+function genIsik(){
+  const it=pick(ISIK);
+  return{text:it.s,answer:it.c,options:shuffle([it.c,...it.y]),explain:it.e};
+}
+
+// A5: Deney/yorum (en zor)
+function genYorumS(){
+  const s=[
+ {s:'Bir öğrenci saat çalar saati cam fanusun içine koyup fanustaki havayı boşaltıyor. Saatin sesi giderek azalıyor ve sonunda hiç duyulmuyor.\n\nBu deney neyi kanıtlar?',
+  c:'Sesin yayılması için madde ortamı gerektiğini',y:['Sesin ışıktan hızlı olduğunu','Camın sesi emdiğini','Saatin bozulduğunu'],
+  e:'Hava boşaldıkça sesi taşıyacak madde kalmaz. Bu yüzden uzayda (boşlukta) ses duyulmaz.'},
+ {s:'Bir öğrenci el feneriyle duvara doğru tuttuğu topun gölgesini inceliyor. Topu duvardan uzaklaştırıp fenere yaklaştırıyor.\n\nGölge nasıl değişir?',
+  c:'Büyür',y:['Küçülür','Kaybolur','Değişmez'],
+  e:'Cisim ışık kaynağına yaklaştıkça ışığın daha büyük kısmını engeller, gölge büyür.'},
+ {s:'Yağmurlu havada önce şimşeği görüp bir süre sonra gök gürültüsünü duyarız.\n\nBunun sebebi nedir?',
+  c:'Işığın sesten çok daha hızlı yayılması',y:['Sesin ışıktan hızlı olması','Şimşeğin önce oluşması','Kulağın yavaş çalışması'],
+  e:'Işık ve ses aynı anda oluşur ama ışık çok daha hızlı yayıldığı için önce şimşeği görürüz.'},
+ {s:'Boş bir odada konuşurken sesimiz yankılanıyor, ama oda eşyayla dolduğunda yankı kayboluyor.\n\nBunun sebebi nedir?',
+  c:'Eşyaların sesi soğurması (emmesi)',y:['Odanın küçülmesi','Sesin hızlanması','Havanın azalması'],
+  e:'Sert ve boş yüzeyler sesi yansıtır (yankı). Halı, perde ve mobilya sesi emer, yankı azalır.'},
+ {s:'Bir öğrenci gece lambasını yatağının hemen yanında açık bırakıyor ve sabah yorgun uyanıyor.\n\nBu durumun sebebi ne olabilir?',
+  c:'Işık kirliliğinin uyku düzenini bozması',y:['Ses kirliliği','Hava kirliliği','Lambanın bozuk olması'],
+  e:'Gereksiz ışık, uyku hormonunun salgılanmasını engeller ve dinlenmeyi bozar.'}
+  ];
+  const it=pick(s);
+  return{text:it.s,answer:it.c,options:shuffle([it.c,...it.y]),explain:it.e};
+}
+
+initGame([
+  {name:'Işık Kaynakları',gen:genKaynak},
+  {name:'Işık ve Ses Kirliliği',gen:genKirlilik},
+  {name:'Sesin Özellikleri',gen:genSes},
+  {name:'Işık ve Aydınlatma',gen:genIsik},
+  {name:'Deney Yorumu',gen:genYorumS}
+],{c1:'#F9A825',c2:'#FDD835',shadow:'rgba(249,168,37,.35)',boxBg:'linear-gradient(135deg,#fffdf2 0%,#fffae6 100%)',boxBorder:'#ffe082'});
+</script>
+</body>
+</html>

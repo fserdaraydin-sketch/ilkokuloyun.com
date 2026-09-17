@@ -74,9 +74,9 @@
     // çakıştığı için İngilizce testi tam ad eşleşmesiyle yapılır.)
     if (/ayna|oruntu|eglence/.test(f)) return 'eğlence';
     if (/motor|line|wave|shape|letter|cizgi/.test(f)) return 'motor beceri';
+    if (/science|fen-u\d|^fen$|hayat/.test(f)) return 'fen';
     if (/math|sayilar|toplama|carpma|carpim|kesirler|geometri|olcme|^mat$/.test(f)) return 'matematik';
     if (/turkce|turkish|kelime|deyim|noktalama|yazim|hece|cumle|^trk$/.test(f)) return 'türkçe';
-    if (/science|^fen$|hayat/.test(f)) return 'fen';
     if (/english|^ing$/.test(f)) return 'i̇ngilizce';
     return 'diğer';
   }

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>6. Ünite: İnsan ve Çevre - 4. Sınıf Fen Bilimleri</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade4-style.css">
+<script defer src="analytics.js"></script>
+</head>
+<body>
+<div class="container">
+  <div class="header"><h1>♻️ 6. Ünite: İnsan ve Çevre</h1><p>Kolaydan zora 5 aşama</p></div>
+  <div class="levels" id="levels"></div>
+  <div class="stats">
+    <div class="stat"><div class="stat-l">PUAN</div><div class="stat-v" id="score">0</div></div>
+    <div class="stat"><div class="stat-l">DOĞRU</div><div class="stat-v" id="correct">0</div></div>
+    <div class="stat"><div class="stat-l">SORU</div><div class="stat-v" id="total">0</div></div>
+  </div>
+  <div class="question-box">
+    <div class="q-text" id="qText">Yükleniyor...</div>
+    <div id="qVisual"></div>
+    <div class="options" id="options"></div>
+  </div>
+  <div class="feedback" id="feedback"></div>
+  <div class="explain" id="explain"></div>
+  <button class="btn btn-next" onclick="newQuestion()">Yeni Soru ➜</button>
+  <button class="btn btn-back" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade4-engine.js"></script>
+<script>
+// A1: Hangi kutuya atılır
+const ATIK=[
+ {ad:'gazete',kutu:'Kâğıt'},{ad:'karton kutu',kutu:'Kâğıt'},{ad:'defter',kutu:'Kâğıt'},
+ {ad:'cam şişe',kutu:'Cam'},{ad:'kavanoz',kutu:'Cam'},{ad:'kırık bardak',kutu:'Cam'},
+ {ad:'plastik şişe',kutu:'Plastik'},{ad:'yoğurt kabı',kutu:'Plastik'},{ad:'poşet',kutu:'Plastik'},
+ {ad:'teneke kutu',kutu:'Metal'},{ad:'konserve kutusu',kutu:'Metal'},{ad:'alüminyum kapak',kutu:'Metal'},
+ {ad:'meyve kabuğu',kutu:'Organik'},{ad:'yemek artığı',kutu:'Organik'},{ad:'çay posası',kutu:'Organik'}
+];
+function genAtik(){
+  const it=pick(ATIK);
+  return{
+    text:`"${it.ad}" hangi geri dönüşüm kutusuna atılmalıdır?`,
+    numberDisplay:it.ad,
+    answer:it.kutu,
+    options:shuffle(shuffle(['Kâğıt','Cam','Plastik','Metal','Organik'].filter(x=>x!==it.kutu)).slice(0,3).concat([it.kutu])),
+    explain:`${it.ad} → ${it.kutu} kutusu\n\n💡 Geri dönüşüm kutuları renklerle ayrılır:\n📘 Mavi: kâğıt  🟢 Yeşil: cam\n🟡 Sarı: plastik  ⚫ Gri: metal  🟤 Kahverengi: organik`
+  };
+}
+
+// A2: Geri dönüşüm bilgisi
+const DONUSUM=[
+ {s:'Geri dönüşüm ne demektir?',c:'Atıkların yeniden işlenip kullanılabilir hâle getirilmesi',y:['Atıkların yakılması','Atıkların gömülmesi','Atıkların denize atılması'],
+  e:'Geri dönüşüm, atıkların hammadde olarak yeniden kullanılmasıdır.'},
+ {s:'1 ton kâğıdın geri dönüşümü kaç ağacı kurtarır?',c:'Yaklaşık 17 ağaç',y:['1 ağaç','100 ağaç','Hiç ağaç kurtarmaz'],
+  e:'Kâğıt geri dönüşümü ormanların korunmasını sağlar.'},
+ {s:'Cam kaç kez geri dönüştürülebilir?',c:'Özelliğini kaybetmeden sonsuz kez',y:['Sadece 1 kez','En fazla 3 kez','Hiç dönüştürülemez'],
+  e:'Cam, özelliğini kaybetmeden defalarca geri dönüştürülebilen bir malzemedir.'},
+ {s:'Atık pil normal çöpe atılırsa ne olur?',c:'Toprağa ve suya zehirli maddeler karışır',y:['Hiçbir şey olmaz','Toprağı besler','Çöpü hafifletir'],
+  e:'Piller ağır metal içerir. Özel atık pil kutularına atılmalıdır.'},
+ {s:'Kullanılmış kızartma yağı lavaboya dökülürse ne olur?',c:'Su kaynakları kirlenir',y:['Borular temizlenir','Hiçbir şey olmaz','Su arıtılır'],
+  e:'1 litre atık yağ binlerce litre suyu kirletir. Atık yağ toplama noktalarına verilmelidir.'},
+ {s:'Aşağıdakilerden hangisi geri dönüştürülemez?',c:'Kullanılmış peçete',y:['Cam şişe','Gazete','Teneke kutu'],
+  e:'Kirlenmiş kâğıt ürünleri (peçete, yağlı kâğıt) geri dönüştürülemez, organik atığa gider.'}
+];
+function genDonusum(){
+  const it=pick(DONUSUM);
+  return{text:it.s,answer:it.c,options:shuffle([it.c,...it.y]),
+    explain:`${it.e}\n\n💡 Önce AZALT, sonra YENİDEN KULLAN, en son GERİ DÖNÜŞTÜR.`};
+}
+
+// A3: Kaynakları koruma
+const KORUMA=[
+ {s:'Diş fırçalarken musluğu açık bırakmak neye yol açar?',c:'Su israfına',y:['Su tasarrufuna','Dişlerin daha temiz olmasına','Hiçbir şeye'],
+  e:'Musluk açık bırakılırsa dakikada litrelerce su boşa akar.'},
+ {s:'Odadan çıkarken ışığı kapatmak neyi sağlar?',c:'Enerji tasarrufu',y:['Ampulün bozulmasını','Daha çok elektrik harcamayı','Odanın ısınmasını'],
+  e:'Gereksiz yanan lambalar hem enerji hem para israfıdır.'},
+ {s:'Alışverişe giderken bez torba götürmek neden önemlidir?',c:'Plastik poşet kullanımını azaltır',y:['Daha çok şey alabilmek için','Torba daha ucuz olduğu için','Hiçbir faydası yok'],
+  e:'Plastik poşet doğada yüzlerce yıl yok olmaz. Bez torba defalarca kullanılabilir.'},
+ {s:'Ağaç dikmenin çevreye faydası nedir?',c:'Havayı temizler, erozyonu önler',y:['Su tüketimini artırır','Havayı kirletir','Toprağı zayıflatır'],
+  e:'Ağaçlar karbondioksiti alıp oksijen verir, toprağı kökleriyle tutar.'},
+ {s:'Aşağıdakilerden hangisi doğal kaynakların korunmasına örnektir?',c:'Kullanılmayan elektronik cihazları fişten çekmek',y:['Musluğu açık bırakmak','Çöpleri doğaya atmak','Işıkları sürekli açık tutmak'],
+  e:'Fişte kalan cihazlar bekleme modunda bile elektrik harcar.'},
+ {s:'Doğaya atılan bir plastik şişe kaç yılda yok olur?',c:'Yaklaşık 400-1000 yıl',y:['1 hafta','1 yıl','10 yıl'],
+  e:'Plastik doğada çok uzun süre kalır. Bu yüzden geri dönüşüm çok önemlidir.'}
+];
+function genKoruma(){
+  const it=pick(KORUMA);
+  return{text:it.s,answer:it.c,options:shuffle([it.c,...it.y]),explain:it.e};
+}
+
+// A4: Çevre kirliliği türleri
+const KIRLI=[
+ {d:'Fabrika bacalarından çıkan dumanlar',t:'Hava kirliliği',e:'Bacalardan çıkan gazlar havayı kirletir, solunum hastalıklarına yol açar.'},
+ {d:'Fabrika atıklarının dereye boşaltılması',t:'Su kirliliği',e:'Kimyasal atıklar su canlılarını öldürür, içme suyunu kirletir.'},
+ {d:'Tarlaya aşırı ilaç ve gübre atılması',t:'Toprak kirliliği',e:'Kimyasallar toprakta birikir, verimi düşürür ve bitkilere geçer.'},
+ {d:'Egzoz gazları',t:'Hava kirliliği',e:'Araç egzozları havaya zararlı gazlar salar.'},
+ {d:'Denize dökülen petrol',t:'Su kirliliği',e:'Petrol su yüzeyini kaplar, oksijen geçişini engeller, canlıları öldürür.'},
+ {d:'Çöplerin gelişigüzel araziye dökülmesi',t:'Toprak kirliliği',e:'Çöpler toprağa zararlı maddeler sızdırır.'}
+];
+function genKirli(){
+  const it=pick(KIRLI);
+  return{
+    text:'Aşağıdaki durum hangi kirlilik türüne örnektir?',
+    readDisplay:it.d,
+    answer:it.t,
+    options:shuffle(['Hava kirliliği','Su kirliliği','Toprak kirliliği']),
+    explain:`${it.d} → ${it.t}\n${it.e}\n\n💡 Her kirlilik türü sonunda birbirini etkiler: kirli hava yağmurla toprağa, toprak da suya karışır.`
+  };
+}
+
+// A5: Yorum (en zor)
+function genYorumC(){
+  const s=[
+ {s:'Bir sınıf, kullandıkları kâğıtları biriktirip geri dönüşüme veriyor. Bir yılda 1 ton kâğıt topluyorlar.\n\nBu davranışın en önemli sonucu nedir?',
+  c:'Yaklaşık 17 ağacın kesilmekten kurtulması',y:['Sınıfın daha temiz olması','Kâğıt fiyatlarının düşmesi','Okulun büyümesi'],
+  e:'1 ton kâğıt geri dönüşümü ortalama 17 ağacı, binlerce litre suyu ve ciddi miktarda enerjiyi korur.'},
+ {s:'Bir derenin yanına fabrika kuruluyor. Bir süre sonra deredeki balıklar ölmeye başlıyor ve çevredeki tarlalarda verim düşüyor.\n\nBu durumun en olası sebebi nedir?',
+  c:'Fabrika atıklarının suya karışması',y:['Havaların soğuması','Balıkların göç etmesi','Derenin hızlanması'],
+  e:'Arıtılmadan bırakılan atıklar önce suyu, sulama yoluyla sonra toprağı kirletir. Kirlilik zincirleme yayılır.'},
+ {s:'Bir ailede herkes ayrı ayrı araba kullanmak yerine toplu taşımayı tercih ediyor.\n\nBu davranış hangi kirliliği azaltır?',
+  c:'Hava kirliliğini',y:['Toprak kirliliğini','Su kirliliğini','Işık kirliliğini'],
+  e:'Daha az araç, daha az egzoz gazı demektir. Bu da hava kirliliğini azaltır.'},
+ {s:'Bir öğrenci evdeki atıkları kâğıt, cam, plastik ve organik olarak ayırıyor.\n\nBu davranışa ne ad verilir?',
+  c:'Atıkları kaynağında ayırma',y:['Atıkları yakma','Atıkları gömme','Çöp toplama'],
+  e:'Atıkların üretildiği yerde türlerine göre ayrılmasına kaynağında ayırma denir. Geri dönüşümün ilk ve en önemli adımıdır.'},
+ {s:'Bir bölgede ağaçlar kesildikten sonra şiddetli yağmurlarda toprak kaymaları başlıyor.\n\nBunun sebebi nedir?',
+  c:'Ağaç kökleri toprağı tutmadığı için erozyon oluşması',y:['Yağmurun artması','Toprağın ısınması','Havanın kirlenmesi'],
+  e:'Ağaç kökleri toprağı bir ağ gibi tutar. Ağaçlar kesilince yağmur toprağı sürükler (erozyon).'}
+  ];
+  const it=pick(s);
+  return{text:it.s,answer:it.c,options:shuffle([it.c,...it.y]),explain:it.e};
+}
+
+initGame([
+  {name:'Hangi Kutuya',gen:genAtik},
+  {name:'Geri Dönüşüm',gen:genDonusum},
+  {name:'Kaynakları Koru',gen:genKoruma},
+  {name:'Çevre Kirliliği',gen:genKirli},
+  {name:'Yorum Soruları',gen:genYorumC}
+],{c1:'#00695C',c2:'#4DB6AC',shadow:'rgba(0,105,92,.35)',boxBg:'linear-gradient(135deg,#f0faf8 0%,#e8f6f3 100%)',boxBorder:'#a7ddd5'});
+</script>
+</body>
+</html>

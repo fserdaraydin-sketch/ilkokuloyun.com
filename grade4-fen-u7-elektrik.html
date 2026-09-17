@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>7. Ünite: Basit Elektrik Devreleri - 4. Sınıf Fen Bilimleri</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade4-style.css">
+<script defer src="analytics.js"></script>
+</head>
+<body>
+<div class="container">
+  <div class="header"><h1>🔌 7. Ünite: Basit Elektrik Devreleri</h1><p>Kolaydan zora 5 aşama</p></div>
+  <div class="levels" id="levels"></div>
+  <div class="stats">
+    <div class="stat"><div class="stat-l">PUAN</div><div class="stat-v" id="score">0</div></div>
+    <div class="stat"><div class="stat-l">DOĞRU</div><div class="stat-v" id="correct">0</div></div>
+    <div class="stat"><div class="stat-l">SORU</div><div class="stat-v" id="total">0</div></div>
+  </div>
+  <div class="question-box">
+    <div class="q-text" id="qText">Yükleniyor...</div>
+    <div id="qVisual"></div>
+    <div class="options" id="options"></div>
+  </div>
+  <div class="feedback" id="feedback"></div>
+  <div class="explain" id="explain"></div>
+  <button class="btn btn-next" onclick="newQuestion()">Yeni Soru ➜</button>
+  <button class="btn btn-back" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade4-engine.js"></script>
+<script>
+// A1: Devre elemanları ve görevleri
+const ELEMAN=[
+ {ad:'Pil',gorev:'Devreye elektrik enerjisi sağlar (elektrik kaynağı).'},
+ {ad:'Ampul',gorev:'Elektrik enerjisini ışık enerjisine dönüştürür.'},
+ {ad:'Anahtar',gorev:'Devreyi açıp kapatmaya yarar, elektrik akışını kontrol eder.'},
+ {ad:'Bağlantı kabloları',gorev:'Elektriğin devre elemanları arasında iletilmesini sağlar.'},
+ {ad:'Duy',gorev:'Ampulün devreye takılmasını sağlar.'},
+ {ad:'Pil yatağı',gorev:'Pilin devreye yerleştirilmesini sağlar.'}
+];
+function genEleman(){
+  const kind=rnd(0,1);
+  const it=pick(ELEMAN);
+  if(kind===0){
+    const w=distractors(it.gorev,()=>pick(ELEMAN).gorev);
+    return{
+      text:`Basit elektrik devresinde "${it.ad}" ne işe yarar?`,
+      numberDisplay:it.ad,
+      answer:it.gorev,
+      options:shuffle([it.gorev,...w]),
+      explain:`${it.ad}: ${it.gorev}\n\n💡 Basit bir devrede pil, ampul, anahtar ve kablo bulunur.`
+    };
+  }
+  const w=distractors(it.ad,()=>pick(ELEMAN).ad);
+  return{
+    text:'Aşağıda görevi verilen devre elemanı hangisidir?',
+    readDisplay:it.gorev,
+    answer:it.ad,
+    options:shuffle([it.ad,...w]),
+    explain:`${it.ad}: ${it.gorev}`
+  };
+}
+
+// A2: Devre çalışır mı (GÖRSEL)
+function genDevre(){
+  const durumlar=[
+   {anahtar:true, pil:true, kablo:true, ampul:true, c:'Ampul yanar', e:'Devre tamamdır: pil var, anahtar kapalı, kablolar bağlı, ampul sağlam.'},
+   {anahtar:false,pil:true, kablo:true, ampul:true, c:'Ampul yanmaz',e:'Anahtar AÇIK olduğu için devre tamamlanmaz, elektrik akamaz.'},
+   {anahtar:true, pil:false,kablo:true, ampul:true, c:'Ampul yanmaz',e:'Pil yoksa devreye elektrik enerjisi sağlanamaz.'},
+   {anahtar:true, pil:true, kablo:false,ampul:true, c:'Ampul yanmaz',e:'Kablolardan biri kopuk olduğu için devre tamamlanmaz.'},
+   {anahtar:true, pil:true, kablo:true, ampul:false,c:'Ampul yanmaz',e:'Ampulün içindeki tel (filaman) kopuksa ışık vermez.'}
+  ];
+  const it=pick(durumlar);
+  return{
+    text:'Aşağıdaki devrede ampul yanar mı?',
+    visual:()=>drawDevre(it),
+    answer:it.c,
+    options:shuffle(['Ampul yanar','Ampul yanmaz']),
+    explain:`${it.c}.\n${it.e}\n\n💡 Ampulün yanması için devre KAPALI (tamamlanmış) olmalı: pil + sağlam kablo + kapalı anahtar + sağlam ampul.`
+  };
+}
+
+function drawDevre(d){
+  const{c,ctx,W,H}=newCanvas(1,.58,400);
+  const L=40,R=W-40,T=40,B=H-40;
+  ctx.lineWidth=4;ctx.lineCap='round';
+
+  // Kablolar
+  ctx.strokeStyle=d.kablo?'#37474F':'#B0BEC5';
+  ctx.beginPath();
+  ctx.moveTo(L,B);ctx.lineTo(L,T);              // sol dikey
+  ctx.moveTo(L,T);ctx.lineTo(W/2-34,T);         // üst sol
+  ctx.moveTo(W/2+34,T);ctx.lineTo(R,T);         // üst sağ
+  ctx.moveTo(R,T);ctx.lineTo(R,B);              // sağ dikey
+  ctx.stroke();
+  // Alt kablo: kopuksa boşluk bırak
+  ctx.beginPath();
+  if(d.kablo){ ctx.moveTo(L,B);ctx.lineTo(R,B); }
+  else{ ctx.moveTo(L,B);ctx.lineTo(W*0.42,B); ctx.moveTo(W*0.58,B);ctx.lineTo(R,B); }
+  ctx.stroke();
+  if(!d.kablo){
+    ctx.fillStyle='#E53935';ctx.font='700 13px Fredoka,Arial';ctx.textAlign='center';
+    ctx.fillText('KOPUK',W/2,B-12);
+  }
+
+  // PİL (sol alt bölge, sol dikey kablo üzerinde)
+  const py=(T+B)/2;
+  if(d.pil){
+    ctx.strokeStyle='#37474F';ctx.lineWidth=4;
+    ctx.beginPath();ctx.moveTo(L-14,py-13);ctx.lineTo(L+14,py-13);ctx.stroke(); // uzun çizgi
+    ctx.beginPath();ctx.moveTo(L-8,py+2);ctx.lineTo(L+8,py+2);ctx.stroke();     // kısa çizgi
+    ctx.fillStyle='#37474F';ctx.font='700 12px Fredoka,Arial';ctx.textAlign='center';
+    ctx.fillText('PİL',L,py+26);
+  }else{
+    ctx.fillStyle='#E53935';ctx.font='700 12px Fredoka,Arial';ctx.textAlign='center';
+    ctx.fillText('PİL YOK',L+6,py+4);
+  }
+
+  // AMPUL (üst orta)
+  const ax=W/2, ay=T;
+  const yanar = d.anahtar&&d.pil&&d.kablo&&d.ampul;
+  if(yanar){
+    ctx.fillStyle='rgba(255,213,79,.45)';
+    ctx.beginPath();ctx.arc(ax,ay,32,0,Math.PI*2);ctx.fill();
+  }
+  ctx.fillStyle=yanar?'#FFD54F':'#ECEFF1';
+  ctx.strokeStyle='#546E7A';ctx.lineWidth=3;
+  ctx.beginPath();ctx.arc(ax,ay,20,0,Math.PI*2);ctx.fill();ctx.stroke();
+  // filaman
+  ctx.strokeStyle=d.ampul?(yanar?'#E65100':'#90A4AE'):'#E53935';
+  ctx.lineWidth=2.5;
+  ctx.beginPath();
+  if(d.ampul){ ctx.moveTo(ax-9,ay+4);ctx.lineTo(ax-3,ay-6);ctx.lineTo(ax+3,ay+4);ctx.lineTo(ax+9,ay-6); }
+  else{ ctx.moveTo(ax-9,ay+4);ctx.lineTo(ax-4,ay-4); ctx.moveTo(ax+4,ay-4);ctx.lineTo(ax+9,ay+4); }
+  ctx.stroke();
+  if(!d.ampul){
+    ctx.fillStyle='#E53935';ctx.font='700 11px Fredoka,Arial';ctx.textAlign='center';
+    ctx.fillText('FİLAMAN KOPUK',ax,ay+40);
+  }
+
+  // ANAHTAR (sağ dikey kablo üzerinde)
+  ctx.strokeStyle='#37474F';ctx.lineWidth=4;
+  ctx.beginPath();
+  if(d.anahtar){ ctx.moveTo(R,py-16);ctx.lineTo(R,py+16); }
+  else{ ctx.moveTo(R,py-16);ctx.lineTo(R+22,py+10); }
+  ctx.stroke();
+  ctx.fillStyle='#37474F';ctx.beginPath();ctx.arc(R,py-16,4,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(R,py+16,4,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=d.anahtar?'#2E7D32':'#E53935';
+  ctx.font='700 11px Fredoka,Arial';ctx.textAlign='right';
+  ctx.fillText(d.anahtar?'KAPALI':'AÇIK',R-10,py+4);
+  return c;
+}
+
+// A3: Elektrik kaynakları
+const KAYNAKLAR=[
+ {ad:'TV kumandası',k:'Pil'},{ad:'duvar saati',k:'Pil'},{ad:'el feneri',k:'Pil'},
+ {ad:'oyuncak araba',k:'Pil'},{ad:'cep telefonu',k:'Pil'},
+ {ad:'buzdolabı',k:'Şehir elektriği'},{ad:'çamaşır makinesi',k:'Şehir elektriği'},
+ {ad:'televizyon',k:'Şehir elektriği'},{ad:'elektrikli fırın',k:'Şehir elektriği'},
+ {ad:'tavan lambası',k:'Şehir elektriği'}
+];
+function genKaynakE(){
+  const it=pick(KAYNAKLAR);
+  return{
+    text:`"${it.ad}" hangi elektrik kaynağını kullanır?`,
+    numberDisplay:it.ad,
+    answer:it.k,
+    options:shuffle(['Pil','Şehir elektriği']),
+    explain:`${it.ad} → ${it.k}\n\n💡 Küçük ve taşınabilir araçlar genelde PİL ile çalışır.\n💡 Çok enerji gerektiren büyük ev aletleri ŞEHİR ELEKTRİĞİ kullanır.`
+  };
+}
+
+// A4: Elektrik güvenliği
+const GUVENLIK=[
+ {s:'Islak elle elektrik düğmesine dokunmak neden tehlikelidir?',c:'Su elektriği ilettiği için çarpılma riski vardır',y:['Düğme bozulur','Işık az yanar','Hiçbir tehlikesi yok'],
+  e:'Su elektriği iyi iletir. Islak elle dokunmak elektrik çarpmasına yol açabilir.'},
+ {s:'Prize metal cisim sokmak neden tehlikelidir?',c:'Metal elektriği iletir, çarpılmaya yol açar',y:['Priz kirlenir','Elektrik kesilir','Hiçbir tehlikesi yok'],
+  e:'Metaller elektriği çok iyi iletir. Prize metal sokmak ölümcül olabilir.'},
+ {s:'Bir prize çok sayıda cihaz takmak neye yol açar?',c:'Aşırı yüklenme ve yangın riskine',y:['Daha çok elektrik üretmeye','Cihazların hızlanmasına','Tasarrufa'],
+  e:'Aşırı yüklenen priz ısınır ve yangına neden olabilir.'},
+ {s:'Fişi prizden çıkarırken nereden tutmalıyız?',c:'Fişin plastik gövdesinden',y:['Kablodan çekerek','Metal uçlarından','Islak elle'],
+  e:'Kablodan çekmek kabloyu yıpratır ve içindeki teli açığa çıkarabilir.'},
+ {s:'Yalıtkan madde ne demektir?',c:'Elektriği iletmeyen madde',y:['Elektriği ileten madde','Elektrik üreten madde','Elektriği depolayan madde'],
+  e:'Plastik, cam, lastik, tahta yalıtkandır. Kablonun dışındaki plastik bu yüzden vardır.'},
+ {s:'Aşağıdakilerden hangisi elektriği İLETİR?',c:'Bakır tel',y:['Plastik cetvel','Cam bardak','Tahta kaşık'],
+  e:'Metaller (bakır, demir, alüminyum) elektriği iletir. Plastik, cam ve tahta yalıtkandır.'},
+ {s:'Kopmuş bir elektrik kablosu görürsek ne yapmalıyız?',c:'Dokunmayıp büyüklere haber vermeliyiz',y:['Elimizle düzeltmeliyiz','Üzerine basmalıyız','Su dökmeliyiz'],
+  e:'Kopuk kabloda elektrik olabilir. Asla dokunulmamalı, yetkililere haber verilmelidir.'}
+];
+function genGuvenlik(){
+  const it=pick(GUVENLIK);
+  return{text:it.s,answer:it.c,options:shuffle([it.c,...it.y]),
+    explain:`${it.e}\n\n⚠️ Elektrik hayatımızı kolaylaştırır ama dikkatsiz kullanılırsa çok tehlikelidir.`};
+}
+
+// A5: Devre yorumu (en zor)
+function genYorumE(){
+  const s=[
+ {s:'Bir devrede ampul yanmıyor. Öğrenci pili değiştiriyor, yine yanmıyor. Kabloları kontrol ediyor, sağlamlar. Anahtarın kapalı olduğunu görüyor.\n\nSorun büyük ihtimalle nerededir?',
+  c:'Ampulün filamanı kopuktur',y:['Pil zayıftır','Anahtar bozuktur','Kablolar kısadır'],
+  e:'Pil, kablo ve anahtar elendiğine göre geriye ampul kalır. Filaman kopuksa ampul yanmaz.'},
+ {s:'Bir devreye ikinci bir pil eklendiğinde ampulün daha parlak yandığı gözleniyor.\n\nBuna göre ne söylenebilir?',
+  c:'Pil sayısı arttıkça ampulün parlaklığı artar',y:['Pil sayısı parlaklığı etkilemez','Ampul söner','Kablo ısınmaz'],
+  e:'Daha çok pil, devreye daha çok elektrik enerjisi verir, ampul daha parlak yanar.'},
+ {s:'Bir devrede anahtar açıldığında ampul sönüyor, kapatıldığında yanıyor.\n\nAnahtarın görevi nedir?',
+  c:'Elektrik akışını kontrol etmek',y:['Elektrik üretmek','Işık vermek','Elektriği depolamak'],
+  e:'Anahtar devreyi tamamlar ya da keser. Kapalıyken elektrik akar, açıkken akmaz.'},
+ {s:'Öğrenci devredeki kablonun plastik kısmını kesip metal telini açığa çıkarıyor.\n\nBu davranış neden tehlikelidir?',
+  c:'Plastik yalıtkandır, çıkarılınca elektrik çarpma riski doğar',y:['Kablo kısalır','Ampul daha parlak yanar','Pil biter'],
+  e:'Kablonun dışındaki plastik yalıtkandır ve bizi elektrikten korur. Çıkarılması çok tehlikelidir.'},
+ {s:'İki ampullü bir devrede ampullerden biri çıkarılıyor ve diğeri de sönüyor.\n\nBu devre nasıl bağlanmıştır?',
+  c:'Ampuller arka arkaya (seri) bağlanmıştır',y:['Yan yana bağlanmıştır','Bağlı değildir','Pil bitmiştir'],
+  e:'Arka arkaya bağlı devrede biri çıkarılırsa devre kesilir ve diğeri de sönür.'}
+  ];
+  const it=pick(s);
+  return{text:it.s,answer:it.c,options:shuffle([it.c,...it.y]),explain:it.e};
+}
+
+initGame([
+  {name:'Devre Elemanları',gen:genEleman},
+  {name:'Ampul Yanar mı',gen:genDevre},
+  {name:'Elektrik Kaynakları',gen:genKaynakE},
+  {name:'Elektrik Güvenliği',gen:genGuvenlik},
+  {name:'Devre Yorumu',gen:genYorumE}
+],{c1:'#EF6C00',c2:'#FFB74D',shadow:'rgba(239,108,0,.35)',boxBg:'linear-gradient(135deg,#fffaf3 0%,#fff5e8 100%)',boxBorder:'#ffd9a0'});
+</script>
+</body>
+</html>

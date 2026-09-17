@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2. Ünite: Besinlerimiz - 4. Sınıf Fen Bilimleri</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade4-style.css">
+<script defer src="analytics.js"></script>
+</head>
+<body>
+<div class="container">
+  <div class="header"><h1>🥗 2. Ünite: Besinlerimiz</h1><p>Kolaydan zora 5 aşama</p></div>
+  <div class="levels" id="levels"></div>
+  <div class="stats">
+    <div class="stat"><div class="stat-l">PUAN</div><div class="stat-v" id="score">0</div></div>
+    <div class="stat"><div class="stat-l">DOĞRU</div><div class="stat-v" id="correct">0</div></div>
+    <div class="stat"><div class="stat-l">SORU</div><div class="stat-v" id="total">0</div></div>
+  </div>
+  <div class="question-box">
+    <div class="q-text" id="qText">Yükleniyor...</div>
+    <div id="qVisual"></div>
+    <div class="options" id="options"></div>
+  </div>
+  <div class="feedback" id="feedback"></div>
+  <div class="explain" id="explain"></div>
+  <button class="btn btn-next" onclick="newQuestion()">Yeni Soru ➜</button>
+  <button class="btn btn-back" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade4-engine.js"></script>
+<script>
+const ICERIK=[
+ {ad:'Karbonhidrat',gorev:'Vücuda öncelikli olarak ENERJİ verir.',ornek:['ekmek','makarna','pirinç','patates','bal']},
+ {ad:'Protein',gorev:'Büyüme, gelişme ve yıpranan hücrelerin onarımını sağlar.',ornek:['et','yumurta','süt','peynir','mercimek']},
+ {ad:'Yağ',gorev:'Enerji depolar, vücut ısısını korur.',ornek:['zeytinyağı','tereyağı','fındık','ceviz']},
+ {ad:'Vitamin',gorev:'Vücudun düzenli çalışmasını sağlar, hastalıklara karşı korur.',ornek:['portakal','havuç','ıspanak','elma']},
+ {ad:'Mineral',gorev:'Kemik ve dişlerin gelişimine yardım eder.',ornek:['süt','yoğurt','peynir','ceviz']},
+ {ad:'Su',gorev:'Besinlerin taşınmasını ve atıkların atılmasını sağlar.',ornek:['su','ayran','çorba']}
+];
+
+// A1: Besin içeriğinin görevi
+function genGorev(){
+  const it=pick(ICERIK);
+  const w=distractors(it.gorev,()=>pick(ICERIK).gorev);
+  return{
+    text:`"${it.ad}" vücudumuzda hangi görevi yapar?`,
+    numberDisplay:it.ad,
+    answer:it.gorev,
+    options:shuffle([it.gorev,...w]),
+    explain:`${it.ad}: ${it.gorev}\nÖrnek besinler: ${it.ornek.join(', ')}\n\n💡 Dengeli beslenme için her besin içeriğinden yeterince almalıyız.`
+  };
+}
+
+// A2: Hangi besinde bulunur
+function genBesin(){
+  const it=pick(ICERIK);
+  const o=pick(it.ornek);
+  const digerler=ICERIK.filter(x=>x!==it).flatMap(x=>x.ornek);
+  const w=distractors(o,()=>pick(digerler));
+  return{
+    text:`Aşağıdaki besinlerden hangisi bol miktarda "${it.ad}" içerir?`,
+    numberDisplay:it.ad,
+    answer:o,
+    options:shuffle([o,...w]),
+    explain:`${o} → ${it.ad} bakımından zengindir.\n${it.ad}: ${it.gorev}\n\n💡 ${it.ad} içeren diğer besinler: ${it.ornek.join(', ')}`
+  };
+}
+
+// A3: Sağlıklı beslenme
+const SAGLIK=[
+ {s:'Günde kaç öğün yemek yenmesi önerilir?',c:'3 ana öğün ve ara öğünler',y:['Sadece 1 öğün','Sadece akşam','Sürekli atıştırmak'],
+  e:'Düzenli olarak 3 ana öğün ve gerektiğinde ara öğün tüketmek sağlıklıdır.'},
+ {s:'Günün en önemli öğünü hangisidir?',c:'Kahvaltı',y:['Akşam yemeği','Gece atıştırması','Öğle yemeği'],
+  e:'Kahvaltı, uzun bir açlıktan sonra vücuda gün boyu gerekli enerjiyi verir.'},
+ {s:'Aşağıdakilerden hangisi sağlıksız bir beslenme alışkanlığıdır?',c:'Öğün atlamak',y:['Bol su içmek','Sebze meyve tüketmek','Düzenli kahvaltı yapmak'],
+  e:'Öğün atlamak vücudun enerjisiz kalmasına ve sonraki öğünde fazla yemeye yol açar.'},
+ {s:'Besinleri satın alırken nelere dikkat etmeliyiz?',c:'Son kullanma tarihine ve ambalajın sağlam olmasına',y:['Sadece fiyatına','Sadece rengine','Sadece reklamına'],
+  e:'Son kullanma tarihi geçmiş veya ambalajı bozuk besinler sağlığımıza zarar verir.'},
+ {s:'Yemekten önce ellerin yıkanmasının sebebi nedir?',c:'Mikropların vücuda girmesini önlemek',y:['Elleri ıslatmak','Su tasarrufu','Yemeği soğutmak'],
+  e:'Ellerdeki görünmeyen mikroplar besinle birlikte vücuda girip hastalık yapabilir.'},
+ {s:'Aşırı şekerli ve yağlı besinler tüketmek neye yol açar?',c:'Obezite ve diş çürüklerine',y:['Daha hızlı büyümeye','Daha iyi görmeye','Hiçbir etkiye'],
+  e:'Fazla şeker ve yağ vücutta depolanır, ayrıca şeker diş çürüklerine neden olur.'},
+ {s:'Su içmek neden önemlidir?',c:'Besinlerin taşınmasını ve atıkların atılmasını sağlar',y:['Sadece susuzluğu giderir','Enerji verir','Kemikleri güçlendirir'],
+  e:'Vücudumuzun büyük kısmı sudur. Su, besin taşınması ve atıkların atılması için gereklidir.'}
+];
+function genSaglik(){
+  const it=pick(SAGLIK);
+  return{
+    text:it.s,
+    answer:it.c,
+    options:shuffle([it.c,...it.y]),
+    explain:`${it.e}\n\n💡 Sağlıklı beslenme = dengeli besin + düzenli öğün + temizlik + bol su`
+  };
+}
+
+// A4: Diş sağlığı ve besin etiketi
+const DIS=[
+ {s:'Dişler günde kaç kez fırçalanmalıdır?',c:'Günde en az 2 kez',y:['Haftada 1 kez','Ayda 1 kez','Sadece yemekten önce'],
+  e:'Sabah ve akşam olmak üzere günde en az 2 kez, 2 dakika fırçalamak gerekir.'},
+ {s:'Diş çürümesinin en önemli sebebi nedir?',c:'Şekerli besinlerin dişte kalması ve fırçalanmaması',y:['Su içmek','Sebze yemek','Diş fırçalamak'],
+  e:'Dişte kalan şeker, bakterilerin asit üretmesine ve diş minesinin çürümesine yol açar.'},
+ {s:'Besin ambalajında ilk bakılması gereken bilgi nedir?',c:'Son kullanma tarihi',y:['Ürünün rengi','Ambalajın parlaklığı','Reklam görseli'],
+  e:'Son kullanma tarihi geçmiş besin bozulmuş olabilir ve zehirlenmeye yol açabilir.'},
+ {s:'Diş ipi ne işe yarar?',c:'Dişlerin arasında kalan besin artıklarını temizler',y:['Dişleri beyazlatır','Diş etini keser','Nefesi kokutur'],
+  e:'Fırçanın ulaşamadığı diş aralarını temizler, çürük oluşumunu önler.'},
+ {s:'Küflenmiş bir besin görürsek ne yapmalıyız?',c:'Tamamını atmalıyız',y:['Küflü kısmı kesip yemeliyiz','Yıkayıp yemeliyiz','Pişirip yemeliyiz'],
+  e:'Küf gözle görünmeyen kısımlara da yayılmıştır. Küflü besin tamamen atılmalıdır.'}
+];
+function genDis(){
+  const it=pick(DIS);
+  return{
+    text:it.s,
+    answer:it.c,
+    options:shuffle([it.c,...it.y]),
+    explain:`${it.e}`
+  };
+}
+
+// A5: Yorum (en zor)
+function genYorumF(){
+  const s=[
+ {s:'Ali her sabah kahvaltı yapmadan okula gidiyor. Derslerde dikkatini toplayamıyor ve çabuk yoruluyor.\n\nBu durumun en olası sebebi nedir?',
+  c:'Kahvaltı yapmadığı için vücudunun enerjisiz kalması',y:['Çok su içmesi','Fazla sebze yemesi','Erken uyuması'],
+  e:'Kahvaltı gün boyu gerekli enerjiyi sağlar. Kahvaltısız gün, dikkat dağınıklığı ve yorgunluk yapar.'},
+ {s:'Zeynep hızlı büyüyen bir çocuk. Kemikleri ve kasları gelişiyor.\n\nZeynep’in beslenmesinde özellikle hangi besin içeriği bol olmalıdır?',
+  c:'Protein ve mineral',y:['Sadece yağ','Sadece şeker','Sadece su'],
+  e:'Protein büyüme ve gelişmeyi, mineraller (özellikle kalsiyum) kemik gelişimini destekler.'},
+ {s:'Bir sporcu maçtan hemen önce yüksek enerjili bir besin almak istiyor.\n\nHangisini tercih etmelidir?',
+  c:'Karbonhidrat içeren bir besin',y:['Sadece su','Bol yağlı bir yemek','Hiçbir şey yememeli'],
+  e:'Karbonhidrat vücuda en hızlı enerjiyi verir. Ağır yağlı yemek sindirimi zorlaştırır.'},
+ {s:'Bir öğrenci sürekli hastalanıyor, bağışıklığı zayıf.\n\nBeslenmesinde hangisini artırması önerilir?',
+  c:'Vitamin içeren sebze ve meyveler',y:['Şekerli içecekler','Kızartmalar','Hazır atıştırmalıklar'],
+  e:'Vitaminler vücudun hastalıklara karşı direncini artırır. En çok sebze ve meyvede bulunur.'},
+ {s:'Bir tabakta sadece pilav var. Öğrenci bunu dengeli hâle getirmek istiyor.\n\nTabağa ne eklemelidir?',
+  c:'Et/yumurta ve salata',y:['Bir tabak daha pilav','Şekerli tatlı','Sadece ekmek'],
+  e:'Pilav karbonhidrattır. Dengeli öğün için protein (et, yumurta) ve vitamin (salata) eklenmelidir.'}
+  ];
+  const it=pick(s);
+  return{
+    text:it.s,
+    answer:it.c,
+    options:shuffle([it.c,...it.y]),
+    explain:`${it.e}\n\n💡 Soruda anlatılan İHTİYACI bul, sonra o ihtiyacı karşılayan besin içeriğini seç.`
+  };
+}
+
+initGame([
+  {name:'Besin İçerikleri',gen:genGorev},
+  {name:'Hangi Besinde Var',gen:genBesin},
+  {name:'Sağlıklı Beslenme',gen:genSaglik},
+  {name:'Diş ve Besin Güvenliği',gen:genDis},
+  {name:'Yorum Soruları',gen:genYorumF}
+],{c1:'#2E7D32',c2:'#66BB6A',shadow:'rgba(46,125,50,.35)',boxBg:'linear-gradient(135deg,#f1f9f2 0%,#e9f6ec 100%)',boxBorder:'#b9e0bf'});
+</script>
+</body>
+</html>
