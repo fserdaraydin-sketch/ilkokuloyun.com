@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ailem ve Toplum - 1. Sınıf Hayat Bilgisi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade1-style.css">
+<script defer src="analytics.js"></script>
+</head>
+<body>
+<div class="kutu">
+  <div class="baslik"><h1>🏠 Ailem ve Toplum</h1><p>3. Öğrenme Alanı · Aile, nezaket, iş birliği</p></div>
+  <div class="ilerleme"><div class="ilerleme-dolu" id="ilerlemeDolu"></div></div>
+  <div class="yildizlar" id="yildizlar"></div>
+  <div class="yonerge">
+    <span class="yonerge-metin" id="yonergeMetin">Hazırlanıyor...</span>
+    <button class="btn-ses" id="sesBtn" onclick="sesDegistir()" aria-label="Sesi aç kapat">🔊</button>
+  </div>
+  <div class="soru-gorsel" id="soruGorsel"></div>
+  <div class="secenekler" id="secenekler"></div>
+  <div class="geri" id="geri"></div>
+  <button class="btn-devam" id="devamBtn" onclick="tekrarDinle()">🔊 Tekrar Dinle</button>
+  <button class="btn-geri" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade1-engine.js"></script>
+<script>
+function metinKarti(t,b){
+  const{c,ctx,W,H}=sahne(148,96);
+  ctx.save(); ctx.fillStyle='#37474F'; ctx.font='600 '+(b||15)+'px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  const kel=t.split(' '); const sat=[]; let s='';
+  kel.forEach(k=>{ const d=s?s+' '+k:k;
+    if(ctx.measureText(d).width>130){ sat.push(s); s=k; } else s=d; });
+  if(s) sat.push(s);
+  const bas=H/2-(sat.length-1)*9.5;
+  sat.forEach((x,i)=>ctx.fillText(x,W/2,bas+i*19));
+  ctx.restore(); return c;
+}
+function emojiKarti(ch){
+  const{c,ctx,W,H}=sahne(148,100); emoji(ctx,ch,W/2,H/2,50); return c;
+}
+
+/* ============================================================
+   AİLE ŞEMASI
+   Kitap çekirdek ve geniş aileyi tanımlıyor. Bu kavramlar
+   öğretiliyor ama çocuğa "senin ailen hangisi" diye
+   SORULMUYOR — her aile farklıdır.
+   ============================================================ */
+function aileSahne(tip){
+  const{c,ctx,W,H}=sahne(240,148);
+  ctx.fillStyle='#FFF8F0'; ctx.fillRect(0,0,W,H);
+  // Ev silueti
+  ctx.fillStyle='#FFE0B2'; ctx.strokeStyle='#E8A33D'; ctx.lineWidth=2.5;
+  ctx.beginPath();
+  ctx.moveTo(W*0.06,H*0.30); ctx.lineTo(W*0.50,H*0.06); ctx.lineTo(W*0.94,H*0.30);
+  ctx.lineTo(W*0.94,H*0.80); ctx.lineTo(W*0.06,H*0.80); ctx.closePath();
+  ctx.fill(); ctx.stroke();
+
+  const kisiler = tip==='çekirdek'
+    ? ['👩','👨','🧒','👧']
+    : ['👵','👴','👩','👨','🧒','👧','👶'];
+  const sut=Math.min(4,kisiler.length);
+  const sat=Math.ceil(kisiler.length/sut);
+  const boyut=tip==='çekirdek'?34:27;
+  kisiler.forEach((k,i)=>{
+    const s2=Math.min(sut,kisiler.length-Math.floor(i/sut)*sut);
+    const x=W/2+((i%sut)-(s2-1)/2)*(W/(sut+0.7));
+    const y=H*0.50+(Math.floor(i/sut)-(sat-1)/2)*(boyut*1.15);
+    emoji(ctx,k,x,y,boyut);
+  });
+  ctx.save(); ctx.fillStyle='#8D6E52'; ctx.font='700 13px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(tip==='çekirdek'?'çekirdek aile':'geniş aile',W/2,H*0.91);
+  ctx.restore();
+  return c;
+}
+
+/* ===== SOFRA SAHNESİ ===== */
+function sofraSahne(){
+  const{c,ctx,W,H}=sahne(240,132);
+  ctx.fillStyle='#FFF6E8'; ctx.fillRect(0,0,W,H*0.55);
+  ctx.fillStyle='#D8C3A5'; ctx.fillRect(0,H*0.55,W,H*0.45);
+  // Masa
+  ctx.fillStyle='#C68642'; ctx.strokeStyle='#7A4B1C'; ctx.lineWidth=2.5;
+  ctx.beginPath(); ctx.ellipse(W/2,H*0.66,W*0.40,H*0.14,0,0,Math.PI*2);
+  ctx.fill(); ctx.stroke();
+  ctx.fillStyle='#8D5524'; ctx.fillRect(W*0.47,H*0.78,W*0.06,H*0.16);
+  // Tabaklar ve çatal kaşık
+  [0.30,0.50,0.70].forEach(x=>{
+    ctx.fillStyle='#fff'; ctx.strokeStyle='#B0BEC5'; ctx.lineWidth=1.8;
+    ctx.beginPath(); ctx.ellipse(W*x,H*0.64,W*0.058,H*0.028,0,0,Math.PI*2);
+    ctx.fill(); ctx.stroke();
+    emoji(ctx,'🍽️',W*x,H*0.64,13);
+  });
+  // Aile bireyleri (kim oldukları belirtilmiyor — her aile farklı)
+  emoji(ctx,'🧒',W*0.22,H*0.40,28);
+  emoji(ctx,'🧑',W*0.50,H*0.36,28);
+  emoji(ctx,'🧓',W*0.78,H*0.40,28);
+  return c;
+}
+
+/* ===== 1. AİLE KAVRAMI ===== */
+function etkAileKavram(){
+  const tip=rnd(0,1);
+  if(tip===0){
+    const cekirdekMi=rnd(0,1)===0;
+    const g=aileSahne(cekirdekMi?'çekirdek':'geniş');
+    g.style.width='230px'; g.style.height='142px';
+    return{
+      yonerge:'Bu resimde hangi aile türü gösteriliyor?',
+      secenek:shuffle(['çekirdek aile','geniş aile']),
+      dogru:cekirdekMi?'çekirdek aile':'geniş aile',
+      ustGorsel:g, ciz:t=>metinKarti(t,17),
+      ipucu:cekirdekMi
+        ? 'ÇEKİRDEK AİLE anne, baba ve çocuklardan oluşur.'
+        : 'GENİŞ AİLE, anne baba ve çocukların yanında başka aile bireylerinin de bulunduğu büyük ailedir.'
+    };
+  }
+  const sorular=[
+    {s:'Çekirdek aile kimlerden oluşur?',c:'Anne, baba ve çocuklar',
+     y:['Sadece çocuklar','Bütün akrabalar'],
+     e:'Çekirdek aile; anne, baba ve çocuklardan oluşur.'},
+    {s:'Geniş aile nedir?',c:'Başka aile bireylerinin de bulunduğu büyük aile',
+     y:['Sadece anne ve baba','Sadece iki kişi'],
+     e:'Geniş aile; anne, baba ve çocuklar dışında başka aile bireylerinin de bulunduğu büyük ailedir.'},
+    {s:'Bütün aileler birbirinin aynısı mıdır?',c:'Hayır, her aile farklıdır',
+     y:['Evet, hepsi aynıdır','Sadece iki çeşit vardır'],
+     e:'Her aile birbirinden farklıdır. Kalabalık ya da az kişili olabilir; hepsi birer ailedir.'},
+    {s:'Ailemizde kendimizi nasıl hissederiz?',c:'Güvende ve güçlü',
+     y:['Yalnız','Korkmuş'],
+     e:'Aile olmak önemlidir. Çünkü ailemizde kendimizi güvende ve güçlü hissederiz.'},
+    {s:'Aileyi bir arada tutan şey nedir?',c:'Sevgi, saygı ve anlayış',
+     y:['Evin büyüklüğü','Kişi sayısı'],
+     e:'Ailemizi bir arada tutan değerler vardır: sevgi, şefkat, fedakârlık, anlayışlı olmak, birlik ve beraberlik.'}
+  ];
+  const it=pick(sorular);
+  return{
+    yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ciz:t=>metinKarti(t,14), ipucu:it.e
+  };
+}
+
+/* ===== 2. NEZAKET İFADELERİ ===== */
+const NEZAKET=[
+  {ifade:'Günaydın',    ne:'Sabah birini ilk gördüğümüzde söyleriz.'},
+  {ifade:'Lütfen',      ne:'Bir şey isterken söyleriz.'},
+  {ifade:'Teşekkür ederim',ne:'Bize bir iyilik yapıldığında söyleriz.'},
+  {ifade:'Elinize sağlık',ne:'Yemeği hazırlayan kişiye söyleriz.'},
+  {ifade:'Afiyet olsun',ne:'Yemek yiyen birine söyleriz.'},
+  {ifade:'Özür dilerim',ne:'Bir yanlış yaptığımızda söyleriz.'},
+  {ifade:'İyi geceler', ne:'Gece uyumadan önce söyleriz.'},
+  {ifade:'Geçmiş olsun',ne:'Hasta olan birine söyleriz.'}
+];
+function etkNezaket(){
+  const it=pick(NEZAKET);
+  const yon=rnd(0,1);
+  if(yon===0){
+    const w=distractors(it.ifade,()=>pick(NEZAKET).ifade);
+    return{
+      yonerge:it.ne+' Hangi sözü söyleriz?',
+      secenek:shuffle([it.ifade,...w.slice(0,2)]), dogru:it.ifade,
+      ciz:t=>metinKarti(t,16),
+      ipucu:'"'+it.ifade+'" — '+it.ne
+    };
+  }
+  const durumlar=[
+    {d:'Yemek bittiğinde yemeği hazırlayana ne dersin?',c:'Elinize sağlık',
+     y:['Günaydın','Geçmiş olsun'],
+     e:'Yemeği hazırlayan kişiye "Elinize sağlık." deriz.'},
+    {d:'Birinden bir şey isterken ne dersin?',c:'Lütfen',
+     y:['Hemen ver','Tamam'],
+     e:'Bir şey isterken "Lütfen" demek nezakettir.'},
+    {d:'Sana yardım eden birine ne dersin?',c:'Teşekkür ederim',
+     y:['Tamam','Hadi'],
+     e:'İyilik yapan birine "Teşekkür ederim." deriz.'},
+    {d:'Yanlışlıkla birine çarptın. Ne dersin?',c:'Özür dilerim',
+     y:['Sen dikkat et','Hiçbir şey'],
+     e:'Bir yanlış yaptığımızda "Özür dilerim." deriz. Bu, özrü bilen kişinin gücüdür.'},
+    {d:'Evdeki biri hastalanmış. Ne dersin?',c:'Geçmiş olsun',
+     y:['Afiyet olsun','Günaydın'],
+     e:'Hasta olan birine "Geçmiş olsun." deriz ve yardımcı olmaya çalışırız.'}
+  ];
+  const it2=pick(durumlar);
+  return{
+    yonerge:it2.d, secenek:shuffle([it2.c,...it2.y]), dogru:it2.c,
+    ciz:t=>metinKarti(t,16), ipucu:it2.e
+  };
+}
+
+/* ===== 3. GÖRGÜ KURALLARI ===== */
+function etkGorgu(){
+  const sorular=[
+    {s:'Evdeki birinin odasına girerken ne yaparsın?',c:'Kapıyı çalar, izin isterim',
+     y:['Doğrudan girerim','Bağırarak girerim'],
+     e:'Aile üyelerinin odasına girerken kapıyı çalar, izin isteriz. Herkesin kişisel alanı vardır.'},
+    {s:'Evdeki birinin eşyasını kullanman gerekiyor. Ne yaparsın?',c:'İzin alır, özenli kullanırım',
+     y:['Habersiz alırım','Kırılırsa kırılır'],
+     e:'Aile bireylerimizin eşyalarını izin alarak ve özenli kullanırız.'},
+    {s:'Yemek yerken neleri kullanırız?',c:'Çatal, kaşık ve peçete',
+     y:['Sadece ellerimizi','Hiçbir şey'],
+     e:'Yemekte çatal, kaşık ve peçete kullanırız. Bu sofra adabının bir parçasıdır.'},
+    {s:'Büyükler konuşurken ne yaparsın?',c:'Sözlerini bitirmelerini beklerim',
+     y:['Sözlerini keserim','Bağırırım'],
+     e:'Büyüklerimiz konuşurken sözlerini kesmeyiz, sıramızı bekleriz.'},
+    {s:'Sabah uyandığında evdekilere ne dersin?',c:'Günaydın',
+     y:['Hiçbir şey','Bana kahvaltı ver'],
+     e:'Aile yaşamında nezaket ifadelerini kullanırız. Sabah "Günaydın" demek güne güzel başlatır.'},
+    {s:'Sofrada ağzın doluyken konuşmak doğru mudur?',c:'Hayır, önce yutmalıyım',
+     y:['Evet, sorun olmaz','Sadece bazen'],
+     e:'Ağzımız doluyken konuşmayız. Önce lokmamızı yutarız.'},
+    {s:'Bir misafir geldiğinde ne yaparsın?',c:'Selam verir, hoş geldiniz derim',
+     y:['Odama giderim','Görmezden gelirim'],
+     e:'Misafire selam verip "Hoş geldiniz." demek güzel bir gelenektir. Misafirperverlik önemli bir değerimizdir.'},
+    {s:'Bayramda büyükleri ziyaret etmek ne demektir?',c:'Sevgi ve saygı göstermektir',
+     y:['Zorunlu bir iştir','Gerekli değildir'],
+     e:'Bayramlarda büyükleri ziyaret etmek, onlara sevgi ve saygı göstermenin güzel bir yoludur.'}
+  ];
+  const it=pick(sorular);
+  return{
+    yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ciz:t=>metinKarti(t,14), ipucu:it.e
+  };
+}
+
+/* ===== 4. SOFRA VE PAYLAŞMA ===== */
+function etkSofra(){
+  const g=sofraSahne(); g.style.width='230px'; g.style.height='127px';
+  const sorular=[
+    {s:'Sofra kurulurken sen ne yapabilirsin?',c:'Çatal kaşık dizmeye yardım edebilirim',
+     y:['Oyun oynamaya devam ederim','Televizyon izlerim'],
+     e:'Sofra kurmak ortak bir iştir. Çocuklar da yardım edebilir.'},
+    {s:'Yemek bittiğinde ne yapabilirsin?',c:'Tabağımı mutfağa götürebilirim',
+     y:['Masadan hemen kalkarım','Hiçbir şey yapmam'],
+     e:'Yemek sonrası sofrayı toplamak da paylaşılan bir iştir.'},
+    {s:'Sofrada herkes aynı anda yemeye başlar mı?',c:'Herkes sofraya gelince başlanır',
+     y:['İlk gelen hemen başlar','Herkes istediği zaman'],
+     e:'Sofrada herkesi beklemek bir nezaket kuralıdır. Birlikte yemek aileyi yakınlaştırır.'},
+    {s:'Sevmediğin bir yemek var. Ne yaparsın?',c:'Nazikçe “Teşekkür ederim, istemiyorum” derim',
+     y:['“Bu ne biçim yemek” derim','Tabağı iterim'],
+     e:'Sevmediğimiz bir yemeği nazikçe reddedebiliriz. Yemeği hazırlayanı üzecek sözler söylemeyiz.'}
+  ];
+  const it=pick(sorular);
+  return{
+    yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ustGorsel:g, ciz:t=>metinKarti(t,14), ipucu:it.e
+  };
+}
+
+/* ===== 5. AİLEDE İŞ BÖLÜMÜ ===== */
+function etkIsBolumu(){
+  const sorular=[
+    {s:'Evde yemek yapma görevi kime aittir?',c:'Ailede bunu yapabilen herkese',
+     y:['Sadece annelere','Sadece büyüklere'],
+     e:'Her ailede iş bölümü birbirinden FARKLIDIR. Yemek yapmayı ailede kim üstlenmişse o yapar; bu kişi değişebilir.'},
+    {s:'Çamaşır yıkama görevi kime aittir?',c:'Ailede bu işi üstlenen kişiye',
+     y:['Sadece kadınlara','Sadece erkeklere'],
+     e:'Ev işlerinin kadın işi ya da erkek işi diye ayrılması doğru değildir. Her ailenin kendi düzeni vardır.'},
+    {s:'Ailedeki bütün sorumluluklar tek bir kişiye mi aittir?',c:'Hayır, herkes üzerine düşeni yapar',
+     y:['Evet, tek kişiye aittir','Evet, sadece büyüklere'],
+     e:'Ailede herkes üzerine düşen görevi yerine getirmelidir. Tek kişiye yüklenmez.'},
+    {s:'Çocukların evde yapabileceği işler var mıdır?',c:'Evet, oyuncaklarını toplamak gibi',
+     y:['Hayır, çocuklar iş yapmaz','Sadece büyüyünce'],
+     e:'Evde çocukların da yapabileceği işler vardır: oyuncakları toplamak, sofraya yardım etmek, çiçekleri sulamak.'},
+    {s:'Evcil hayvanın bakımı kimin sorumluluğudur?',c:'Ona bakmayı üstlenen herkesin',
+     y:['Kimsenin','Sadece en küçüğün'],
+     e:'Evcil hayvanımız varsa onun bakımına yardımcı olabiliriz. Bu da paylaşılan bir sorumluluktur.'},
+    {s:'Herkes evde sorumluluğunu yerine getirirse ne olur?',c:'İşler daha hızlı biter, birbirimize daha çok zaman kalır',
+     y:['Hiçbir şey değişmez','İşler zorlaşır'],
+     e:'Sorumluluklarımızı yerine getirdiğimizde işlerimiz hızlı biter, aile yaşantımız düzenli olur ve birbirimize daha fazla zaman ayırırız.'},
+    {s:'Sen de evde bir iş üstlenebilir misin?',c:'Evet, yaşıma uygun işler yapabilirim',
+     y:['Hayır, ben küçüğüm','Hayır, gerek yok'],
+     e:'Yaşımıza uygun sorumluluklar alabiliriz. Küçük bir yardım bile ailemize destek olur.'}
+  ];
+  const it=pick(sorular);
+  return{
+    yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ciz:t=>metinKarti(t,13), ipucu:it.e
+  };
+}
+
+/* ===== 6. EVDE YAPABİLECEĞİM İŞLER ===== */
+function etkEvIsleri(){
+  const isler=[
+    {ch:'🧸',ad:'oyuncakları toplamak'},
+    {ch:'🍽️',ad:'sofraya yardım etmek'},
+    {ch:'🪴',ad:'çiçekleri sulamak'},
+    {ch:'🐕',ad:'evcil hayvana bakmak'},
+    {ch:'🛏️',ad:'yatağını toplamak'},
+    {ch:'🗑️',ad:'çöpü kutuya atmak'}
+  ];
+  const it=pick(isler);
+  const w=distractors(it.ad,()=>pick(isler).ad);
+  return{
+    yonerge:'Bu resimde hangi iş gösteriliyor? Sen de bunu yapabilirsin.',
+    secenek:shuffle([it.ad,...w.slice(0,2)]), dogru:it.ad,
+    ustGorsel:(()=>{const c=emojiKarti(it.ch);c.style.width='130px';c.style.height='88px';return c;})(),
+    ciz:t=>metinKarti(t,14),
+    ipucu:'Evde senin de yapabileceğin işler var: '+
+      isler.map(x=>x.ad).slice(0,4).join(', ')+'...'
+  };
+}
+
+/* ===== 7. YARDIMLAŞMA VE DAYANIŞMA ===== */
+function etkYardimlasma(){
+  const sorular=[
+    {s:'Evdeki biri yorgun görünüyor. Ne yapabilirsin?',c:'Yardım teklif ederim',
+     y:['Görmezden gelirim','Daha çok iş çıkarırım'],
+     e:'Yorgun birine "Yardım edebilir miyim?" demek güzel bir davranıştır.'},
+    {s:'Komşunuz taşınıyor ve zorlanıyor. Ne yapılabilir?',c:'Ailece yardım edilebilir',
+     y:['Bizi ilgilendirmez','İzleriz'],
+     e:'Komşuluk önemli bir değerimizdir. Komşular birbirine zor günde destek olur.'},
+    {s:'Bir arkadaşın yardıma ihtiyacı var. Ne yaparsın?',c:'Elimden geleni yaparım',
+     y:['Başkası yapsın','Görmezden gelirim'],
+     e:'Yardımlaşmak insanı güçlendirir. Küçük bir yardım bile büyük fark yaratır.'},
+    {s:'Ailece bir iş yapmak nasıl bir duygudur?',c:'Birlik duygumuzu güçlendirir',
+     y:['Sıkıcıdır','Gereksizdir'],
+     e:'Birlikte iş yapmak aramızdaki sevgi, saygı ve bağlılığı artırır.'},
+    {s:'Büyüklerimize nasıl davranmalıyız?',c:'Saygılı ve yardımsever',
+     y:['İlgisiz','Sadece bayramlarda nazik'],
+     e:'Büyüklerimize her zaman saygı gösteririz. Onların deneyimlerinden çok şey öğreniriz.'},
+    {s:'Kendinden küçük birine nasıl davranmalısın?',c:'Koruyucu ve anlayışlı',
+     y:['Alay ederek','Emrederek'],
+     e:'Küçükleri korumak, büyüklere saygı göstermek bizim güzel geleneğimizdir.'}
+  ];
+  const it=pick(sorular);
+  return{
+    yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ciz:t=>metinKarti(t,14), ipucu:it.e
+  };
+}
+
+/* ===== 8. FARKLILIKLARA SAYGI ===== */
+function etkFarklilik(){
+  const sorular=[
+    {s:'Arkadaşının ailesi seninkinden farklı. Bu ne demektir?',c:'Her ailenin kendi düzeni vardır',
+     y:['Onunki yanlıştır','Benimki daha iyidir'],
+     e:'Her aile birbirinden farklıdır. Hiçbir aile diğerinden üstün değildir.'},
+    {s:'Özel gereksinimli bir arkadaşın var. Ne yaparsın?',c:'Oyunlarıma dâhil ederim',
+     y:['Uzak dururum','Acırım'],
+     e:'Farklılıklara saygı duyarız. Herkesin oyuna katılma hakkı vardır.'},
+    {s:'Bir arkadaşın farklı bir şehirden gelmiş. Ne yaparsın?',c:'Tanışır, arkadaş olurum',
+     y:['Dalga geçerim','Konuşmam'],
+     e:'Farklı yerlerden gelen arkadaşlarımızdan yeni şeyler öğreniriz.'},
+    {s:'Herkesin hakları aynı mıdır?',c:'Evet, herkes eşit haklara sahiptir',
+     y:['Hayır, büyüklerin daha çok','Hayır, bazılarının yok'],
+     e:'Bütün insanlar eşit haklara sahiptir. Hiç kimse farklı olduğu için ayrı tutulamaz.'},
+    {s:'Yaşlı bir komşun merdiven çıkmakta zorlanıyor. Ne yaparsın?',c:'Yardım teklif ederim',
+     y:['Önünden geçerim','Beklerim'],
+     e:'Yaşlılara yardım etmek hem nezaket hem de güzel bir gelenektir.'}
+  ];
+  const it=pick(sorular);
+  return{
+    yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ciz:t=>metinKarti(t,14), ipucu:it.e
+  };
+}
+
+initEtkinlik([etkAileKavram,etkNezaket,etkGorgu,etkSofra,
+              etkIsBolumu,etkEvIsleri,etkYardimlasma,etkFarklilik],
+  {ad:'Ailem ve Toplum',c1:'#fbc2eb',c2:'#a6c1ee',koyu:'#AD1457',orta:'#EC407A',acik:'#FCE4EC'});
+</script>
+</body>
+</html>
