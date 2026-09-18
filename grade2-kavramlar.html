@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kavramları Tanıyalım - 2. Sınıf Matematik</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade1-style.css">
+<script defer src="analytics.js"></script>
+</head>
+<body>
+<div class="kutu">
+  <div class="baslik"><h1>🔍 Kavramları Tanıyalım</h1><p>2. Sınıf · Temel Matematik Kavramları</p></div>
+  <div class="ilerleme"><div class="ilerleme-dolu" id="ilerlemeDolu"></div></div>
+  <div class="yildizlar" id="yildizlar"></div>
+  <div class="yonerge">
+    <span class="yonerge-metin" id="yonergeMetin">Hazırlanıyor...</span>
+    <button class="btn-ses" id="sesBtn" onclick="sesDegistir()" aria-label="Sesi aç kapat">🔊</button>
+  </div>
+  <div class="soru-gorsel" id="soruGorsel"></div>
+  <div class="secenekler" id="secenekler"></div>
+  <div class="geri" id="geri"></div>
+  <button class="btn-devam" id="devamBtn" onclick="tekrarDinle()">🔊 Tekrar Dinle</button>
+  <button class="btn-geri" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade1-engine.js"></script>
+<script>
+// ===== 3B CİSİM ÇİZİMLERİ (izometrik) =====
+function kutuCiz(ctx,cx,cy,g,y,d,renk,koyu,yan){
+  // g: genişlik, y: yükseklik, d: derinlik
+  const x0=cx-g/2, y0=cy+y/2;
+  ctx.strokeStyle='rgba(0,0,0,.35)'; ctx.lineWidth=2; ctx.lineJoin='round';
+  // Ön yüz
+  ctx.fillStyle=renk;
+  ctx.beginPath(); ctx.rect(x0,y0-y,g,y); ctx.fill(); ctx.stroke();
+  // Üst yüz
+  ctx.fillStyle=koyu;
+  ctx.beginPath();
+  ctx.moveTo(x0,y0-y); ctx.lineTo(x0+d,y0-y-d);
+  ctx.lineTo(x0+g+d,y0-y-d); ctx.lineTo(x0+g,y0-y);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  // Sağ yüz
+  ctx.fillStyle=yan;
+  ctx.beginPath();
+  ctx.moveTo(x0+g,y0-y); ctx.lineTo(x0+g+d,y0-y-d);
+  ctx.lineTo(x0+g+d,y0-d); ctx.lineTo(x0+g,y0);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+}
+function cizCisim(ctx,tip,cx,cy,olcek){
+  const s=olcek||1;
+  if(tip==='küp')               kutuCiz(ctx,cx,cy,52*s,52*s,20*s,'#66BB6A','#A5D6A7','#43A047');
+  else if(tip==='kare prizma')  kutuCiz(ctx,cx,cy,40*s,66*s,18*s,'#42A5F5','#90CAF9','#1E88E5');
+  else if(tip==='dikdörtgen prizma') kutuCiz(ctx,cx,cy,68*s,40*s,20*s,'#FFA726','#FFCC80','#F57C00');
+  else if(tip==='üçgen prizma'){
+    // Derinlik SAĞA ve YUKARI (diğer cisimlerle aynı izometrik yön)
+    const g=52*s, y=44*s, d=19*s, x0=cx-g/2-d/2, y0=cy+y/2+d/2;
+    ctx.strokeStyle='rgba(0,0,0,.35)'; ctx.lineWidth=2; ctx.lineJoin='round';
+    const onSol=[x0,y0], onSag=[x0+g,y0], onTepe=[x0+g/2,y0-y];
+    const arSol=[x0+d,y0-d], arSag=[x0+g+d,y0-d], arTepe=[x0+g/2+d,y0-y-d];
+    const yuz=(p,renk)=>{ ctx.fillStyle=renk; ctx.beginPath();
+      p.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));
+      ctx.closePath(); ctx.fill(); ctx.stroke(); };
+    yuz([arSol,arSag,arTepe],'#7B1FA2');              // arka üçgen
+    yuz([onTepe,arTepe,arSag,onSag],'#CE93D8');       // sağ eğik yüz
+    yuz([onSol,onSag,onTepe],'#AB47BC');              // ön üçgen
+  }
+  else if(tip==='silindir'){
+    const r=28*s, y=58*s;
+    ctx.strokeStyle='rgba(0,0,0,.35)'; ctx.lineWidth=2;
+    ctx.fillStyle='#EF5350';
+    ctx.beginPath(); ctx.rect(cx-r,cy-y/2,r*2,y); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(cx-r,cy-y/2); ctx.lineTo(cx-r,cy+y/2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx+r,cy-y/2); ctx.lineTo(cx+r,cy+y/2); ctx.stroke();
+    ctx.fillStyle='#E57373';
+    ctx.beginPath(); ctx.ellipse(cx,cy+y/2,r,r*0.32,0,0,Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#FFCDD2';
+    ctx.beginPath(); ctx.ellipse(cx,cy-y/2,r,r*0.32,0,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  }
+  else if(tip==='küre'){
+    const r=32*s;
+    const g=ctx.createRadialGradient(cx-r*0.32,cy-r*0.32,r*0.14,cx,cy,r);
+    g.addColorStop(0,'#FFF59D'); g.addColorStop(1,'#F9A825');
+    ctx.fillStyle=g; ctx.strokeStyle='rgba(0,0,0,.35)'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  }
+}
+// ===== 2B ŞEKİL ÇİZİMLERİ =====
+function cizSekil2B(ctx,tip,cx,cy,olcek){
+  const s=olcek||1, r=32*s;
+  ctx.strokeStyle='#37474F'; ctx.lineWidth=3.5; ctx.lineJoin='round';
+  ctx.beginPath();
+  if(tip==='kare'){ ctx.rect(cx-r*0.86,cy-r*0.86,r*1.72,r*1.72); ctx.fillStyle='#81C784'; }
+  else if(tip==='dikdörtgen'){ ctx.rect(cx-r*1.15,cy-r*0.66,r*2.3,r*1.32); ctx.fillStyle='#FFB74D'; }
+  else if(tip==='üçgen'){ ctx.moveTo(cx,cy-r); ctx.lineTo(cx+r*0.92,cy+r*0.72); ctx.lineTo(cx-r*0.92,cy+r*0.72); ctx.closePath(); ctx.fillStyle='#BA68C8'; }
+  else if(tip==='daire'){ ctx.arc(cx,cy,r*0.92,0,Math.PI*2); ctx.fillStyle='#64B5F6'; }
+  else if(tip==='çember'){ ctx.arc(cx,cy,r*0.92,0,Math.PI*2); ctx.fillStyle='transparent'; }
+  if(tip==='çember'){ ctx.strokeStyle='#1565C0'; ctx.lineWidth=5; ctx.stroke(); }
+  else { ctx.fill(); ctx.stroke(); }
+}
+
+const CISIMLER=['küp','kare prizma','dikdörtgen prizma','üçgen prizma','silindir','küre'];
+const SEKILLER=['kare','dikdörtgen','üçgen','daire','çember'];
+
+// Cisimlerin yüz ve köşe sayıları (2. sınıf düzeyi — "ayrıt" kitapta YOK)
+const CISIM_BILGI={
+  'küp':               {yuz:6, kose:8, not:'Bütün yüzleri KAREDİR.'},
+  'kare prizma':       {yuz:6, kose:8, not:'Karşılıklı iki yüzü kare, diğerleri dikdörtgendir.'},
+  'dikdörtgen prizma': {yuz:6, kose:8, not:'Bütün yüzleri DİKDÖRTGENDİR.'},
+  'üçgen prizma':      {yuz:5, kose:6, not:'İki yüzü üçgen, üç yüzü dikdörtgendir.'},
+  'silindir':          {yuz:3, kose:0, not:'İki dairesel yüzü vardır, KÖŞESİ YOKTUR.'},
+  'küre':              {yuz:1, kose:0, not:'Tamamen yuvarlaktır, köşesi ve düz yüzü yoktur.'}
+};
+const SEKIL_BILGI={
+  'kare':      {kenar:4, kose:4, not:'Dört kenarının uzunluğu da eşittir.'},
+  'dikdörtgen':{kenar:4, kose:4, not:'Karşılıklı kenarlarının uzunlukları eşittir.'},
+  'üçgen':     {kenar:3, kose:3, not:'Üç kenarı ve üç köşesi vardır.'},
+  'daire':     {kenar:0, kose:0, not:'Çemberin içiyle birlikte tamamıdır. Köşesi yoktur.'},
+  'çember':    {kenar:0, kose:0, not:'Sadece çevresini oluşturan eğri çizgidir, içi boştur.'}
+};
+
+function cisimKarti(ad){ const{c,ctx,W,H}=sahne(148,112); cizCisim(ctx,ad,W/2,H/2,0.86); return c; }
+function sekilKarti(ad){ const{c,ctx,W,H}=sahne(148,112); cizSekil2B(ctx,ad,W/2,H/2,0.88); return c; }
+function metinKarti(t,b){
+  const{c,ctx,W,H}=sahne(148,86);
+  ctx.save(); ctx.fillStyle='#37474F'; ctx.font='600 '+(b||17)+'px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  const kel=t.split(' ');
+  if(t.length>13 && kel.length>1){
+    const o=Math.ceil(kel.length/2);
+    ctx.fillText(kel.slice(0,o).join(' '),W/2,H/2-11);
+    ctx.fillText(kel.slice(o).join(' '),W/2,H/2+11);
+  } else ctx.fillText(t,W/2,H/2);
+  ctx.restore(); return c;
+}
+function sayiKarti(t,b){
+  const{c,ctx,W,H}=sahne(148,86);
+  ctx.save(); ctx.fillStyle='#37474F'; ctx.font='700 '+(b||38)+'px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(t,W/2,H/2); ctx.restore(); return c;
+}
+
+/* ===== 1. ŞEKİL Mİ, CİSİM Mİ? (en kritik ayrım) ===== */
+function etkSekilCisim(){
+  const cisimMi=rnd(0,1)===0;
+  const ad=cisimMi?pick(CISIMLER):pick(SEKILLER);
+  const g=cisimMi?cisimKarti(ad):sekilKarti(ad);
+  g.style.width='150px'; g.style.height='114px';
+  return{
+    yonerge:'Yukarıdaki bir geometrik ŞEKİL mi, yoksa geometrik CİSİM mi?',
+    secenek:['Geometrik şekil','Geometrik cisim'],
+    dogru:cisimMi?'Geometrik cisim':'Geometrik şekil',
+    ustGorsel:g, ciz:t=>metinKarti(t,17),
+    ipucu:cisimMi
+      ? 'CİSİMLER hacimlidir, elimize alabiliriz. Kalınlıkları vardır.'
+      : 'ŞEKİLLER düzdür, kâğıda çizilir. Kalınlıkları yoktur.'
+  };
+}
+
+/* ===== 2. CİSMİN ADI ===== */
+function etkCisimAdi(){
+  const ad=pick(CISIMLER);
+  const w=distractors(ad,()=>pick(CISIMLER));
+  const g=cisimKarti(ad); g.style.width='150px'; g.style.height='114px';
+  return{
+    yonerge:'Bu geometrik cismin adı nedir?',
+    secenek:shuffle([ad,...w.slice(0,2)]), dogru:ad,
+    ustGorsel:g, ciz:t=>metinKarti(t,16),
+    ipucu:CISIM_BILGI[ad].not
+  };
+}
+
+/* ===== 3. ŞEKLİN ADI ===== */
+function etkSekilAdi(){
+  const ad=pick(SEKILLER);
+  const w=distractors(ad,()=>pick(SEKILLER));
+  const g=sekilKarti(ad); g.style.width='150px'; g.style.height='114px';
+  return{
+    yonerge:'Bu geometrik şeklin adı nedir?',
+    secenek:shuffle([ad,...w.slice(0,2)]), dogru:ad,
+    ustGorsel:g, ciz:t=>metinKarti(t,18),
+    ipucu:SEKIL_BILGI[ad].not
+  };
+}
+
+/* ===== 4. KARIŞTIRILAN ÇİFTLER ===== */
+const CIFTLER=[
+  {gorsel:['cisim','küp'],       dogru:'küp',        yanlis:'kare',
+   ip:'KARE düz bir şekildir. KÜP ise hacimlidir, elimize alabiliriz.'},
+  {gorsel:['sekil','kare'],      dogru:'kare',       yanlis:'küp',
+   ip:'Bu düz bir şekil, yani KARE. Küp olsaydı hacimli görünürdü.'},
+  {gorsel:['cisim','dikdörtgen prizma'], dogru:'dikdörtgen prizma', yanlis:'dikdörtgen',
+   ip:'Dikdörtgen düz bir şekildir. Bu ise hacimli, yani PRİZMA.'},
+  {gorsel:['sekil','dikdörtgen'],dogru:'dikdörtgen', yanlis:'dikdörtgen prizma',
+   ip:'Bu düz bir şekil. Prizma olsaydı derinliği görünürdü.'},
+  {gorsel:['cisim','küre'],      dogru:'küre',       yanlis:'daire',
+   ip:'DAİRE düzdür, kâğıda çizilir. KÜRE ise top gibidir.'},
+  {gorsel:['sekil','daire'],     dogru:'daire',      yanlis:'küre',
+   ip:'Bu düz bir şekil, yani DAİRE. Küre top gibi hacimli olurdu.'},
+  {gorsel:['sekil','çember'],    dogru:'çember',     yanlis:'daire',
+   ip:'ÇEMBER sadece eğri çizgidir, içi boştur. DAİRE ise içiyle birlikte doludur.'},
+  {gorsel:['sekil','daire'],     dogru:'daire',      yanlis:'çember',
+   ip:'DAİRE içiyle birlikte doludur. Çemberin ise sadece çevresi vardır.'}
+];
+function etkKaristirilan(){
+  const it=pick(CIFTLER);
+  const g=it.gorsel[0]==='cisim'?cisimKarti(it.gorsel[1]):sekilKarti(it.gorsel[1]);
+  g.style.width='150px'; g.style.height='114px';
+  return{
+    yonerge:'Dikkat! Bunun adı nedir?',
+    secenek:shuffle([it.dogru,it.yanlis]), dogru:it.dogru,
+    ustGorsel:g, ciz:t=>metinKarti(t,16),
+    ipucu:it.ip
+  };
+}
+
+/* ===== 5. YÜZ VE KÖŞE SAYISI ===== */
+function etkYuzKose(){
+  const ad=pick(CISIMLER);
+  const b=CISIM_BILGI[ad];
+  const yuzMu=rnd(0,1)===0;
+  const dogru=String(yuzMu?b.yuz:b.kose);
+  const w=distractors(dogru,()=>String(rnd(0,8)));
+  const g=cisimKarti(ad); g.style.width='150px'; g.style.height='114px';
+  return{
+    yonerge:ad.charAt(0).toLocaleUpperCase('tr')+ad.slice(1)+' cisminin kaç '+(yuzMu?'YÜZÜ':'KÖŞESİ')+' vardır?',
+    secenek:shuffle([dogru,...w.slice(0,2)]), dogru,
+    ustGorsel:g, ciz:t=>sayiKarti(t),
+    ipucu:b.not+' Yüz sayısı '+b.yuz+', köşe sayısı '+b.kose+'.'
+  };
+}
+
+/* ===== 6. KENAR VE KÖŞE SAYISI (şekillerde) ===== */
+function etkKenarKose(){
+  const ad=pick(['kare','dikdörtgen','üçgen']);
+  const b=SEKIL_BILGI[ad];
+  const kenarMi=rnd(0,1)===0;
+  const dogru=String(kenarMi?b.kenar:b.kose);
+  const w=distractors(dogru,()=>String(rnd(0,6)));
+  const g=sekilKarti(ad); g.style.width='150px'; g.style.height='114px';
+  return{
+    yonerge:ad.charAt(0).toLocaleUpperCase('tr')+ad.slice(1)+' şeklinin kaç '+(kenarMi?'KENARI':'KÖŞESİ')+' vardır?',
+    secenek:shuffle([dogru,...w.slice(0,2)]), dogru,
+    ustGorsel:g, ciz:t=>sayiKarti(t),
+    ipucu:b.not+' Şekillerde KENAR ve KÖŞE vardır; cisimlerde YÜZ ve KÖŞE.'
+  };
+}
+
+/* ===== 7. RAKAM MI, SAYI MI? ===== */
+function etkRakamSayi(){
+  const tip=rnd(0,2);
+  if(tip===0){
+    const rakamMi=rnd(0,1)===0;
+    const d=rakamMi?String(rnd(0,9)):String(rnd(10,99));
+    return{
+      yonerge:'"'+d+'" bir RAKAM mıdır, yoksa SAYI mıdır?',
+      secenek:['Rakam','Sayı'], dogru:rakamMi?'Rakam':'Sayı',
+      ustGorsel:(()=>{const c=sayiKarti(d,52);c.style.width='128px';c.style.height='86px';return c;})(),
+      ciz:t=>metinKarti(t,20),
+      ipucu:rakamMi
+        ? 'RAKAMLAR 0\u20139 arasındaki tek haneli simgelerdir: 0,1,2,3,4,5,6,7,8,9'
+        : 'SAYILAR rakamlarla yazılır. '+d+' iki rakamdan oluşur, bu yüzden sayıdır.'
+    };
+  }
+  if(tip===1){
+    return{
+      yonerge:'Toplam kaç tane rakam vardır?',
+      secenek:shuffle(['10','9','20']), dogru:'10',
+      ciz:t=>sayiKarti(t),
+      ipucu:'Rakamlar: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 — sıfırı da sayarsak 10 tane.'
+    };
+  }
+  const n=rnd(10,99);
+  const dogru=String(n).length;
+  return{
+    yonerge:'"'+n+'" sayısı kaç rakamdan oluşur?',
+    secenek:shuffle(['2','1','3']), dogru:String(dogru),
+    ustGorsel:(()=>{const c=sayiKarti(String(n),52);c.style.width='128px';c.style.height='86px';return c;})(),
+    ciz:t=>sayiKarti(t),
+    ipucu:'İki basamaklı sayılar iki rakamla yazılır: '+String(n)[0]+' ve '+String(n)[1]
+  };
+}
+
+/* ===== 8. BASAMAK VE BASAMAK DEĞERİ ===== */
+function basamakGorsel(n){
+  const{c,ctx,W,H}=sahne(230,104);
+  const on=Math.floor(n/10), bir=n%10;
+  ctx.save();
+  // Başlıklar
+  ctx.fillStyle='#546E7A'; ctx.font='600 12px Fredoka,Arial'; ctx.textAlign='center';
+  ctx.fillText('onlar basamağı',W*0.28,16); ctx.fillText('birler basamağı',W*0.72,16);
+  // Kutular
+  [[W*0.28,on,'#42A5F5','#1565C0'],[W*0.72,bir,'#FFA726','#E65100']].forEach(([x,v,f,s])=>{
+    ctx.fillStyle='#FFF'; ctx.strokeStyle=s; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.roundRect(x-30,24,60,54,12); ctx.fill(); ctx.stroke();
+    ctx.fillStyle=s; ctx.font='700 34px Fredoka,Arial'; ctx.textBaseline='middle';
+    ctx.fillText(String(v),x,52);
+  });
+  ctx.fillStyle='#78909C'; ctx.font='600 12px Fredoka,Arial'; ctx.textBaseline='top';
+  ctx.fillText(on+' onluk',W*0.28,84); ctx.fillText(bir+' birlik',W*0.72,84);
+  ctx.restore();
+  return c;
+}
+function etkBasamak(){
+  const n=rnd(11,99);
+  const on=Math.floor(n/10), bir=n%10;
+  const tip=rnd(0,2);
+  const g=basamakGorsel(n); g.style.width='222px'; g.style.height='100px';
+
+  if(tip===0){
+    const onlarMi=rnd(0,1)===0;
+    const dogru=String(onlarMi?on:bir);
+    const w=distractors(dogru,()=>String(rnd(0,9)));
+    return{
+      yonerge:'"'+n+'" sayısının '+(onlarMi?'ONLAR':'BİRLER')+' basamağındaki RAKAM kaçtır?',
+      secenek:shuffle([dogru,...w.slice(0,2)]), dogru,
+      ustGorsel:g, ciz:t=>sayiKarti(t),
+      ipucu:'BASAMAKTAKİ RAKAM, o kutuda yazan rakamdır: onlar '+on+', birler '+bir+'.'
+    };
+  }
+  if(tip===1){
+    const onlarMi=rnd(0,1)===0;
+    const dogru=String(onlarMi?on*10:bir);
+    const w=distractors(dogru,()=>String(pick([on,bir,on*10,bir*10,n])));
+    return{
+      yonerge:'"'+n+'" sayısında '+(onlarMi?'ONLAR':'BİRLER')+' basamağındaki rakamın BASAMAK DEĞERİ kaçtır?',
+      secenek:shuffle([dogru,...w.filter(x=>x!==dogru).slice(0,2)]), dogru,
+      ustGorsel:g, ciz:t=>sayiKarti(t),
+      ipucu:'BASAMAK DEĞERİ farklıdır! Onlar basamağındaki '+on+' aslında '+(on*10)+' değerindedir. Birler basamağındaki '+bir+' ise '+bir+' değerindedir.'
+    };
+  }
+  const dogru=on+' onluk '+bir+' birlik';
+  const w=new Set(); let s=0;
+  while(w.size<2&&s++<40){ const a=rnd(1,9),b=rnd(0,9); if(a!==on||b!==bir) w.add(a+' onluk '+b+' birlik'); }
+  return{
+    yonerge:'"'+n+'" sayısı kaç onluk ve kaç birlikten oluşur?',
+    secenek:shuffle([dogru,...w]), dogru,
+    ustGorsel:g, ciz:t=>metinKarti(t,15),
+    ipucu:'ÇÖZÜMLEME: '+n+' = '+(on*10)+' + '+bir+' , yani '+on+' onluk ve '+bir+' birlik.'
+  };
+}
+
+/* ===== 9. İŞLEM TERİMLERİ ===== */
+function islemGorsel(a,b,op,c2){
+  const{c,ctx,W,H}=sahne(230,84);
+  ctx.save(); ctx.fillStyle='#37474F'; ctx.font='700 30px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(a+'  '+op+'  '+b+'  =  '+c2,W/2,H/2-6);
+  ctx.font='600 11px Fredoka,Arial'; ctx.fillStyle='#78909C';
+  const parcalar=String(a+'  '+op+'  '+b+'  =  '+c2);
+  ctx.restore(); return c;
+}
+function etkIslemTerim(){
+  const toplamaMi=rnd(0,1)===0;
+  if(toplamaMi){
+    let a,b,t,dene=0;
+    do{ a=rnd(10,40); b=rnd(10,40); t=a+b; }
+    while((a===b || a===t || b===t) && dene++<40);
+    const hangi=pick(['toplanan','toplam']);
+    const dogru = hangi==='toplam' ? String(t) : String(pick([a,b]));
+    const w=[String(a),String(b),String(t)].filter(x=>x!==dogru);
+    const g=islemGorsel(a,b,'+',t); g.style.width='222px'; g.style.height='80px';
+    return{
+      yonerge:'Bu toplama işleminde '+hangi.toUpperCase()+' hangisidir?',
+      secenek:shuffle([dogru,...w.slice(0,2)]), dogru,
+      ustGorsel:g, ciz:t2=>sayiKarti(t2),
+      ipucu:'TOPLAMA: toplanan + toplanan = TOPLAM\nBurada '+a+' ve '+b+' toplananlar, '+t+' ise toplamdır.'
+    };
+  }
+  let a,b,f,dene2=0;
+  do{ a=rnd(30,90); b=rnd(5,25); f=a-b; }
+  while((a===b || a===f || b===f) && dene2++<40);
+  const hangi=pick(['eksilen','çıkan','fark']);
+  const dogru = hangi==='eksilen'?String(a) : hangi==='çıkan'?String(b) : String(f);
+  const w=[String(a),String(b),String(f)].filter(x=>x!==dogru);
+  const g=islemGorsel(a,b,'−',f); g.style.width='222px'; g.style.height='80px';
+  return{
+    yonerge:'Bu çıkarma işleminde '+hangi.toUpperCase()+' hangisidir?',
+    secenek:shuffle([dogru,...w.slice(0,2)]), dogru,
+    ustGorsel:g, ciz:t2=>sayiKarti(t2),
+    ipucu:'ÇIKARMA: eksilen − çıkan = FARK\nBurada '+a+' eksilen, '+b+' çıkan, '+f+' ise farktır.'
+  };
+}
+
+/* ===== 10. TANIMDAN KAVRAM ===== */
+const TANIMLAR=[
+  {k:'Rakam',      t:'Sayıları yazmak için kullanılan 0’dan 9’a kadar olan simgeler'},
+  {k:'Sayı',       t:'Bir çokluğu belirten, rakamlarla yazılan değer'},
+  {k:'Basamak',    t:'Bir sayıda rakamların bulunduğu yer'},
+  {k:'Çözümleme',  t:'Bir sayıyı onluk ve birliklerine ayırıp yazmak'},
+  {k:'Geometrik cisim', t:'Hacmi olan, elle tutulabilen üç boyutlu nesne'},
+  {k:'Geometrik şekil', t:'Düz bir yüzeye çizilen, kalınlığı olmayan iki boyutlu biçim'},
+  {k:'Toplam',     t:'Toplama işleminin sonucu'},
+  {k:'Fark',       t:'Çıkarma işleminin sonucu'},
+  {k:'Eksilen',    t:'Çıkarma işleminde kendisinden çıkarma yapılan sayı'},
+  {k:'Çıkan',      t:'Çıkarma işleminde çıkarılan sayı'}
+];
+function etkTanim(){
+  const it=pick(TANIMLAR);
+  const yon=rnd(0,1);
+  if(yon===0){
+    const w=distractors(it.k,()=>pick(TANIMLAR).k);
+    return{
+      yonerge:'Aşağıda tanımı verilen kavram hangisidir?',
+      secenek:shuffle([it.k,...w.slice(0,2)]), dogru:it.k,
+      ustGorsel:(()=>{const c=metinKarti(it.t,14);c.style.width='230px';c.style.height='96px';return c;})(),
+      ciz:t=>metinKarti(t,16),
+      ipucu:it.k+': '+it.t
+    };
+  }
+  const w=distractors(it.t,()=>pick(TANIMLAR).t);
+  return{
+    yonerge:'"'+it.k+'" ne demektir?',
+    secenek:shuffle([it.t,...w.slice(0,2)]), dogru:it.t,
+    ciz:t=>metinKarti(t,13),
+    ipucu:it.k+': '+it.t
+  };
+}
+
+initEtkinlik([etkSekilCisim,etkCisimAdi,etkSekilAdi,etkKaristirilan,etkYuzKose,
+              etkKenarKose,etkRakamSayi,etkBasamak,etkIslemTerim,etkTanim],
+  {ad:'Kavramlar',c1:'#84fab0',c2:'#8fd3f4',koyu:'#00695C',orta:'#26A69A',acik:'#E0F2F1'});
+</script>
+</body>
+</html>
