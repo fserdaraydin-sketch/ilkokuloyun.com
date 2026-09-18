@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sağlığım ve Güvenliğim - 1. Sınıf Hayat Bilgisi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade1-style.css">
+<script defer src="analytics.js"></script>
+</head>
+<body>
+<div class="kutu">
+  <div class="baslik"><h1>🚦 Sağlığım ve Güvenliğim</h1><p>2. Öğrenme Alanı · Sağlık, kişisel alan, trafik, acil durum</p></div>
+  <div class="ilerleme"><div class="ilerleme-dolu" id="ilerlemeDolu"></div></div>
+  <div class="yildizlar" id="yildizlar"></div>
+  <div class="yonerge">
+    <span class="yonerge-metin" id="yonergeMetin">Hazırlanıyor...</span>
+    <button class="btn-ses" id="sesBtn" onclick="sesDegistir()" aria-label="Sesi aç kapat">🔊</button>
+  </div>
+  <div class="soru-gorsel" id="soruGorsel"></div>
+  <div class="secenekler" id="secenekler"></div>
+  <div class="geri" id="geri"></div>
+  <button class="btn-devam" id="devamBtn" onclick="tekrarDinle()">🔊 Tekrar Dinle</button>
+  <button class="btn-geri" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade1-engine.js"></script>
+<script>
+function metinKarti(t,b){
+  const{c,ctx,W,H}=sahne(148,96);
+  ctx.save(); ctx.fillStyle='#37474F'; ctx.font='600 '+(b||15)+'px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  const kel=t.split(' '); const sat=[]; let s='';
+  kel.forEach(k=>{ const d=s?s+' '+k:k;
+    if(ctx.measureText(d).width>130){ sat.push(s); s=k; } else s=d; });
+  if(s) sat.push(s);
+  const bas=H/2-(sat.length-1)*9.5;
+  sat.forEach((x,i)=>ctx.fillText(x,W/2,bas+i*19));
+  ctx.restore(); return c;
+}
+function emojiKarti(ch){
+  const{c,ctx,W,H}=sahne(148,100); emoji(ctx,ch,W/2,H/2,52); return c;
+}
+function sayiKarti(t){
+  const{c,ctx,W,H}=sahne(148,92);
+  ctx.save(); ctx.fillStyle='#C62828'; ctx.font='700 40px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(t,W/2,H/2); ctx.restore(); return c;
+}
+
+/* ============================================================
+   KİŞİSEL ALAN ÇEMBERİ — kitabın ana metaforu
+   "Kişisel alanımızı çevremizdeki görünmez bir çember gibi
+    düşünebiliriz. Bu çemberin içine güvendiğimiz kişileri alırız."
+   ============================================================ */
+function cemberSahne(durum){
+  const{c,ctx,W,H}=sahne(230,164);
+  const cx=W*0.42, cy=H*0.47, r=H*0.31;
+  // Görünmez çember — kesikli
+  ctx.save();
+  ctx.setLineDash([7,5]);
+  ctx.strokeStyle= durum==='ihlal' ? '#E53935' : '#43A047';
+  ctx.lineWidth=3.5;
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle= durum==='ihlal' ? 'rgba(229,57,53,.08)' : 'rgba(67,160,71,.08)';
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+  // Ortadaki çocuk
+  emoji(ctx,'🧒',cx,cy,40);
+  // Diğer kişi
+  if(durum==='ihlal'){
+    emoji(ctx,'🧑',cx+r*0.55,cy,34);          // çemberin İÇİNDE — çok yakın
+    ctx.save(); ctx.fillStyle='#C62828'; ctx.font='700 14px Fredoka,Arial';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('çok yakın!',W*0.50,H*0.90); ctx.restore();
+  }else if(durum==='uygun'){
+    emoji(ctx,'🧑',cx+r*1.85,cy,34);          // çemberin DIŞINDA — uygun mesafe
+    ctx.save(); ctx.fillStyle='#2E7D32'; ctx.font='700 14px Fredoka,Arial';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('uygun mesafe',W*0.56,H*0.90); ctx.restore();
+  }
+  // Etiket
+  ctx.save(); ctx.fillStyle='#546E7A'; ctx.font='600 12px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('kişisel alan',cx,cy-r-12); ctx.restore();
+  return c;
+}
+
+/* ===== TRAFİK SAHNELERİ ===== */
+function trafikSahne(ad){
+  const{c,ctx,W,H}=sahne(230,140);
+
+  if(ad==='yaya geçidi'){
+    ctx.fillStyle='#BFE3F5'; ctx.fillRect(0,0,W,H*0.34);
+    ctx.fillStyle='#8BC34A'; ctx.fillRect(0,H*0.34,W,H*0.12);
+    ctx.fillStyle='#616161'; ctx.fillRect(0,H*0.46,W,H*0.42);
+    ctx.fillStyle='#8BC34A'; ctx.fillRect(0,H*0.88,W,H*0.12);
+    // Zebra çizgileri
+    ctx.fillStyle='#FFFFFF';
+    for(let i=0;i<5;i++) ctx.fillRect(W*0.30+i*W*0.075,H*0.46,W*0.045,H*0.42);
+    // Yaya levhası
+    ctx.fillStyle='#90A4AE'; ctx.fillRect(W*0.80,H*0.30,3,H*0.30);
+    ctx.fillStyle='#1565C0'; ctx.strokeStyle='#fff'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.roundRect(W*0.73,H*0.14,W*0.17,H*0.17,4); ctx.fill(); ctx.stroke();
+    emoji(ctx,'🚶',W*0.815,H*0.225,15);
+    emoji(ctx,'🧒',W*0.40,H*0.66,26);
+  }
+  else if(ad==='trafik ışığı'){
+    ctx.fillStyle='#E8F4FA'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#455A64';
+    ctx.beginPath(); ctx.roundRect(W*0.40,H*0.10,W*0.20,H*0.66,8); ctx.fill();
+    ctx.fillStyle='#90A4AE'; ctx.fillRect(W*0.475,H*0.76,W*0.05,H*0.18);
+    [['#E53935',0.22],['#FFC107',0.42],['#4CAF50',0.62]].forEach(([renk,y])=>{
+      ctx.fillStyle=renk;
+      ctx.beginPath(); ctx.arc(W*0.50,H*y,H*0.075,0,Math.PI*2); ctx.fill();
+    });
+  }
+  else if(ad==='araç içi'){
+    ctx.fillStyle='#CFD8DC'; ctx.fillRect(0,0,W,H);
+    // Koltuklar
+    ctx.fillStyle='#546E7A';
+    ctx.beginPath(); ctx.roundRect(W*0.10,H*0.30,W*0.32,H*0.50,7); ctx.fill();
+    ctx.beginPath(); ctx.roundRect(W*0.55,H*0.30,W*0.32,H*0.50,7); ctx.fill();
+    ctx.save(); ctx.fillStyle='#37474F'; ctx.font='600 11px Fredoka,Arial';
+    ctx.textAlign='center';
+    ctx.fillText('ön koltuk',W*0.26,H*0.92);
+    ctx.fillText('arka koltuk',W*0.71,H*0.92); ctx.restore();
+    emoji(ctx,'🧒',W*0.71,H*0.50,30);
+    // Emniyet kemeri — omuzdan çapraz + toka
+    ctx.strokeStyle='#212121'; ctx.lineWidth=6; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(W*0.605,H*0.355); ctx.lineTo(W*0.795,H*0.665); ctx.stroke();
+    ctx.strokeStyle='#616161'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(W*0.605,H*0.355); ctx.lineTo(W*0.795,H*0.665); ctx.stroke();
+    ctx.fillStyle='#C62828'; ctx.strokeStyle='#8E0000'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.roundRect(W*0.775,H*0.63,W*0.055,H*0.075,2); ctx.fill(); ctx.stroke();
+    ctx.save(); ctx.fillStyle='#2E7D32'; ctx.font='700 11px Fredoka,Arial';
+    ctx.textAlign='center'; ctx.fillText('kemer takılı ✓',W*0.71,H*0.18); ctx.restore();
+    // Direksiyon
+    ctx.strokeStyle='#37474F'; ctx.lineWidth=4;
+    ctx.beginPath(); ctx.arc(W*0.26,H*0.22,H*0.10,0,Math.PI*2); ctx.stroke();
+  }
+  else if(ad==='üst geçit'){
+    ctx.fillStyle='#BFE3F5'; ctx.fillRect(0,0,W,H*0.62);
+    ctx.fillStyle='#616161'; ctx.fillRect(0,H*0.62,W,H*0.26);
+    ctx.fillStyle='#8BC34A'; ctx.fillRect(0,H*0.88,W,H*0.12);
+    ctx.strokeStyle='#FFEB3B'; ctx.lineWidth=2.5; ctx.setLineDash([9,7]);
+    ctx.beginPath(); ctx.moveTo(0,H*0.75); ctx.lineTo(W,H*0.75); ctx.stroke();
+    ctx.setLineDash([]);
+    // Köprü
+    ctx.fillStyle='#B0BEC5';
+    ctx.fillRect(W*0.14,H*0.30,W*0.72,H*0.05);
+    ctx.fillRect(W*0.14,H*0.35,W*0.04,H*0.27);
+    ctx.fillRect(W*0.82,H*0.35,W*0.04,H*0.27);
+    ctx.strokeStyle='#90A4AE'; ctx.lineWidth=2;
+    for(let i=0;i<7;i++){ ctx.beginPath();
+      ctx.moveTo(W*(0.18+i*0.105),H*0.30); ctx.lineTo(W*(0.18+i*0.105),H*0.20); ctx.stroke(); }
+    ctx.beginPath(); ctx.moveTo(W*0.16,H*0.20); ctx.lineTo(W*0.84,H*0.20); ctx.stroke();
+    emoji(ctx,'🧒',W*0.50,H*0.245,20);
+  }
+  return c;
+}
+
+/* ===== 1. SAĞLIKLI BESLENME VE UYKU ===== */
+function etkSaglik(){
+  const sorular=[
+    {s:'Sağlıklı büyümek için nasıl beslenmeliyiz?',c:'Dengeli beslenmeliyiz',
+     y:['Sadece sevdiğimizi yemeliyiz','Hiç yememeliyiz'],
+     e:'Sağlıklı büyümek ve gelişmek için dengeli besleniriz. Vücudumuza yararlı besinlerden yeteri kadar yeriz.'},
+    {s:'Kahvaltı yapmadan okula gitmek doğru mudur?',c:'Hayır, öğün atlamamalıyız',
+     y:['Evet, zaman kazanırız','Fark etmez'],
+     e:'Öğün atlamayız. Kahvaltı günün en önemli öğünüdür, bize güç verir.'},
+    {s:'Gece geç saate kadar uyanık kalmak doğru mudur?',c:'Hayır, düzenli ve yeterli uyumalıyız',
+     y:['Evet, daha çok oyun oynarız','Fark etmez'],
+     e:'Düzenli ve yeterli uyuruz. Uyku sırasında vücudumuz dinlenir ve büyür.'},
+    {s:'Sağlıklı kalmak için ne yapmalıyız?',c:'Düzenli spor yapmalıyız',
+     y:['Hiç hareket etmemeliyiz','Sadece oturmalıyız'],
+     e:'Düzenli spor yaparız. Hareket etmek kaslarımızı ve kalbimizi güçlendirir.'},
+    {s:'Hangisi vücudumuza daha yararlıdır?',c:'Meyve ve sebze',
+     y:['Şekerli içecekler','Cips ve şeker'],
+     e:'Vücudumuza yararlı olan besinlerden yeteri kadar yer ve içeriz. Meyve, sebze, süt ve ayran bunlardandır.'},
+    {s:'Susadığında ne içmelisin?',c:'Su',y:['Gazlı içecek','Hiçbir şey'],
+     e:'Su vücudumuz için en gerekli içecektir. Gün içinde yeterince su içmeliyiz.'}
+  ];
+  const it=pick(sorular);
+  return{
+    yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ciz:t=>metinKarti(t,15), ipucu:it.e
+  };
+}
+
+/* ===== 2. KİŞİSEL BAKIM ===== */
+function etkBakim(){
+  const bakimlar=[
+    {ch:'🧼',ad:'ellerimizi yıkamak', ne:'Yemekten önce ve sonra, tuvaletten sonra ellerimizi yıkarız.'},
+    {ch:'🪥',ad:'diş fırçalamak',     ne:'Dişlerimizi günde iki kez, sabah ve akşam fırçalarız.'},
+    {ch:'🛁',ad:'banyo yapmak',       ne:'Düzenli banyo yaparak vücudumuzu temiz tutarız.'},
+    {ch:'💇',ad:'saçlarımızı taramak',ne:'Saçlarımızı tarar, temiz tutarız.'},
+    {ch:'💅',ad:'tırnaklarımızı kesmek',ne:'Tırnaklarımızın temizliğine dikkat eder, uzayınca kestiririz.'}
+  ];
+  const tip=rnd(0,1);
+  if(tip===0){
+    const it=pick(bakimlar);
+    const w=distractors(it.ad,()=>pick(bakimlar).ad);
+    return{
+      yonerge:'Bu resim hangi kişisel bakım davranışını gösteriyor?',
+      secenek:shuffle([it.ad,...w.slice(0,2)]), dogru:it.ad,
+      ustGorsel:(()=>{const c=emojiKarti(it.ch);c.style.width='130px';c.style.height='88px';return c;})(),
+      ciz:t=>metinKarti(t,15), ipucu:it.ne
+    };
+  }
+  const durumlar=[
+    {s:'Yemekten önce ne yapmalısın?',c:'Ellerimi yıkamalıyım',
+     y:['Hemen yemeliyim','Ellerimi cebime koymalıyım'],
+     e:'Yemekten önce ellerimizi mutlaka yıkarız. Eller mikropları taşır.'},
+    {s:'Tuvaletten çıkınca ne yapmalısın?',c:'Ellerimi sabunla yıkamalıyım',
+     y:['Hemen oyuna dönmeliyim','Sadece suyla ıslatmalıyım'],
+     e:'Tuvaletten sonra elleri SABUNLA yıkamak çok önemlidir.'},
+    {s:'Dişlerini günde kaç kez fırçalamalısın?',c:'İki kez, sabah ve akşam',
+     y:['Haftada bir kez','Hiç gerekmez'],
+     e:'Dişlerimizi günde iki kez, sabah ve akşam fırçalarız.'},
+    {s:'Öksürürken ne yapmalısın?',c:'Kolumun içine öksürmeliyim',
+     y:['Arkadaşıma doğru','Hiçbir şey yapmam'],
+     e:'Öksürürken kolumuzun iç kısmını kullanırız. Böylece mikropları yaymayız.'}
+  ];
+  const it=pick(durumlar);
+  return{
+    yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ciz:t=>metinKarti(t,14), ipucu:it.e
+  };
+}
+
+/* ===== 3. KİŞİSEL ALAN — KAVRAM ===== */
+function etkKisiselAlanKavram(){
+  const tip=rnd(0,1);
+  if(tip===0){
+    const ihlalMi=rnd(0,1)===0;
+    const g=cemberSahne(ihlalMi?'ihlal':'uygun');
+    g.style.width='220px'; g.style.height='157px';
+    return{
+      yonerge:'Bu resimde kişisel alana saygı gösteriliyor mu?',
+      secenek:['Evet, uygun mesafede duruyor','Hayır, çok yaklaşmış'],
+      dogru:ihlalMi?'Hayır, çok yaklaşmış':'Evet, uygun mesafede duruyor',
+      ustGorsel:g, ciz:t=>metinKarti(t,14),
+      ipucu:ihlalMi
+        ? 'Kişisel alan, çevremizdeki görünmez bir çember gibidir. İzinsiz bu çembere girmek rahatsız eder.'
+        : 'Konuşurken aramızda uygun bir mesafe bırakırız. Bu herkesi rahat ettirir.'
+    };
+  }
+  const sorular=[
+    {s:'Kişisel alan ne demektir?',c:'Kendimi rahat ve güvende hissettiğim alan',
+     y:['Oyun oynadığım bahçe','Oturduğum sıra'],
+     e:'Kişisel alanımız, kendimizi rahat ve güvende hissettiğimiz alandır. Çevremizdeki görünmez bir çember gibi düşünebiliriz.'},
+    {s:'Kişisel alanımızın içine kimleri alırız?',c:'Güvendiğimiz kişileri',
+     y:['Herkesi','Hiç kimseyi'],
+     e:'Bu çemberin içine güvendiğimiz kişileri alırız. Kimi alacağımıza biz karar veririz.'},
+    {s:'Herkesin kişisel alanı var mıdır?',c:'Evet, herkesin vardır',
+     y:['Sadece büyüklerin','Sadece çocukların'],
+     e:'Herkesin kişisel alanı vardır. Başkalarının alanına da saygı göstermeliyiz.'}
+  ];
+  const it=pick(sorular);
+  return{
+    yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ciz:t=>metinKarti(t,14), ipucu:it.e
+  };
+}
+
+/* ===== 4. KİŞİSEL ALANI KORUMA — KORUYUCU KAZANIM ===== */
+function etkKisiselAlanKoru(){
+  const sorular=[
+    {s:'Biri sana izinsiz sarılmak istiyor ama sen istemiyorsun. Ne yaparsın?',
+     c:'“İstemiyorum” derim',y:['Sesimi çıkarmam','Kabul ederim'],
+     e:'İzin almadan dokunmak ya da sarılmak doğru değildir. “İstemiyorum” demek senin hakkındır.'},
+    {s:'Bir arkadaşın sana çok yaklaşıp rahatsız ediyor. Ne yaparsın?',
+     c:'Nazikçe biraz uzaklaşmasını isterim',y:['Onu iterim','Hiçbir şey demem'],
+     e:'“Biraz geri durabilir misin?” demek yeterlidir. İtmek gerekmez, sözle anlatmak daha etkilidir.'},
+    {s:'Tanımadığın biri seninle konuşmak istiyor. Ne yaparsın?',
+     c:'Uzaklaşır, güvendiğim bir büyüğe haber veririm',
+     y:['Onunla sohbet ederim','Adresimi söylerim'],
+     e:'Tanımadığımız kişilerle iletişim kurmayız. Hemen güvendiğimiz bir büyüğe haber veririz.'},
+    {s:'Biri senden fotoğrafını ya da adresini istiyor. Ne yaparsın?',
+     c:'Vermem, aileme söylerim',y:['Hemen veririm','Sadece fotoğrafı veririm'],
+     e:'Kişisel bilgilerimizi ve fotoğraflarımızı herkesle paylaşmayız. Bu bilgiler bize aittir.'},
+    {s:'Arkadaşına lakap takmak doğru mudur?',c:'Hayır, bu onu incitir',
+     y:['Evet, eğlenceli olur','Şaka olursa olur'],
+     e:'Başkalarıyla alay etmek, onlara lakap takmak kişisel alana saygısızlıktır ve incitir.'},
+    {s:'Seni rahatsız eden bir şey oldu. Ne yaparsın?',
+     c:'Güvendiğim bir büyüğe anlatırım',y:['Sır olarak saklarım','Kimseye söylemem'],
+     e:'Seni rahatsız eden bir durumu MUTLAKA güvendiğin bir büyüğe anlat. Bu senin hakkın.'},
+    {s:'Bir arkadaşın “İstemiyorum” dedi. Ne yaparsın?',c:'Saygı gösterip vazgeçerim',
+     y:['Israr ederim','Kızarım'],
+     e:'Birinin “hayır” demesine saygı göstermeliyiz. Başkalarının kişisel alanı da bizimki kadar önemlidir.'},
+    {s:'Arkadaşının çantasını izinsiz karıştırmak doğru mudur?',c:'Hayır, önce izin istemeliyim',
+     y:['Evet, arkadaşız','Sadece bir kez olur'],
+     e:'Kişisel eşyalar da kişisel alana dâhildir. Kullanmadan önce izin isteriz.'}
+  ];
+  const it=pick(sorular);
+  return{
+    yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ciz:t=>metinKarti(t,14), ipucu:it.e
+  };
+}
+
+/* ===== 5. TRAFİK — YAYA ===== */
+function etkTrafikYaya(){
+  const tip=rnd(0,1);
+  if(tip===0){
+    const sahneler=[
+      {ad:'yaya geçidi',s:'Karşıdan karşıya nereden geçmeliyiz?',c:'yaya geçidi',
+       y:['trafik ışığı','araç içi'],
+       e:'Yaya geçidi olan yerlerde karşıdan karşıya geçerken yaya geçitlerini tercih ederiz.'},
+      {ad:'üst geçit',s:'Yolun üstünden güvenle geçmek için ne kullanırız?',c:'üst geçit',
+       y:['yaya geçidi','trafik ışığı'],
+       e:'Karşıdan karşıya geçişlerde alt veya üst geçit varsa onu kullanırız. En güvenli yol budur.'}
+    ];
+    const it=pick(sahneler);
+    const g=trafikSahne(it.ad); g.style.width='220px'; g.style.height='134px';
+    return{
+      yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+      ustGorsel:g, ciz:t=>metinKarti(t,16), ipucu:it.e
+    };
+  }
+  const sorular=[
+    {s:'Karşıdan karşıya geçerken önce nereye bakarız?',c:'Önce sola, sonra sağa, sonra tekrar sola',
+     y:['Sadece sağa','Hiçbir yere'],
+     e:'Karşıdan karşıya geçerken önce SOLA, sonra SAĞA bakarız. Sonra tekrar SOLA bakıp karşıya geçeriz.'},
+    {s:'Trafik ışığı kırmızıyken yaya ne yapar?',c:'Bekler',y:['Geçer','Koşar'],
+     e:'Yayalar için yeşil ışık yanana kadar bekleriz. Kırmızıda asla geçmeyiz.'},
+    {s:'Yolda yürürken ne yapmalıyız?',c:'Kaldırımda ve dikkatli yürümeliyiz',
+     y:['Yolun ortasında yürümeliyiz','Koşmalıyız'],
+     e:'Yayalar kaldırımda yürür. Kaldırım yoksa yolun kenarından dikkatle yürürüz.'},
+    {s:'Top yola kaçtı. Ne yaparsın?',c:'Bir büyükten yardım isterim',
+     y:['Hemen koşup alırım','Yolun ortasında beklerim'],
+     e:'Yola asla koşarak girmeyiz. Mutlaka bir büyükten yardım isteriz.'}
+  ];
+  const it=pick(sorular);
+  return{
+    yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ciz:t=>metinKarti(t,14), ipucu:it.e
+  };
+}
+
+/* ===== 6. TRAFİK — YOLCU ===== */
+function etkTrafikYolcu(){
+  const tip=rnd(0,1);
+  if(tip===0){
+    const g=trafikSahne('araç içi'); g.style.width='220px'; g.style.height='134px';
+    const sorular=[
+      {s:'Araçta çocuklar nerede oturmalıdır?',c:'Arka koltukta',y:['Ön koltukta','Sürücünün kucağında'],
+       e:'Araçta arka koltuğa otururuz. Arka koltuk çocuklar için daha güvenlidir.'},
+      {s:'Araca bindiğinde ilk ne yaparsın?',c:'Emniyet kemerimi bağlarım',
+       y:['Camı açarım','Müziği açarım'],
+       e:'Emniyet kemerimizi bağlarız. Kemer bir kaza anında bizi korur.'}
+    ];
+    const it=pick(sorular);
+    return{
+      yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+      ustGorsel:g, ciz:t=>metinKarti(t,14), ipucu:it.e
+    };
+  }
+  const sorular=[
+    {s:'Araç giderken sürücüyle sohbet etmek doğru mudur?',c:'Hayır, dikkatini dağıtmamalıyız',
+     y:['Evet, yol uzun olmasın','Fark etmez'],
+     e:'Sürücünün dikkatini dağıtmayız. Dikkati dağılan sürücü kaza yapabilir.'},
+    {s:'Yolculuk sırasında emniyet kemerini çıkarabilir misin?',c:'Hayır, araç durana kadar takılı kalmalı',
+     y:['Evet, sıkıcı olunca','Sadece kısa yolda'],
+     e:'Yolculuk boyunca emniyet kemeri takılı kalmalıdır. Araç tamamen durunca çıkarılır.'},
+    {s:'Araçta camdan elini çıkarmak doğru mudur?',c:'Hayır, çok tehlikelidir',
+     y:['Evet, eğlenceli','Sadece yavaşken'],
+     e:'Camdan el ya da baş çıkarmak çok tehlikelidir. Asla yapmamalıyız.'},
+    {s:'Servisten inerken ne yapmalısın?',c:'Araç tamamen durduktan sonra inmeliyim',
+     y:['Yavaşlayınca atlarım','Koşarak inerim'],
+     e:'Araç tamamen durmadan asla inmeyiz. İndikten sonra da aracın önünden geçmeyiz.'}
+  ];
+  const it=pick(sorular);
+  return{
+    yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ciz:t=>metinKarti(t,14), ipucu:it.e
+  };
+}
+
+/* ===== 7. TRAFİK IŞIĞI ===== */
+function etkTrafikIsik(){
+  const renkler=[
+    {ad:'kırmızı',ne:'Dur! Geçmek yok.',ch:'🔴'},
+    {ad:'sarı',   ne:'Dikkat! Hazır ol, ışık değişecek.',ch:'🟡'},
+    {ad:'yeşil',  ne:'Geç! Ama yine de sağa sola bakarız.',ch:'🟢'}
+  ];
+  const it=pick(renkler);
+  const g=trafikSahne('trafik ışığı'); g.style.width='180px'; g.style.height='110px';
+  return{
+    yonerge:'Trafik ışığında '+it.ad.toLocaleUpperCase('tr')+' yandığında ne yaparız?',
+    secenek:shuffle([it.ne,...shuffle(renkler.filter(x=>x.ad!==it.ad)).map(x=>x.ne)]),
+    dogru:it.ne,
+    ustGorsel:g, ciz:t=>metinKarti(t,14),
+    ipucu:'🔴 Kırmızı: dur · 🟡 Sarı: dikkat et · 🟢 Yeşil: geç\nYeşilde bile geçmeden önce sağa sola bakarız.'
+  };
+}
+
+/* ===== 8. ACİL DURUM ===== */
+function etkAcil(){
+  const tip=rnd(0,2);
+  if(tip===0){
+    // 112 numarası
+    const w=distractors('112',()=>String(pick([110,155,156,177,113])));
+    return{
+      yonerge:'Acil bir durumda hangi numarayı aramalıyız?',
+      secenek:shuffle(['112',...w.slice(0,2)]), dogru:'112',
+      ustGorsel:(()=>{const c=sayiKarti('112');c.style.width='150px';c.style.height='94px';return c;})(),
+      ciz:t=>sayiKarti(t),
+      ipucu:'Acil Çağrı Merkezine ulaşmak için 112 numarasını ararız.\nAmbulans, itfaiye ve polis için tek numara: 112'
+    };
+  }
+  if(tip===1){
+    const durumlar=[
+      {d:'Evdeyken acil bir durum oldu. Kimden yardım istersin?',c:'Aile büyüklerimden',
+       y:['Kimseden','Televizyondan'],
+       e:'Evimizdeysek aile büyüklerimizden yardım isteriz.'},
+      {d:'Okuldayken acil bir durum oldu. Kimden yardım istersin?',c:'Öğretmenimden',
+       y:['Arkadaşımdan','Kimseden'],
+       e:'Okuldaysak öğretmenlerimizden yardım isteriz.'},
+      {d:'Kalabalıkta ailenden ayrıldın. Ne yaparsın?',c:'Polis ya da güvenlik görevlisine giderim',
+       y:['Koşarak ararım','Dışarı çıkarım'],
+       e:'Kalabalıkta kaybolursak polis, güvenlik personeli gibi GÖREVLİLERDEN yardım alırız. Olduğumuz yerde kalmak da doğrudur.'},
+      {d:'Mutfakta gaz kokusu aldın. İlk ne yaparsın?',c:'Hemen bir büyüğe haber veririm',
+       y:['Işığı açarım','Hiçbir şey yapmam'],
+       e:'Gaz kokusu acil bir durumdur. Hemen bir büyüğe haber verilir. Elektrik düğmesine dokunulmaz.'}
+    ];
+    const it=pick(durumlar);
+    return{
+      yonerge:it.d, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+      ciz:t=>metinKarti(t,14), ipucu:it.e
+    };
+  }
+  const sorular=[
+    {s:'Acil bir durumda önce ne yapmalıyız?',c:'Sakin kalmaya çalışmalıyız',
+     y:['Bağırıp koşmalıyız','Saklanmalıyız'],
+     e:'Öncelikle SAKİN kalmaya çalışırız. Panik yaparsak doğru düşünemeyiz.'},
+    {s:'Hangisi acil bir durumdur?',c:'Gaz kaçağı',y:['Ödevini unutmak','Oyuncağın kırılması'],
+     e:'Çarpma, düşme, gaz kaçağı, kaybolma, zehirlenme ve trafik kazası acil durumlardır.'},
+    {s:'Acil durumda işine yarayacak bilgi hangisidir?',c:'Adresim ve aile büyüğümün telefonu',
+     y:['En sevdiğim renk','Arkadaşımın adı'],
+     e:'Adresimizi ve aile büyüğümüzün telefon numarasını bilmek çok önemlidir.'},
+    {s:'112’yi aradığında ne söylemelisin?',c:'Nerede olduğumu ve ne olduğunu',
+     y:['Sadece adımı','Hiçbir şey'],
+     e:'Nerede olduğumuzu ve ne olduğunu açıkça anlatırız. Sakin konuşmak yardımın hızlı gelmesini sağlar.'},
+    {s:'Şaka amaçlı 112’yi aramak doğru mudur?',c:'Hayır, gerçekten ihtiyacı olanları engeller',
+     y:['Evet, eğlenceli','Bir kez olur'],
+     e:'Şaka amaçlı arama, gerçekten yardıma ihtiyacı olan birinin yardım almasını geciktirir.'}
+  ];
+  const it=pick(sorular);
+  return{
+    yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ciz:t=>metinKarti(t,14), ipucu:it.e
+  };
+}
+
+initEtkinlik([etkSaglik,etkBakim,etkKisiselAlanKavram,etkKisiselAlanKoru,
+              etkTrafikYaya,etkTrafikYolcu,etkTrafikIsik,etkAcil],
+  {ad:'Sağlığım ve Güvenliğim',c1:'#fddb92',c2:'#d1fdff',koyu:'#E65100',orta:'#FB8C00',acik:'#FFF3E0'});
+</script>
+</body>
+</html>
