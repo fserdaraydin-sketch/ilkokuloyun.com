@@ -33,10 +33,29 @@ let sesAcik=true;
 function seslendir(metin){
   if(!sesAcik||!('speechSynthesis' in window))return;
   speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(metin.replace(/[👆🔊⭐✨🎉]/g,''));
+  const u=new SpeechSynthesisUtterance(seslendirmeMetni(metin));
   u.lang='tr-TR'; u.rate=.82; u.pitch=1.05;
   speechSynthesis.speak(u);
 }
+
+// Matematik sembollerini Türkçe okunuşlarına çevirir.
+// Aksi hâlde ekran okuyucu "4 × 3" ifadesini "dört iks üç" diye okuyor.
+function seslendirmeMetni(metin){
+  return String(metin)
+    .replace(/[👆🔊⭐✨🎉👀💪🌟👏🏆]/g,'')
+    .replace(/\s*×\s*/g,' çarpı ')
+    .replace(/\s*÷\s*/g,' bölü ')
+    .replace(/\s*[−–—]\s*/g,' eksi ')
+    .replace(/(\d)\s*-\s*(\d)/g,'$1 eksi $2')
+    .replace(/\s*\+\s*/g,' artı ')
+    .replace(/\s*=\s*/g,' eşittir ')
+    .replace(/\s*≈\s*/g,' yaklaşık ')
+    .replace(/\s*>\s*/g,' büyüktür ')
+    .replace(/\s*<\s*/g,' küçüktür ')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+
 function sesiDurdur(){ if('speechSynthesis' in window) speechSynthesis.cancel(); }
 
 // ---- CANVAS ----
