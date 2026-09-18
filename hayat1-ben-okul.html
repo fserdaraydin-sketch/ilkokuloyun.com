@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ben ve Okulum - 1. Sınıf Hayat Bilgisi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade1-style.css">
+<script defer src="analytics.js"></script>
+</head>
+<body>
+<div class="kutu">
+  <div class="baslik"><h1>🏫 Ben ve Okulum</h1><p>1. Öğrenme Alanı · Tanışma, okul, kurallar, duygular</p></div>
+  <div class="ilerleme"><div class="ilerleme-dolu" id="ilerlemeDolu"></div></div>
+  <div class="yildizlar" id="yildizlar"></div>
+  <div class="yonerge">
+    <span class="yonerge-metin" id="yonergeMetin">Hazırlanıyor...</span>
+    <button class="btn-ses" id="sesBtn" onclick="sesDegistir()" aria-label="Sesi aç kapat">🔊</button>
+  </div>
+  <div class="soru-gorsel" id="soruGorsel"></div>
+  <div class="secenekler" id="secenekler"></div>
+  <div class="geri" id="geri"></div>
+  <button class="btn-devam" id="devamBtn" onclick="tekrarDinle()">🔊 Tekrar Dinle</button>
+  <button class="btn-geri" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade1-engine.js"></script>
+<script>
+function metinKarti(t,b){
+  const{c,ctx,W,H}=sahne(148,92);
+  ctx.save(); ctx.fillStyle='#37474F'; ctx.font='600 '+(b||16)+'px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  const kel=t.split(' '); const satir=[]; let s='';
+  kel.forEach(k=>{ const d=s?s+' '+k:k;
+    if(ctx.measureText(d).width>128){ satir.push(s); s=k; } else s=d; });
+  if(s) satir.push(s);
+  const bas=H/2-(satir.length-1)*10;
+  satir.forEach((x,i)=>ctx.fillText(x,W/2,bas+i*20));
+  ctx.restore(); return c;
+}
+function emojiKarti(ch){
+  const{c,ctx,W,H}=sahne(148,100);
+  emoji(ctx,ch,W/2,H/2,52); return c;
+}
+
+/* ===== DUYGU YÜZÜ ÇİZİMİ ===== */
+function duyguYuz(ctx,cx,cy,r,tip){
+  // Yüz
+  ctx.fillStyle='#FFD86B';
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#E0A82E'; ctx.lineWidth=r*0.07; ctx.stroke();
+  const gz=r*0.34, gy=cy-r*0.18;
+  ctx.fillStyle='#4A3B10'; ctx.strokeStyle='#4A3B10';
+  ctx.lineWidth=r*0.075; ctx.lineCap='round';
+
+  // Gözler
+  if(tip==='şaşkın'||tip==='heyecanlı'){
+    [-1,1].forEach(s=>{ ctx.beginPath(); ctx.arc(cx+s*gz,gy,r*0.15,0,Math.PI*2); ctx.fill(); });
+  }else if(tip==='korkmuş'){
+    [-1,1].forEach(s=>{ ctx.beginPath(); ctx.ellipse(cx+s*gz,gy,r*0.12,r*0.17,0,0,Math.PI*2); ctx.fill(); });
+  }else{
+    [-1,1].forEach(s=>{ ctx.beginPath(); ctx.arc(cx+s*gz,gy,r*0.11,0,Math.PI*2); ctx.fill(); });
+  }
+  // Kaşlar
+  ctx.beginPath();
+  if(tip==='kızgın'){
+    ctx.moveTo(cx-gz-r*0.18,gy-r*0.42); ctx.lineTo(cx-gz+r*0.16,gy-r*0.25);
+    ctx.moveTo(cx+gz+r*0.18,gy-r*0.42); ctx.lineTo(cx+gz-r*0.16,gy-r*0.25);
+  }else if(tip==='üzgün'||tip==='korkmuş'){
+    ctx.moveTo(cx-gz-r*0.18,gy-r*0.26); ctx.lineTo(cx-gz+r*0.16,gy-r*0.42);
+    ctx.moveTo(cx+gz+r*0.18,gy-r*0.26); ctx.lineTo(cx+gz-r*0.16,gy-r*0.42);
+  }else if(tip==='şaşkın'){
+    ctx.moveTo(cx-gz-r*0.17,gy-r*0.46); ctx.lineTo(cx-gz+r*0.17,gy-r*0.46);
+    ctx.moveTo(cx+gz-r*0.17,gy-r*0.46); ctx.lineTo(cx+gz+r*0.17,gy-r*0.46);
+  }
+  ctx.stroke();
+  // Ağız
+  ctx.lineWidth=r*0.085;
+  ctx.beginPath();
+  if(tip==='mutlu'){
+    ctx.arc(cx,cy+r*0.10,r*0.42,0.18*Math.PI,0.82*Math.PI);
+  }else if(tip==='heyecanlı'){
+    // Açık ağızla gülümseme — mutludan ayırt edilsin
+    ctx.save();
+    ctx.fillStyle='#4A3B10';
+    ctx.beginPath(); ctx.ellipse(cx,cy+r*0.34,r*0.28,r*0.22,0,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#FF8A80';
+    ctx.beginPath(); ctx.ellipse(cx,cy+r*0.44,r*0.15,r*0.10,0,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+  }else if(tip==='üzgün'){
+    ctx.arc(cx,cy+r*0.62,r*0.42,1.18*Math.PI,1.82*Math.PI);
+  }else if(tip==='kızgın'){
+    ctx.arc(cx,cy+r*0.58,r*0.36,1.20*Math.PI,1.80*Math.PI);
+  }else if(tip==='şaşkın'){
+    ctx.ellipse(cx,cy+r*0.30,r*0.17,r*0.24,0,0,Math.PI*2);
+  }else if(tip==='korkmuş'){
+    ctx.ellipse(cx,cy+r*0.32,r*0.20,r*0.16,0,0,Math.PI*2);
+  }else{ // sakin
+    ctx.moveTo(cx-r*0.26,cy+r*0.30); ctx.lineTo(cx+r*0.26,cy+r*0.30);
+  }
+  ctx.stroke();
+  if(tip==='heyecanlı'){
+    ctx.save(); ctx.font=(r*0.45)+'px serif'; ctx.textAlign='center';
+    ctx.fillText('✨',cx+r*0.86,cy-r*0.66); ctx.restore();
+  }
+  if(tip==='üzgün'){
+    ctx.fillStyle='#4FC3F7';
+    ctx.beginPath(); ctx.ellipse(cx-gz,gy+r*0.36,r*0.07,r*0.12,0,0,Math.PI*2); ctx.fill();
+  }
+}
+function yuzKarti(tip,boyut){
+  const b=boyut||120;
+  const{c,ctx,W,H}=sahne(b,b);
+  duyguYuz(ctx,W/2,H/2,b*0.36,tip);
+  return c;
+}
+
+const DUYGULAR=[
+  {ad:'mutlu',    tip:'mutlu',    ne:'Sevindiğimizde, hoşumuza giden bir şey olduğunda mutlu oluruz.'},
+  {ad:'üzgün',    tip:'üzgün',    ne:'Sevdiğimiz bir şeyi kaybettiğimizde ya da canımız yandığında üzülürüz.'},
+  {ad:'kızgın',   tip:'kızgın',   ne:'Haksızlığa uğradığımızda ya da bir şey ters gittiğinde kızabiliriz.'},
+  {ad:'şaşkın',   tip:'şaşkın',   ne:'Beklemediğimiz bir şey olduğunda şaşırırız.'},
+  {ad:'korkmuş',  tip:'korkmuş',  ne:'Tehlike hissettiğimizde ya da bilmediğimiz bir durumda korkarız.'},
+  {ad:'heyecanlı',tip:'heyecanlı',ne:'Güzel bir şey olacağını beklerken heyecanlanırız.'}
+];
+
+/* ===== 1. KENDİNİ TANITMA ===== */
+function etkTanisma(){
+  const sorular=[
+    {s:'Yeni tanıştığın bir arkadaşına önce ne söylersin?',c:'Adımı söylerim',
+     y:['Hiçbir şey söylemem','Sırasını alırım'],
+     e:'Tanışırken önce adımızı söyleriz. “Merhaba, benim adım …” demek güzel bir başlangıçtır.'},
+    {s:'Biri sana adını sorduğunda ne yaparsın?',c:'Gözlerine bakıp adımı söylerim',
+     y:['Başımı çevirip susarım','Arkadaşımın adını söylerim'],
+     e:'Konuşurken karşımızdakinin gözlerine bakmak saygı göstergesidir.'},
+    {s:'Kendini tanıtırken hangisini söylersin?',c:'Adımı, yaşımı ve okulumu',
+     y:['Arkadaşımın sırrını','Komşumuzun adını'],
+     e:'Kendimizi tanıtırken adımızı, yaşımızı, okulumuzu ve sevdiğimiz şeyleri söyleyebiliriz.'},
+    {s:'Sınıfa yeni bir arkadaş geldi. Ne yaparsın?',c:'Yanına gidip tanışırım',
+     y:['Görmezden gelirim','Arkadaşlarımla gülerim'],
+     e:'Yeni gelen biri kendini yalnız hissedebilir. Tanışmak onu rahatlatır.'},
+    {s:'Herkesin adı, boyu ve saçı aynı mıdır?',c:'Hayır, herkes farklıdır',
+     y:['Evet, herkes aynıdır','Sadece adlar farklıdır'],
+     e:'Her insan birbirinden farklıdır. Bu farklılıklar bizi özel yapar.'}
+  ];
+  const it=pick(sorular);
+  return{
+    yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ciz:t=>metinKarti(t,15), ipucu:it.e
+  };
+}
+
+/* ===== 2. OKUL MEKÂNLARI ===== */
+const MEKANLAR=[
+  {ch:'📚',ad:'kütüphane', is:'Kitap okumak ve ödünç almak için gittiğimiz yer'},
+  {ch:'🍽️',ad:'yemekhane', is:'Öğle yemeğimizi yediğimiz yer'},
+  {ch:'🏀',ad:'spor salonu',is:'Beden eğitimi dersi yaptığımız yer'},
+  {ch:'🩹',ad:'revir',      is:'Canımız yandığında ya da rahatsızlandığımızda gittiğimiz yer'},
+  {ch:'🪑',ad:'sınıf',      is:'Derslerimizi işlediğimiz yer'},
+  {ch:'🌳',ad:'bahçe',      is:'Teneffüste oyun oynadığımız yer'},
+  {ch:'🚪',ad:'müdür odası',is:'Okul müdürünün çalıştığı yer'}
+];
+function etkMekan(){
+  const it=pick(MEKANLAR);
+  const yon=rnd(0,1);
+  if(yon===0){
+    const w=distractors(it.ad,()=>pick(MEKANLAR).ad);
+    return{
+      yonerge:it.is+'. Burası neresidir?',
+      secenek:shuffle([it.ad,...w.slice(0,2)]), dogru:it.ad,
+      ustGorsel:(()=>{const c=emojiKarti(it.ch);c.style.width='130px';c.style.height='88px';return c;})(),
+      ciz:t=>metinKarti(t,16),
+      ipucu:it.ad.charAt(0).toLocaleUpperCase('tr')+it.ad.slice(1)+': '+it.is.toLocaleLowerCase('tr')+'.'
+    };
+  }
+  const w=shuffle(MEKANLAR.filter(x=>x.ad!==it.ad)).slice(0,2);
+  return{
+    yonerge:'Kitap okumak istiyorsan okulda nereye gidersin?',
+    secenek:shuffle(['kütüphane','yemekhane','spor salonu']), dogru:'kütüphane',
+    ciz:t=>metinKarti(t,16),
+    ipucu:'Kütüphane, kitap okuduğumuz ve kitap ödünç aldığımız yerdir.'
+  };
+}
+
+/* ===== 3. OKULDAKİ KİŞİLER ===== */
+function etkKisiler(){
+  const sorular=[
+    {s:'Derslerimizi kim anlatır?',c:'Öğretmenimiz',y:['Güvenlik görevlisi','Aşçı'],
+     e:'Öğretmenimiz bize dersleri anlatır, öğrenmemize yardım eder.'},
+    {s:'Okulun tamamından kim sorumludur?',c:'Okul müdürü',y:['Sınıf başkanı','Kapıcı'],
+     e:'Okul müdürü okulun düzeninden ve işleyişinden sorumludur.'},
+    {s:'Okulun kapısında güvenliği kim sağlar?',c:'Güvenlik görevlisi',y:['Öğretmen','Müdür'],
+     e:'Güvenlik görevlisi okula giriş çıkışı kontrol eder, bizi korur.'},
+    {s:'Bir sorunun olduğunda okulda kime anlatabilirsin?',c:'Öğretmenime ya da rehber öğretmene',
+     y:['Kimseye söylemem','Sadece arkadaşıma'],
+     e:'Bir sorunun olduğunda mutlaka güvendiğin bir yetişkine anlat. Yalnız kalmana gerek yok.'},
+    {s:'Okulun temizliğini kim yapar?',c:'Yardımcı personel',y:['Sadece öğrenciler','Hiç kimse'],
+     e:'Yardımcı personel okulumuzu temiz tutar. Biz de kirletmeyerek onlara yardım ederiz.'}
+  ];
+  const it=pick(sorular);
+  return{
+    yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ciz:t=>metinKarti(t,15), ipucu:it.e
+  };
+}
+
+/* ===== 4. SINIF ARAÇ GEREÇLERİ VE ŞEREF KÖŞESİ ===== */
+function etkAracGerec(){
+  const tip=rnd(0,1);
+  if(tip===0){
+    const esyalar=[
+      {ch:'✏️',ad:'kalem',is:'Yazı yazmak için'},
+      {ch:'📕',ad:'kitap',is:'Okumak ve öğrenmek için'},
+      {ch:'📐',ad:'cetvel',is:'Düz çizgi çizmek için'},
+      {ch:'✂️',ad:'makas',is:'Kesmek için'},
+      {ch:'🖍️',ad:'boya kalemi',is:'Boyamak için'},
+      {ch:'📒',ad:'defter',is:'Not almak için'}
+    ];
+    const it=pick(esyalar);
+    const w=distractors(it.ad,()=>pick(esyalar).ad);
+    return{
+      yonerge:it.is+' hangisini kullanırız?',
+      secenek:shuffle([it.ad,...w.slice(0,2)]), dogru:it.ad,
+      ustGorsel:(()=>{const c=emojiKarti(it.ch);c.style.width='130px';c.style.height='88px';return c;})(),
+      ciz:t=>metinKarti(t,16),
+      ipucu:it.ad.charAt(0).toLocaleUpperCase('tr')+it.ad.slice(1)+' '+it.is.toLocaleLowerCase('tr')+' kullanılır.'
+    };
+  }
+  const sorular=[
+    {s:'Sınıfımızda tahtanın üzerinde bulunan köşeye ne denir?',c:'Şeref köşesi',
+     y:['Kitap köşesi','Oyun köşesi'],
+     e:'Şeref köşesinde Türk bayrağı, İstiklâl Marşı, Atatürk’ün fotoğrafı ve Gençliğe Hitabe bulunur.'},
+    {s:'Şeref köşesinde hangisi bulunur?',c:'Türk bayrağı',y:['Oyuncaklar','Çöp kutusu'],
+     e:'Şeref köşesinde Türk bayrağı, İstiklâl Marşı, Atatürk’ün fotoğrafı ve Gençliğe Hitabe yer alır.'},
+    {s:'Ders araç gereçlerimizi nasıl kullanmalıyız?',c:'Dikkatli ve temiz kullanmalıyız',
+     y:['İstediğimiz gibi, kırılırsa yenisi alınır','Arkadaşımızınkini izinsiz almalıyız'],
+     e:'Eşyalarımızı dikkatli kullanırsak uzun süre işimize yarar. Başkasının eşyasını izin alarak kullanırız.'}
+  ];
+  const it=pick(sorular);
+  return{
+    yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ciz:t=>metinKarti(t,15), ipucu:it.e
+  };
+}
+
+/* ===== 5. KURALLAR ===== */
+function etkKurallar(){
+  const sorular=[
+    {s:'Öğretmen konuşurken ne yaparız?',c:'Sessizce dinleriz',
+     y:['Biz de konuşuruz','Sıradan kalkarız'],
+     e:'Konuşanı dinlemek saygıdır. Dinlersek daha iyi öğreniriz.'},
+    {s:'Söz almak istediğimizde ne yaparız?',c:'Parmak kaldırıp sıramızı bekleriz',
+     y:['Hemen bağırırız','Arkadaşımızın sözünü keseriz'],
+     e:'Parmak kaldırmak herkesin konuşabilmesini sağlar.'},
+    {s:'Teneffüste koridorda nasıl yürürüz?',c:'Koşmadan, dikkatli yürürüz',
+     y:['Koşarak','İterek'],
+     e:'Koridorda koşmak düşmeye ve çarpışmaya yol açabilir.'},
+    {s:'Kurallar neden vardır?',c:'Hep birlikte rahat ve güvende olalım diye',
+     y:['Bizi cezalandırmak için','Eğlenceyi engellemek için'],
+     e:'Kurallar bizi kısıtlamak için değil, herkesin güvende ve rahat olması için vardır.'},
+    {s:'Oyun oynarken kural olmalı mıdır?',c:'Evet, oyunun da kuralları vardır',
+     y:['Hayır, oyunda kural olmaz','Sadece büyükler için'],
+     e:'Oyunun kuralı olmazsa kimse ne yapacağını bilemez ve oyun bozulur.'},
+    {s:'Kurallar sadece okulda mı vardır?',c:'Hayır, her yerde kurallar vardır',
+     y:['Evet, sadece okulda','Sadece sınıfta'],
+     e:'Evde, trafikte, parkta, oyunda… Kurallar her yerde vardır.'},
+    {s:'Sınıf kurallarını kim belirler?',c:'Öğretmen ve öğrenciler birlikte',
+     y:['Sadece müdür','Hiç kimse'],
+     e:'Kuralları birlikte belirlersek onlara uymak daha kolay olur.'}
+  ];
+  const it=pick(sorular);
+  return{
+    yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ciz:t=>metinKarti(t,15), ipucu:it.e
+  };
+}
+
+/* ===== 6. DUYGULARI TANIMA ===== */
+function etkDuygu(){
+  const it=pick(DUYGULAR);
+  const yon=rnd(0,1);
+  const g=yuzKarti(it.tip,130); g.style.width='130px'; g.style.height='130px';
+  if(yon===0){
+    const w=distractors(it.ad,()=>pick(DUYGULAR).ad);
+    return{
+      yonerge:'Bu yüz hangi duyguyu anlatıyor?',
+      secenek:shuffle([it.ad,...w.slice(0,2)]), dogru:it.ad,
+      ustGorsel:g, ciz:t=>metinKarti(t,18),
+      ipucu:it.ne+'\nDuygularımızı yüz ifademizle belli ederiz.'
+    };
+  }
+  const w=shuffle(DUYGULAR.filter(x=>x.ad!==it.ad)).slice(0,2);
+  return{
+    yonerge:'"'+it.ad.charAt(0).toLocaleUpperCase('tr')+it.ad.slice(1)+'" duygusunu gösteren yüz hangisidir?',
+    secenek:shuffle([it.tip,...w.map(x=>x.tip)]), dogru:it.tip,
+    ciz:t=>yuzKarti(t,110),
+    ipucu:it.ne
+  };
+}
+
+/* ===== 7. DUYGULARLA BAŞA ÇIKMA ===== */
+function etkDuyguYonet(){
+  const sorular=[
+    {s:'Üzgün olmak kötü bir şey midir?',c:'Hayır, herkes bazen üzülür',
+     y:['Evet, hiç üzülmemeliyiz','Sadece küçükler üzülür'],
+     e:'Üzülmek doğaldır, herkes bazen üzülür. Önemli olan bu duyguyu birine anlatabilmektir.'},
+    {s:'Çok kızdığında ne yapmak iyi gelir?',c:'Derin nefes alıp sakinleşmek',
+     y:['Bir şeye vurmak','Arkadaşıma bağırmak'],
+     e:'Kızmak normaldir ama kızgınken yaptıklarımız zarar verebilir. Önce sakinleşmek iyi gelir.'},
+    {s:'Bir arkadaşın üzgün görünüyor. Ne yaparsın?',c:'Yanına gidip “İyi misin?” diye sorarım',
+     y:['Ona gülerim','Görmezden gelirim'],
+     e:'Üzgün bir arkadaşa sormak onu rahatlatır. Dinlemek büyük bir yardımdır.'},
+    {s:'Kendini kötü hissettiğinde ne yapmalısın?',c:'Güvendiğim bir büyüğe anlatmalıyım',
+     y:['İçimde saklamalıyım','Kimseye söylememeliyim'],
+     e:'Duygularımızı anlatmak bizi rahatlatır. Anne, baba, öğretmen ya da güvendiğimiz bir büyüğe anlatabiliriz.'},
+    {s:'Aynı olay karşısında herkes aynı şeyi mi hisseder?',c:'Hayır, herkes farklı hissedebilir',
+     y:['Evet, herkes aynı hisseder','Sadece büyükler farklı hisseder'],
+     e:'Aynı olaya farklı kişiler farklı tepkiler verebilir. Bu çok doğaldır.'},
+    {s:'Heyecanlandığında ne hissedersin?',c:'Kalbim hızlı atar, içim kıpır kıpır olur',
+     y:['Hiçbir şey hissetmem','Canım yanar'],
+     e:'Heyecan, güzel bir şey beklerken hissettiğimiz duygudur. Kalp atışımız hızlanabilir.'},
+    {s:'Bir arkadaşın seni üzdü. En iyi ne yaparsın?',c:'Ona ne hissettiğimi söylerim',
+     y:['Ben de onu üzerim','Bir daha hiç konuşmam'],
+     e:'“Bu davranışın beni üzdü” demek en doğrusudur. Böylece arkadaşın da fark eder.'}
+  ];
+  const it=pick(sorular);
+  return{
+    yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ciz:t=>metinKarti(t,14), ipucu:it.e
+  };
+}
+
+/* ===== 8. BEDENİM VE GÖRÜNÜŞÜM ===== */
+function etkBeden(){
+  const sorular=[
+    {s:'Herkesin saç rengi aynı mıdır?',c:'Hayır, herkes farklıdır',
+     y:['Evet, hepimiz aynıyız','Sadece iki renk vardır'],
+     e:'Saç rengi, boy, göz rengi… Herkes farklıdır ve bu çok güzeldir.'},
+    {s:'Arkadaşın senden uzun. Bu ne demektir?',c:'Sadece boyları farklı, ikisi de normal',
+     y:['O daha iyidir','Sen daha iyisin'],
+     e:'Boy farkı bir üstünlük değildir. Herkes kendi hızında büyür.'},
+    {s:'Birinin görünüşüyle alay etmek doğru mudur?',c:'Hayır, bu onu üzer',
+     y:['Evet, eğlencelidir','Şaka olursa olur'],
+     e:'Görünüşle alay etmek incitir. Şaka gibi görünse de karşımızdaki üzülür.'},
+    {s:'Kendini tanıtırken neleri söyleyebilirsin?',c:'Adımı, sevdiğim şeyleri ve becerilerimi',
+     y:['Sadece boyumu','Hiçbir şeyi'],
+     e:'Kendimizi tanıtırken hem fiziksel hem de sevdiğimiz şeyleri anlatabiliriz.'},
+    {s:'“Ben iyi resim yaparım” demek ne anlama gelir?',c:'Bir becerimi tanıtmak',
+     y:['Övünmek','Yalan söylemek'],
+     e:'Becerilerimizi bilmek ve söylemek kendimizi tanımaktır. Herkesin iyi olduğu bir şey vardır.'}
+  ];
+  const it=pick(sorular);
+  return{
+    yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ciz:t=>metinKarti(t,14), ipucu:it.e
+  };
+}
+
+initEtkinlik([etkTanisma,etkMekan,etkKisiler,etkAracGerec,etkKurallar,
+              etkDuygu,etkDuyguYonet,etkBeden],
+  {ad:'Ben ve Okulum',c1:'#a1c4fd',c2:'#c2e9fb',koyu:'#1565C0',orta:'#42A5F5',acik:'#E3F2FD'});
+</script>
+</body>
+</html>
