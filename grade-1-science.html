@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>1. Sınıf Fen Bilimleri Oyunları - İlkokulOyun.com</title>
+    <title>1. Sınıf Hayat Bilgisi Oyunları - İlkokulOyun.com</title>
     <link rel="stylesheet" href="style.css">
     <style>
         .game-list {
@@ -113,35 +113,19 @@
         <button class="back-button" onclick="history.back()">← Geri Dön</button>
 
         <header>
-            <h1>🔬 1. Sınıf Fen Bilimleri Oyunları 🔬</h1>
+            <h1>🔬 1. Sınıf Hayat Bilgisi Oyunları 🔬</h1>
             <p class="subtitle">Doğayı keşfet ve hayvanları tanı!</p>
         </header>
 
         <div class="game-list">
             <div class="game-card">
-                <div class="icon">🐕</div>
-                <h3>Hayvan Seslerini Tanı</h3>
-                <p>Hayvan sesini dinle ve hayvanı seç</p>
-                <div class="difficulty">Kolay</div>
-                <button class="play-button" onclick="playGame('sounds')">Oyna!</button>
+                <div class="icon">📅</div>
+                <h3>Belirli Gün ve Haftalar</h3>
+                <p>13 bilgi kartı: ne olduğu, neden önemli olduğu ve neler yapabileceğin</p>
+                <div class="difficulty">Bilgi Kartları · Sesli</div>
+                <button class="play-button" onclick="git('hayat1-gunler.html')">Keşfet!</button>
             </div>
 
-            <div class="game-card">
-                <div class="icon">🌻</div>
-                <h3>Çiçekleri Eşleştir</h3>
-                <p>Çiçekleri renkleriyle eşleştir</p>
-                <div class="difficulty">Kolay</div>
-                <button class="play-button" onclick="playGame('flowers')">Oyna!</button>
-            </div>
-
-            <div class="game-card">
-                <div class="icon">🌤️</div>
-                <h3>Hava Durumunu Tahmin Et</h3>
-                <p>Bulutlara bak ve hava durumunu seç</p>
-                <div class="difficulty">Orta</div>
-                <button class="play-button" onclick="playGame('weather')">Oyna!</button>
-            </div>
-        </div>
 
         <div class="footer">
             <p>✨ Doğayı keşfet! ✨</p>
@@ -168,5 +152,6 @@
             });
         });
     </script>
+<script>function git(u){window.location.href=u;}</script>
 </body>
 </html>

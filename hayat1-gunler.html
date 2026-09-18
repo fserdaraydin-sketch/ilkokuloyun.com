@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Belirli Gün ve Haftalar - 1. Sınıf Hayat Bilgisi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script defer src="analytics.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Fredoka',Arial,sans-serif;
+  background:linear-gradient(160deg,#f6d365 0%,#fda085 100%);
+  min-height:100vh;padding:14px;display:flex;justify-content:center}
+.kutu{background:rgba(255,255,255,.97);border-radius:28px;padding:20px;
+  box-shadow:0 20px 50px rgba(0,0,0,.18);max-width:760px;width:100%}
+
+.baslik{text-align:center;margin-bottom:14px}
+.baslik h1{font-size:25px;font-weight:700;color:#C2410C}
+.baslik p{color:#9A8478;font-size:14px;font-weight:500;margin-top:2px}
+
+.arac{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.ara{flex:1;min-width:150px;padding:11px 15px;border:2.5px solid #FFD9A0;border-radius:15px;
+  font-family:inherit;font-size:15px;outline:none;color:#5B4636}
+.ara:focus{border-color:#FB923C}
+.btn-ses-genel{width:48px;height:48px;border-radius:14px;border:none;background:#FB923C;
+  color:#fff;font-size:21px;cursor:pointer;flex-shrink:0}
+
+.aylar{display:flex;gap:7px;overflow-x:auto;padding-bottom:8px;margin-bottom:14px;
+  -webkit-overflow-scrolling:touch}
+.ay-btn{flex-shrink:0;padding:8px 15px;border-radius:20px;border:2.5px solid #FFE0B8;
+  background:#fff;font-family:inherit;font-weight:600;font-size:14px;color:#8B5A2B;cursor:pointer}
+.ay-btn.aktif{background:#FB923C;border-color:#FB923C;color:#fff}
+
+.kartlar{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:13px}
+.kart{border-radius:22px;padding:17px;cursor:pointer;border:3px solid;
+  transition:transform .18s ease,box-shadow .18s ease;position:relative;overflow:hidden}
+.kart:active{transform:scale(.975)}
+.kart:hover{box-shadow:0 8px 20px rgba(0,0,0,.13)}
+.kart .simge{font-size:40px;line-height:1;margin-bottom:8px}
+.kart h3{font-size:16.5px;font-weight:700;line-height:1.28;margin-bottom:5px}
+.kart .tarih{font-size:13px;font-weight:600;opacity:.78;margin-bottom:9px}
+.kart .ozet{font-size:13.5px;line-height:1.5;color:#4A3B32}
+.kart .dokun{margin-top:10px;font-size:12px;font-weight:600;opacity:.62}
+
+.ayrinti{position:fixed;inset:0;background:rgba(40,25,15,.62);display:none;
+  align-items:center;justify-content:center;padding:18px;z-index:100}
+.ayrinti.acik{display:flex}
+.ayrinti-kutu{background:#fff;border-radius:26px;padding:24px;max-width:460px;width:100%;
+  max-height:88vh;overflow-y:auto;position:relative}
+.ayrinti .simge{font-size:54px;text-align:center;margin-bottom:8px}
+.ayrinti h2{font-size:21px;font-weight:700;text-align:center;margin-bottom:4px}
+.ayrinti .tarih{text-align:center;font-size:15px;font-weight:600;color:#9A8478;margin-bottom:16px}
+.bolum{margin-bottom:15px}
+.bolum h4{font-size:14px;font-weight:700;color:#C2410C;margin-bottom:5px;
+  display:flex;align-items:center;gap:6px}
+.bolum p{font-size:15px;line-height:1.62;color:#4A3B32}
+.bolum ul{margin:6px 0 0 4px;list-style:none}
+.bolum li{font-size:14.5px;line-height:1.75;color:#4A3B32;padding-left:22px;position:relative}
+.bolum li::before{content:'✓';position:absolute;left:0;color:#16A34A;font-weight:700}
+.kapat{width:100%;padding:14px;border:none;border-radius:17px;background:#FB923C;color:#fff;
+  font-family:inherit;font-weight:600;font-size:16px;cursor:pointer;margin-top:6px}
+.dinle-btn{width:100%;padding:13px;border:2.5px solid #FB923C;border-radius:17px;
+  background:#fff;color:#C2410C;font-family:inherit;font-weight:600;font-size:15px;
+  cursor:pointer;margin-bottom:9px}
+
+.bos{text-align:center;padding:34px 16px;color:#9A8478;font-size:15px}
+.btn-geri{width:100%;padding:14px;background:transparent;color:#A98D7C;
+  border:2.5px solid #FFE0B8;border-radius:17px;font-family:inherit;font-weight:600;
+  font-size:15px;cursor:pointer;margin-top:16px}
+@media(max-width:600px){
+  .kutu{padding:15px}
+  .baslik h1{font-size:20px}
+  .kartlar{grid-template-columns:1fr 1fr;gap:10px}
+  .kart{padding:13px;border-radius:18px}
+  .kart .simge{font-size:32px}
+  .kart h3{font-size:14px}
+  .kart .ozet{font-size:12.5px}
+}
+</style>
+</head>
+<body>
+<div class="kutu">
+  <div class="baslik">
+    <h1>📅 Belirli Gün ve Haftalar</h1>
+    <p>Karta dokun, ne olduğunu ve neler yapabileceğini öğren</p>
+  </div>
+
+  <div class="arac">
+    <input class="ara" id="ara" type="search" placeholder="🔍 Ara: bayram, hayvan, çocuk...">
+    <button class="btn-ses-genel" id="sesBtn" onclick="sesAcKapa()" title="Sesi aç/kapat">🔊</button>
+  </div>
+
+  <div class="aylar" id="aylar"></div>
+  <div class="kartlar" id="kartlar"></div>
+  <div class="bos" id="bos" style="display:none">Aradığın gün bulunamadı. Başka bir kelime dene.</div>
+
+  <button class="btn-geri" onclick="history.back()">← Geri Dön</button>
+</div>
+
+<div class="ayrinti" id="ayrinti" onclick="if(event.target===this)kapat()">
+  <div class="ayrinti-kutu" id="ayrintiKutu"></div>
+</div>
+
+<script>
+/* ============================================================
+   1. Sınıf Hayat Bilgisi — Belirli Gün ve Haftalar
+   Kitaptaki 13 gün/hafta. Her kartta üç bölüm:
+   NE OLDU (bilgi) · NEDEN ÖNEMLİ (anlam) · BİZ NE YAPABİLİRİZ (eylem)
+   Dil ilkeleri: aile modeli varsaymaz, korkutmaz, suçluluk yüklemez;
+   çocuğun kendi yapabileceği somut davranışlar önerilir.
+   ============================================================ */
+const GUNLER=[
+ {ad:'İlköğretim Haftası', tarih:'Eylül ayının üçüncü haftası', ay:'Eylül',
+  simge:'📚', renk:'#3B82F6', fon:'#EFF6FF',
+  ozet:'Okulun ve öğrenmenin ne kadar değerli olduğunu konuştuğumuz hafta.',
+  ne:'Eylül ayının üçüncü haftasını İlköğretim Haftası olarak kutlarız. Okulların açıldığı bu günlerde öğrenmenin önemini anlatan etkinlikler yaparız.',
+  neden:'Okumak ve öğrenmek herkesin hakkıdır. Bu hafta, okula gidebilmenin ne kadar değerli olduğunu hatırlatır.',
+  yap:['Okulunu tanı: sınıflar, kütüphane, bahçe nerede?','Yeni gelen bir arkadaşına okulu gezdir.','Sınıf kurallarını arkadaşlarınla birlikte belirle.']},
+
+ {ad:'Hayvanları Koruma Günü', tarih:'4 Ekim', ay:'Ekim',
+  simge:'🐾', renk:'#16A34A', fon:'#F0FDF4',
+  ozet:'Hayvan dostlarımızın da ihtiyaçları olduğunu hatırladığımız gün.',
+  ne:'4 Ekim, Hayvanları Koruma Günü’dür. Hayvanların beslenme, barınma, sevgi ve şefkat gibi ihtiyaçları vardır.',
+  neden:'Hayvanlar konuşup ihtiyaçlarını söyleyemez. Onları fark etmek ve korumak bize düşer.',
+  yap:['Sokak hayvanları için kapının önüne su kabı koy.','Hayvanlara sessizce ve nazikçe yaklaş, korkutma.','Bir hayvanı beslerken ailenden yardım iste.']},
+
+ {ad:'Cumhuriyet Bayramı', tarih:'29 Ekim', ay:'Ekim',
+  simge:'🇹🇷', renk:'#DC2626', fon:'#FEF2F2',
+  ozet:'Türkiye Cumhuriyeti’nin kurulduğu gün. En büyük bayramlarımızdan biri.',
+  ne:'Türkiye Cumhuriyeti 29 Ekim 1923’te kuruldu. Bu günü her yıl sevinç ve coşkuyla kutlarız.',
+  neden:'Cumhuriyet, ülkeyi yönetme hakkının halka ait olması demektir. Herkesin söz hakkı vardır.',
+  yap:['Bayrağımızı as, törenlere katıl.','Cumhuriyet için hazırlanan şiirleri ve şarkıları öğren.','Ailenle bayramın ne anlama geldiğini konuş.']},
+
+ {ad:'Kızılay Haftası', tarih:'29 Ekim – 4 Kasım', ay:'Ekim',
+  simge:'❤️', renk:'#E11D48', fon:'#FFF1F2',
+  ozet:'Zor günlerde yardıma koşan Kızılay’ı tanıdığımız hafta.',
+  ne:'Kızılay; afet, savaş gibi durumlarda yardıma ihtiyacı olanlara destek olur. Barınma ve beslenme ihtiyaçlarını karşılar, kan bağışı toplar.',
+  neden:'Bir gün herkesin yardıma ihtiyacı olabilir. Yardımlaşmak bir toplumu güçlü kılar.',
+  yap:['Kızılay’ın ne iş yaptığını öğren ve arkadaşlarına anlat.','Sınıfça bir yardımlaşma panosu hazırlayın.','İhtiyacı olan bir arkadaşına elinden geleni yap.']},
+
+ {ad:'Atatürk Haftası', tarih:'10 – 16 Kasım', ay:'Kasım',
+  simge:'🕊️', renk:'#0369A1', fon:'#F0F9FF',
+  ozet:'Cumhuriyetimizin kurucusu Mustafa Kemal Atatürk’ü andığımız hafta.',
+  ne:'Mustafa Kemal Atatürk 10 Kasım’da hayata veda etmiştir. Her yıl 10 Kasım’ın içinde bulunduğu hafta boyunca onu anarız.',
+  neden:'Atatürk, Cumhuriyeti kurdu ve herkesin okuyabilmesi için çalıştı. Onu anmak, emeğine saygı göstermektir.',
+  yap:['Atatürk’ün çocukluğunu ve okul yıllarını öğren.','Onun için resim yap ya da şiir oku.','Saygı duruşunda sessiz ve saygılı dur.']},
+
+ {ad:'Afet Eğitimi Hazırlık Günü', tarih:'12 Kasım', ay:'Kasım',
+  simge:'🎒', renk:'#CA8A04', fon:'#FEFCE8',
+  ozet:'Deprem ve diğer afetlere önceden hazırlanmayı öğrendiğimiz gün.',
+  ne:'12 Kasım, Afet Eğitimi Hazırlık Günü’dür. Deprem, sel gibi afetleri tanımanın ve hazırlıklı olmanın önemini öğreniriz.',
+  neden:'Hazırlıklı olmak korkuyu azaltır. Ne yapacağını bilen çocuk daha güvende hisseder.',
+  yap:['Evinizde güvenli yerleri ailenle birlikte belirle.','“Çök – Kapan – Tutun” hareketini öğren ve dene.','Afet çantasında neler olduğunu ailenle birlikte kontrol et.']},
+
+ {ad:'Dünya Çocuk Hakları Günü', tarih:'20 Kasım', ay:'Kasım',
+  simge:'🧒', renk:'#7C3AED', fon:'#F5F3FF',
+  ozet:'Her çocuğun hakları olduğunu hatırladığımız gün.',
+  ne:'Her 20 Kasım’da Dünya Çocuk Hakları Günü’nü kutlarız. Çocukların eğitim, barınma ve sağlık hakları hakkında konuşuruz.',
+  neden:'Haklar herkese doğuştan verilir. Dünyanın neresinde olursa olsun her çocuğun aynı hakları vardır.',
+  yap:['Haklarını öğren: oyun oynamak da bir haktır.','Bir arkadaşın dışlanıyorsa onu oyuna davet et.','Kendini kötü hissettiren bir durumu güvendiğin bir büyüğe anlat.']},
+
+ {ad:'Öğretmenler Günü', tarih:'24 Kasım', ay:'Kasım',
+  simge:'🍎', renk:'#EA580C', fon:'#FFF7ED',
+  ozet:'Öğretmenlerimize teşekkür ettiğimiz gün.',
+  ne:'24 Kasım’ı Öğretmenler Günü olarak kutlarız. Öğrettikleriyle bize yol gösteren öğretmenlerimize teşekkür ederiz.',
+  neden:'Öğretmenler yalnızca ders anlatmaz; okumayı, paylaşmayı ve birlikte yaşamayı da öğretir.',
+  yap:['Öğretmenine teşekkür kartı yaz.','Derste dikkatli dinle — bu da bir teşekkürdür.','Öğrendiğin güzel bir şeyi evde anlat.']},
+
+ {ad:'Dünya Engelliler Günü', tarih:'3 Aralık', ay:'Aralık',
+  simge:'🤝', renk:'#0891B2', fon:'#ECFEFF',
+  ozet:'Farklılıklara saygıyı konuştuğumuz gün.',
+  ne:'3 Aralık, Dünya Engelliler Günü’dür. Özel gereksinimli bireylerin ihtiyaçlarına dikkat çeker, farklılıklara saygı duyarız.',
+  neden:'Herkes farklıdır ve bu çok doğaldır. Önemli olan kimsenin dışarıda kalmamasıdır.',
+  yap:['Engelli rampalarının önünü kapatma.','Yardıma ihtiyacı var gibi görünen birine önce “Yardım edebilir miyim?” diye sor.','Oyunlarına herkesi dâhil et.']},
+
+ {ad:'İnsan Hakları ve Demokrasi Haftası', tarih:'10 Aralık’ı içine alan hafta', ay:'Aralık',
+  simge:'⚖️', renk:'#4F46E5', fon:'#EEF2FF',
+  ozet:'Herkesin eşit haklara sahip olduğunu öğrendiğimiz hafta.',
+  ne:'10 Aralık gününü içine alan haftayı İnsan Hakları ve Demokrasi Haftası olarak kutlarız.',
+  neden:'Bütün insanlar eşit doğar. Hiç kimse dili, dini ya da görünüşü yüzünden ayrı tutulamaz.',
+  yap:['Sınıf kararlarını oylamayla alın — demokrasi budur.','Söz sırası bekle, konuşan arkadaşını dinle.','Farklı düşünen birine de saygı göster.']},
+
+ {ad:'Yerli Malı Haftası', tarih:'12 – 18 Aralık', ay:'Aralık',
+  simge:'🧺', renk:'#B45309', fon:'#FFFBEB',
+  ozet:'Tutumlu olmayı ve ülkemizin ürünlerini tanımayı konuştuğumuz hafta.',
+  ne:'Tutum, Yatırım ve Türk Malları Haftası’nı 12–18 Aralık’ta kutlarız. Tutumlu olmanın ve ülkemizde üretilen ürünlerin değerini konuşuruz.',
+  neden:'Tutumlu olmak, elimizdekini israf etmeden kullanmaktır. Ülkemizde üretilen ürünü tercih etmek üreticiye destek olur.',
+  yap:['Yemeğini israf etme, tabağını bitirmeye çalış.','Kırtasiye eşyalarını dikkatli kullan.','Sınıfça sağlıklı bir yerli malı şöleni hazırlayın.']},
+
+ {ad:'Enerji Tasarrufu Haftası', tarih:'Ocak ayının ikinci haftası', ay:'Ocak',
+  simge:'💡', renk:'#059669', fon:'#ECFDF5',
+  ozet:'Su ve elektriği boşa harcamamayı öğrendiğimiz hafta.',
+  ne:'Ocak ayının ikinci haftasını Enerji Tasarrufu Haftası olarak kutlarız. Su ve elektrik gibi kaynaklarımızın sınırlı olduğunu anlatan etkinlikler yaparız.',
+  neden:'Kaynaklarımız sonsuz değil. Bugün tasarruf edersek yarın da yeter.',
+  yap:['Odadan çıkarken ışığı söndür.','Dişini fırçalarken musluğu kapat.','Şarj biten cihazın fişini çek.']},
+
+ {ad:'Demokrasi ve Millî Birlik Günü', tarih:'15 Temmuz', ay:'Temmuz',
+  simge:'🤲', renk:'#B91C1C', fon:'#FEF2F2',
+  ozet:'Birlik olmanın gücünü hatırladığımız gün.',
+  ne:'15 Temmuz gününü Demokrasi ve Millî Birlik Günü olarak anarız. Etkinlikler yaparak şehitlerimizi anarız.',
+  neden:'Bir toplum birlik olduğunda güçlüdür. Ayrılıklarımıza rağmen birlikte yaşayabiliriz.',
+  yap:['Birlik ve beraberliğin ne demek olduğunu ailenle konuş.','Anma törenlerinde saygılı ol.','Arkadaşlarınla iş birliği yapmayı dene.']}
+];
+
+const AY_SIRA=['Eylül','Ekim','Kasım','Aralık','Ocak','Temmuz'];
+let seciliAy='Hepsi', sesAcik=true;
+
+/* ---- SESLENDİRME ---- */
+function oku(metin){
+  if(!sesAcik||!('speechSynthesis' in window))return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(String(metin).replace(/[📚🐾🇹🇷❤️🕊️🎒🧒🍎🤝⚖️🧺💡🤲✓]/g,''));
+  u.lang='tr-TR'; u.rate=.85; u.pitch=1.03;
+  speechSynthesis.speak(u);
+}
+function sesAcKapa(){
+  sesAcik=!sesAcik;
+  document.getElementById('sesBtn').textContent=sesAcik?'🔊':'🔇';
+  if(!sesAcik&&'speechSynthesis' in window) speechSynthesis.cancel();
+}
+
+/* ---- AY DÜĞMELERİ ---- */
+function aylariCiz(){
+  const k=document.getElementById('aylar');
+  k.innerHTML='';
+  ['Hepsi',...AY_SIRA].forEach(a=>{
+    const b=document.createElement('button');
+    b.className='ay-btn'+(a===seciliAy?' aktif':'');
+    b.textContent=a;
+    b.onclick=()=>{ seciliAy=a; aylariCiz(); kartlariCiz(); };
+    k.appendChild(b);
+  });
+}
+
+/* ---- KARTLAR ---- */
+function kartlariCiz(){
+  const arama=(document.getElementById('ara').value||'').toLocaleLowerCase('tr');
+  const k=document.getElementById('kartlar');
+  k.innerHTML='';
+  const liste=GUNLER.filter(g=>{
+    const ayUyar = seciliAy==='Hepsi' || g.ay===seciliAy;
+    if(!ayUyar) return false;
+    if(!arama) return true;
+    const havuz=(g.ad+' '+g.ozet+' '+g.ne+' '+g.neden+' '+g.yap.join(' ')).toLocaleLowerCase('tr');
+    return havuz.includes(arama);
+  });
+  document.getElementById('bos').style.display=liste.length?'none':'block';
+  liste.forEach(g=>{
+    const d=document.createElement('div');
+    d.className='kart';
+    d.style.background=g.fon;
+    d.style.borderColor=g.renk;
+    d.innerHTML='<div class="simge">'+g.simge+'</div>'+
+      '<h3 style="color:'+g.renk+'">'+g.ad+'</h3>'+
+      '<div class="tarih" style="color:'+g.renk+'">'+g.tarih+'</div>'+
+      '<div class="ozet">'+g.ozet+'</div>'+
+      '<div class="dokun" style="color:'+g.renk+'">👆 Dokun, daha fazlasını öğren</div>';
+    d.onclick=()=>ayrintiAc(g);
+    k.appendChild(d);
+  });
+}
+
+/* ---- AYRINTI ---- */
+function ayrintiAc(g){
+  const kutu=document.getElementById('ayrintiKutu');
+  kutu.innerHTML=
+    '<div class="simge">'+g.simge+'</div>'+
+    '<h2 style="color:'+g.renk+'">'+g.ad+'</h2>'+
+    '<div class="tarih">'+g.tarih+'</div>'+
+    '<button class="dinle-btn" onclick="oku(window.__aktifMetin)">🔊 Dinle</button>'+
+    '<div class="bolum"><h4>📖 Bu gün nedir?</h4><p>'+g.ne+'</p></div>'+
+    '<div class="bolum"><h4>💭 Neden önemli?</h4><p>'+g.neden+'</p></div>'+
+    '<div class="bolum"><h4>🙌 Biz ne yapabiliriz?</h4><ul>'+
+      g.yap.map(x=>'<li>'+x+'</li>').join('')+'</ul></div>'+
+    '<button class="kapat" onclick="kapat()">Kapat</button>';
+  window.__aktifMetin=g.ad+'. '+g.tarih+'. '+g.ne+' '+g.neden;
+  document.getElementById('ayrinti').classList.add('acik');
+  if(window.IO) IO.olay('belirli-gun',{gun:g.ad});
+  setTimeout(()=>oku(window.__aktifMetin),300);
+}
+function kapat(){
+  document.getElementById('ayrinti').classList.remove('acik');
+  if('speechSynthesis' in window) speechSynthesis.cancel();
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') kapat(); });
+document.getElementById('ara').addEventListener('input',kartlariCiz);
+
+aylariCiz();
+kartlariCiz();
+</script>
+</body>
+</html>
