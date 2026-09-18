@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Toplama ve Çıkarma - 2. Sınıf Matematik</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade1-style.css">
+<script defer src="analytics.js"></script>
+</head>
+<body>
+<div class="kutu">
+  <div class="baslik"><h1>➕ Toplama ve Çıkarma</h1><p>3. Tema · İşlemlerden Cebirsel Düşünmeye</p></div>
+  <div class="ilerleme"><div class="ilerleme-dolu" id="ilerlemeDolu"></div></div>
+  <div class="yildizlar" id="yildizlar"></div>
+  <div class="yonerge">
+    <span class="yonerge-metin" id="yonergeMetin">Hazırlanıyor...</span>
+    <button class="btn-ses" id="sesBtn" onclick="sesDegistir()" aria-label="Sesi aç kapat">🔊</button>
+  </div>
+  <div class="soru-gorsel" id="soruGorsel"></div>
+  <div class="secenekler" id="secenekler"></div>
+  <div class="geri" id="geri"></div>
+  <button class="btn-devam" id="devamBtn" onclick="tekrarDinle()">🔊 Tekrar Dinle</button>
+  <button class="btn-geri" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade1-engine.js"></script>
+<script>
+function sayiKarti(t,b){
+  const{c,ctx,W,H}=sahne(148,86);
+  ctx.save(); ctx.fillStyle='#37474F'; ctx.font='700 '+(b||38)+'px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(t,W/2,H/2); ctx.restore(); return c;
+}
+function metinKarti(t,b){
+  const{c,ctx,W,H}=sahne(148,88);
+  ctx.save(); ctx.fillStyle='#37474F'; ctx.font='600 '+(b||16)+'px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  const k=t.split(' ');
+  if(t.length>14&&k.length>1){ const o=Math.ceil(k.length/2);
+    ctx.fillText(k.slice(0,o).join(' '),W/2,H/2-11);
+    ctx.fillText(k.slice(o).join(' '),W/2,H/2+11);
+  } else ctx.fillText(t,W/2,H/2);
+  ctx.restore(); return c;
+}
+
+/* ===== ALT ALTA İŞLEM ÇİZİMİ ===== */
+function altAltaCiz(a,b,op,sonuc){
+  const{c,ctx,W,H}=sahne(200,128);
+  const sag=W-34, ust=18;
+  ctx.save();
+  ctx.textAlign='right'; ctx.textBaseline='top';
+  ctx.fillStyle='#37474F'; ctx.font='700 30px Fredoka,Arial';
+  ctx.fillText(String(a),sag,ust);
+  ctx.fillText(String(b),sag,ust+34);
+  ctx.textAlign='left';
+  ctx.fillStyle=op==='+'?'#2E7D32':'#C62828';
+  ctx.fillText(op,34,ust+34);
+  ctx.strokeStyle='#37474F'; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(30,ust+72); ctx.lineTo(sag+4,ust+72); ctx.stroke();
+  ctx.textAlign='right'; ctx.fillStyle=sonuc===null?'#FB8C00':'#37474F';
+  ctx.font='700 30px Fredoka,Arial';
+  ctx.fillText(sonuc===null?'?':String(sonuc),sag,ust+78);
+  ctx.restore();
+  return c;
+}
+/* ===== YATAY İŞLEM (boşluklu) ===== */
+function yatayCiz(parcalar){
+  const{c,ctx,W,H}=sahne(250,80);
+  ctx.save(); ctx.textAlign='center'; ctx.textBaseline='middle';
+  const metin=parcalar.join('  ');
+  ctx.font='700 30px Fredoka,Arial';
+  let toplamGen=0;
+  parcalar.forEach(p=>toplamGen+=(p==='?'?40:ctx.measureText(p).width+14));
+  let x=(W-toplamGen)/2;
+  parcalar.forEach(p=>{
+    const gen=(p==='?'?40:ctx.measureText(p).width+14);
+    if(p==='?'){
+      ctx.fillStyle='#FFF3E0'; ctx.strokeStyle='#FB8C00'; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.roundRect(x+3,H/2-22,34,44,9); ctx.fill(); ctx.stroke();
+      ctx.fillStyle='#E65100'; ctx.fillText('?',x+20,H/2);
+    }else{
+      ctx.fillStyle=(p==='+'||p==='−'||p==='=')?'#546E7A':'#37474F';
+      ctx.fillText(p,x+gen/2,H/2);
+    }
+    x+=gen;
+  });
+  ctx.restore(); return c;
+}
+
+/* ===== 1. TOPLAMA İŞLEMİ ===== */
+function etkToplama(){
+  const eldeli=rnd(0,1)===0;
+  let a,b,g=0;
+  do{
+    a=rnd(11,60); b=rnd(11,Math.min(39,100-a));
+    g++;
+  }while(((a%10+b%10>=10)!==eldeli || a+b>100) && g<60);
+  const t=a+b;
+  const w=distractors(String(t),()=>String(Math.min(100,Math.max(0,t+pick([-10,-2,-1,1,2,10])))));
+  const gr=altAltaCiz(a,b,'+',null); gr.style.width='190px'; gr.style.height='122px';
+  return{
+    yonerge:'Bu toplama işleminin sonucu kaçtır?',
+    secenek:shuffle([String(t),...w.slice(0,2)]), dogru:String(t),
+    ustGorsel:gr, ciz:x=>sayiKarti(x),
+    ipucu:eldeli
+      ? 'Önce birlikleri topla: '+(a%10)+' + '+(b%10)+' = '+(a%10+b%10)+
+        '. On veya fazlaysa ELDE VAR, onluğa ekle. Sonuç: '+t
+      : 'Önce birlikleri topla: '+(a%10)+' + '+(b%10)+' = '+(a%10+b%10)+
+        '. Sonra onlukları: '+Math.floor(a/10)+' + '+Math.floor(b/10)+' onluk. Sonuç: '+t
+  };
+}
+
+/* ===== 2. ÇIKARMA İŞLEMİ ===== */
+function etkCikarma(){
+  const bozmali=rnd(0,1)===0;
+  let a,b,g=0;
+  do{
+    a=rnd(21,99); b=rnd(5,a-1);
+    g++;
+  }while(((a%10 < b%10)!==bozmali) && g<60);
+  const f=a-b;
+  const w=distractors(String(f),()=>String(Math.max(0,f+pick([-10,-2,-1,1,2,10]))));
+  const gr=altAltaCiz(a,b,'−',null); gr.style.width='190px'; gr.style.height='122px';
+  return{
+    yonerge:'Bu çıkarma işleminin sonucu kaçtır?',
+    secenek:shuffle([String(f),...w.slice(0,2)]), dogru:String(f),
+    ustGorsel:gr, ciz:x=>sayiKarti(x),
+    ipucu:bozmali
+      ? 'Birler basamağında '+(a%10)+' , '+(b%10)+'\u2019den küçük. Bir ONLUK BOZULUR: '+
+        (a%10)+' yerine '+(a%10+10)+' alınır. Sonuç: '+f
+      : 'Birlikleri çıkar: '+(a%10)+' − '+(b%10)+' = '+(a%10-b%10)+
+        '. Sonra onlukları çıkar. Sonuç: '+f
+  };
+}
+
+/* ===== 3. ZİHİNDEN İŞLEM ===== */
+function etkZihinden(){
+  const tip=rnd(0,2);
+  if(tip===0){
+    const a=rnd(2,9)*10, b=rnd(1,9)*10;
+    if(a+b>100) return etkZihinden();
+    const t=a+b;
+    const w=distractors(String(t),()=>String(Math.min(100,t+pick([-20,-10,10,20]))));
+    return{
+      yonerge:'Zihinden hesaplayalım: '+a+' + '+b+' = ?',
+      secenek:shuffle([String(t),...w.slice(0,2)]), dogru:String(t),
+      ustGorsel:(()=>{const c=yatayCiz([String(a),'+',String(b),'=','?']);c.style.width='240px';c.style.height='76px';return c;})(),
+      ciz:x=>sayiKarti(x),
+      ipucu:'Onlukları topla: '+(a/10)+' onluk + '+(b/10)+' onluk = '+(t/10)+' onluk = '+t
+    };
+  }
+  if(tip===1){
+    const a=rnd(20,90), b=pick([10,20,30]);
+    if(a+b>100) return etkZihinden();
+    const t=a+b;
+    const w=distractors(String(t),()=>String(Math.min(100,t+pick([-10,-1,1,10]))));
+    return{
+      yonerge:'Zihinden hesaplayalım: '+a+' + '+b+' = ?',
+      secenek:shuffle([String(t),...w.slice(0,2)]), dogru:String(t),
+      ustGorsel:(()=>{const c=yatayCiz([String(a),'+',String(b),'=','?']);c.style.width='240px';c.style.height='76px';return c;})(),
+      ciz:x=>sayiKarti(x),
+      ipucu:'Onluk eklerken BİRLER basamağı değişmez. '+a+' sayısına '+(b/10)+' onluk eklendi: '+t
+    };
+  }
+  const a=rnd(30,99), b=pick([10,20,30]);
+  const f=a-b;
+  if(f<0) return etkZihinden();
+  const w=distractors(String(f),()=>String(Math.max(0,f+pick([-10,-1,1,10]))));
+  return{
+    yonerge:'Zihinden hesaplayalım: '+a+' − '+b+' = ?',
+    secenek:shuffle([String(f),...w.slice(0,2)]), dogru:String(f),
+    ustGorsel:(()=>{const c=yatayCiz([String(a),'−',String(b),'=','?']);c.style.width='240px';c.style.height='76px';return c;})(),
+    ciz:x=>sayiKarti(x),
+    ipucu:'Onluk çıkarırken BİRLER basamağı değişmez. '+a+' sayısından '+(b/10)+' onluk çıktı: '+f
+  };
+}
+
+/* ===== 4. SONUCU TAHMİN ETME ===== */
+function yuvarla(n){ return Math.round(n/10)*10; }
+function etkTahmin(){
+  const toplamaMi=rnd(0,1)===0;
+  let a,b;
+  if(toplamaMi){ a=rnd(12,48); b=rnd(12,48); }
+  else { a=rnd(40,98); b=rnd(11,38); }
+  const gercek=toplamaMi?a+b:a-b;
+  const tahmin=toplamaMi?yuvarla(a)+yuvarla(b):yuvarla(a)-yuvarla(b);
+  const w=distractors(String(tahmin),()=>String(Math.max(0,Math.min(100,tahmin+pick([-20,-10,10,20])))));
+  return{
+    yonerge:'Sayıları en yakın onluğa yuvarlayarak sonucu TAHMİN edelim: '+a+' '+(toplamaMi?'+':'−')+' '+b,
+    secenek:shuffle([String(tahmin),...w.slice(0,2)]), dogru:String(tahmin),
+    ustGorsel:(()=>{const c=yatayCiz([String(a),toplamaMi?'+':'−',String(b)]);c.style.width='240px';c.style.height='76px';return c;})(),
+    ciz:x=>sayiKarti(x),
+    ipucu:a+' ≈ '+yuvarla(a)+' , '+b+' ≈ '+yuvarla(b)+
+          '. Tahmin: '+yuvarla(a)+' '+(toplamaMi?'+':'−')+' '+yuvarla(b)+' = '+tahmin+
+          ' (gerçek sonuç '+gercek+')'
+  };
+}
+
+/* ===== 5. VERİLMEYEN TOPLANAN ===== */
+function etkVerilmeyenToplanan(){
+  const a=rnd(10,60), b=rnd(10,Math.min(40,100-a));
+  const t=a+b;
+  const solMu=rnd(0,1)===0;
+  const dogru=String(solMu?a:b);
+  const w=distractors(dogru,()=>String(Math.max(0,+dogru+pick([-10,-2,-1,1,2,10]))));
+  const parcalar = solMu ? ['?','+',String(b),'=',String(t)] : [String(a),'+','?','=',String(t)];
+  const g=yatayCiz(parcalar); g.style.width='240px'; g.style.height='76px';
+  return{
+    yonerge:'Boşluğa hangi sayı gelmeli?',
+    secenek:shuffle([dogru,...w.slice(0,2)]), dogru,
+    ustGorsel:g, ciz:x=>sayiKarti(x),
+    ipucu:'VERİLMEYEN TOPLANANI bulmak için TOPLAMDAN bilinen toplananı ÇIKARIRIZ: '+
+          t+' − '+(solMu?b:a)+' = '+dogru
+  };
+}
+
+/* ===== 6. VERİLMEYEN EKSİLEN / ÇIKAN ===== */
+function etkVerilmeyenCikarma(){
+  const a=rnd(30,99), b=rnd(5,a-5);
+  const f=a-b;
+  const eksilenMi=rnd(0,1)===0;
+  const dogru=String(eksilenMi?a:b);
+  const w=distractors(dogru,()=>String(Math.max(0,Math.min(100,+dogru+pick([-10,-2,-1,1,2,10])))));
+  const parcalar = eksilenMi ? ['?','−',String(b),'=',String(f)] : [String(a),'−','?','=',String(f)];
+  const g=yatayCiz(parcalar); g.style.width='240px'; g.style.height='76px';
+  return{
+    yonerge:'Boşluğa hangi sayı gelmeli?',
+    secenek:shuffle([dogru,...w.slice(0,2)]), dogru,
+    ustGorsel:g, ciz:x=>sayiKarti(x),
+    ipucu:eksilenMi
+      ? 'VERİLMEYEN EKSİLENİ bulmak için fark ile çıkanı TOPLARIZ: '+f+' + '+b+' = '+a
+      : 'VERİLMEYEN ÇIKANI bulmak için eksilenden farkı ÇIKARIRIZ: '+a+' − '+f+' = '+b
+  };
+}
+
+/* ===== 7. TOPLAMA-ÇIKARMA İLİŞKİSİ ===== */
+function etkIliski(){
+  const a=rnd(10,50), b=rnd(10,Math.min(45,100-a));
+  const t=a+b;
+  const tip=rnd(0,1);
+  if(tip===0){
+    const dogru=t+' − '+a+' = '+b;
+    const yanlislar=[t+' + '+a+' = '+b, a+' − '+b+' = '+t, b+' − '+t+' = '+a];
+    return{
+      yonerge:'"'+a+' + '+b+' = '+t+'" işlemine göre hangisi DOĞRUDUR?',
+      secenek:shuffle([dogru,...shuffle(yanlislar).slice(0,2)]), dogru,
+      ciz:x=>metinKarti(x,17),
+      ipucu:'TOPLAMA ile ÇIKARMA birbirinin TERSİDİR. '+a+' + '+b+' = '+t+' ise '+
+            t+' − '+a+' = '+b+' olur.'
+    };
+  }
+  // Değişme özelliği
+  const dogru=b+' + '+a+' = '+t;
+  const yanlislar=[b+' − '+a+' = '+t, a+' + '+b+' = '+(t+1), b+' + '+a+' = '+(t-1)];
+  return{
+    yonerge:'"'+a+' + '+b+' = '+t+'" işlemine göre hangisi DOĞRUDUR?',
+    secenek:shuffle([dogru,...shuffle(yanlislar).slice(0,2)]), dogru,
+    ciz:x=>metinKarti(x,17),
+    ipucu:'Toplamada toplananların YERİ DEĞİŞSE DE sonuç değişmez. '+
+          a+' + '+b+' = '+b+' + '+a+' = '+t
+  };
+}
+
+/* ===== 8. PROBLEM ÇÖZME ===== */
+const ISIMLER=['Ayşe','Mehmet','Zeynep','Ali','Elif','Mert','Deniz','Ceren'];
+const PROBLEM_KALIP=[
+  {t:'topla', min:12,maks:55,
+   s:(i1,i2,a,b)=>i1+' kitap kampanyasına '+a+' kitap bağışladı. '+i2+' ise '+b+' kitap bağışladı. İkisi toplam kaç kitap bağışladı?'},
+  {t:'topla', min:10,maks:45,
+   s:(i1,i2,a,b)=>i1+'\u2019in '+a+' bilyesi vardı. '+i2+' ona '+b+' bilye daha verdi. '+i1+'\u2019in kaç bilyesi oldu?'},
+  {t:'topla', min:15,maks:50,
+   s:(i1,i2,a,b)=>'Bir markette sabah '+a+' ekmek, öğleden sonra '+b+' ekmek satıldı. Toplam kaç ekmek satıldı?'},
+  {t:'cikar', min:25,maks:99,
+   s:(i1,i2,a,b)=>i1+'\u2019in '+a+' lirası vardı. '+b+' lirasını harcadı. Kaç lirası kaldı?'},
+  {t:'cikar', min:15,maks:40,
+   s:(i1,i2,a,b)=>'Ağaçta '+a+' kuş vardı. '+b+' tanesi uçtu. Ağaçta kaç kuş kaldı?'},
+  // Sınıf mevcudu gerçekçi olmalı: 20-34 öğrenci, kız sayısı yarıya yakın
+  {t:'sinif', min:20,maks:34,
+   s:(i1,i2,a,b)=>'Bir sınıfta '+a+' öğrenci var. Bunların '+b+' tanesi kız. Kaç tanesi erkektir?'},
+  {t:'cikar', min:20,maks:60,
+   s:(i1,i2,a,b)=>'Bir kutuda '+a+' kalem vardı. '+b+' tanesi dağıtıldı. Kutuda kaç kalem kaldı?'},
+  {t:'fark',  min:20,maks:70,
+   s:(i1,i2,a,b)=>i1+'\u2019in '+a+' , '+i2+'\u2019in '+b+' çıkartması var. '+i1+'\u2019in çıkartması '+i2+'\u2019inkinden kaç fazladır?'}
+];
+function etkProblem(){
+  const k=pick(PROBLEM_KALIP);
+  const [i1,i2]=shuffle([...ISIMLER]).slice(0,2);
+  let a,b,sonuc;
+  if(k.t==='topla'){
+    a=rnd(k.min,k.maks); b=rnd(k.min,Math.min(k.maks,100-a)); sonuc=a+b;
+  }else if(k.t==='sinif'){
+    // Sınıf mevcudu makul, kız sayısı yarıya yakın
+    a=rnd(k.min,k.maks); b=rnd(Math.floor(a*0.35),Math.ceil(a*0.65)); sonuc=a-b;
+  }else{
+    a=rnd(k.min,k.maks); b=rnd(Math.max(5,Math.floor(a*0.2)),a-3); sonuc=a-b;
+  }
+  const metin=k.s(i1,i2,a,b);
+  const w=distractors(String(sonuc),()=>String(Math.max(0,Math.min(100,sonuc+pick([-10,-2,-1,1,2,10])))));
+  const{c,ctx,W,H}=sahne(268,86);
+  ctx.save(); ctx.fillStyle='#37474F'; ctx.font='600 14px Fredoka,Arial';
+  ctx.textAlign='left'; ctx.textBaseline='top';
+  // Metni satırlara böl
+  const kel=metin.split(' '); let satir='', y=12;
+  kel.forEach(kl=>{
+    const dene=satir?satir+' '+kl:kl;
+    if(ctx.measureText(dene).width>244){ ctx.fillText(satir,12,y); y+=19; satir=kl; }
+    else satir=dene;
+  });
+  if(satir) ctx.fillText(satir,12,y);
+  ctx.restore();
+  c.style.width='256px'; c.style.height='82px';
+  return{
+    yonerge:'Problemi okuyalım ve çözelim.',
+    secenek:shuffle([String(sonuc),...w.slice(0,2)]), dogru:String(sonuc),
+    ustGorsel:c, ciz:x=>sayiKarti(x),
+    ipucu:'VERİLENLER: '+a+' ve '+b+'\nİSTENEN: '+(k.t==='topla'?'toplam':'kalan / fark')+
+          '\nÇÖZÜM: '+a+' '+(k.t==='topla'?'+':'−')+' '+b+' = '+sonuc
+  };
+}
+
+initEtkinlik([etkToplama,etkCikarma,etkZihinden,etkTahmin,
+              etkVerilmeyenToplanan,etkVerilmeyenCikarma,etkIliski,etkProblem],
+  {ad:'Toplama ve Çıkarma',c1:'#d4fc79',c2:'#96e6a1',koyu:'#2E7D32',orta:'#66BB6A',acik:'#E8F5E9'});
+</script>
+</body>
+</html>
