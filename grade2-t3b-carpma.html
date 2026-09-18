@@ -51,28 +51,41 @@ function gruplarCiz(grupSayisi,herGrupta,ch,kalan){
   const toplamKutu=grupSayisi+(kalan?1:0);
   const sutun=Math.min(4,toplamKutu);
   const satir=Math.ceil(toplamKutu/sutun);
-  const W=270, H=Math.min(150,14+satir*48);
+  const kutuY=52;                                   // kutu yüksekliği
+  const W=270, H=14+satir*(kutuY+8);
   const{c,ctx}=sahne(W,H);
   const kw=(W-16)/sutun-8;
-  for(let g=0;g<grupSayisi;g++){
-    const sx=8+(g%sutun)*((W-16)/sutun), sy=10+Math.floor(g/sutun)*46;
-    ctx.fillStyle='#E8F5E9'; ctx.strokeStyle='#66BB6A'; ctx.lineWidth=2.5;
-    ctx.beginPath(); ctx.roundRect(sx,sy,kw,38,10); ctx.fill(); ctx.stroke();
-    for(let i=0;i<herGrupta;i++){
-      const x=sx+10+(i%3)*((kw-20)/2.2), y=sy+12+Math.floor(i/3)*14;
-      emoji(ctx,ch,x,y,Math.min(16,kw/4));
+
+  // Bir kutunun içine nesneleri çakışmadan yerleştir
+  function icDoldur(sx,sy,adet,renkli){
+    const sut=adet<=3?adet:(adet<=4?2:3);
+    const sat=Math.ceil(adet/sut);
+    const boyut=Math.min(20, kw/(sut+0.7), (kutuY-10)/(sat+0.35));
+    const yAdim=boyut*1.18;
+    for(let i=0;i<adet;i++){
+      const s2=Math.min(sut,adet-Math.floor(i/sut)*sut);
+      const x=sx+kw/2+((i%sut)-(sut-1)/2)*(kw/(sut+0.5));
+      const y=sy+kutuY/2+(Math.floor(i/sut)-(sat-1)/2)*yAdim-(renkli?5:0);
+      emoji(ctx,ch,x,y,boyut);
     }
+  }
+
+  for(let g=0;g<grupSayisi;g++){
+    const sx=8+(g%sutun)*((W-16)/sutun), sy=10+Math.floor(g/sutun)*(kutuY+8);
+    ctx.fillStyle='#E8F5E9'; ctx.strokeStyle='#66BB6A'; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.roundRect(sx,sy,kw,kutuY,10); ctx.fill(); ctx.stroke();
+    icDoldur(sx,sy,herGrupta,false);
   }
   if(kalan){
     const g=grupSayisi;
-    const sx=8+(g%sutun)*((W-16)/sutun), sy=10+Math.floor(g/sutun)*46;
+    const sx=8+(g%sutun)*((W-16)/sutun), sy=10+Math.floor(g/sutun)*(kutuY+8);
     ctx.fillStyle='#FFF3E0'; ctx.strokeStyle='#FB8C00'; ctx.lineWidth=2.5;
     ctx.setLineDash([5,4]);
-    ctx.beginPath(); ctx.roundRect(sx,sy,kw,38,10); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.roundRect(sx,sy,kw,kutuY,10); ctx.fill(); ctx.stroke();
     ctx.setLineDash([]);
-    for(let i=0;i<kalan;i++) emoji(ctx,ch,sx+10+(i%3)*((kw-20)/2.2),sy+18,14);
+    icDoldur(sx,sy,kalan,true);
     ctx.save(); ctx.fillStyle='#E65100'; ctx.font='600 10px Fredoka,Arial';
-    ctx.textAlign='center'; ctx.fillText('kalan',sx+kw/2,sy+34); ctx.restore();
+    ctx.textAlign='center'; ctx.fillText('kalan',sx+kw/2,sy+kutuY-6); ctx.restore();
   }
   return c;
 }

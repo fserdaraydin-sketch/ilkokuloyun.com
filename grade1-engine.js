@@ -61,6 +61,34 @@ function emoji(ctx,ch,x,y,boyut){
   ctx.restore();
 }
 
+// Soru görselini kutu genişliğine yaklaştırır.
+// Soru görseli cevap kartlarından küçük kalmamalı — çocuk detayı görebilmeli.
+function gorseliBuyut(el,kap){
+  const uygula=()=>{
+    const kutuGen=kap.clientWidth || 0;
+    if(!kutuGen) return;
+    // Soru görseli bir canvas olabilir ya da birkaç canvas içeren bir kap olabilir.
+    // Kap ise içindeki canvas'ları ölçeklemek gerekir; kabı büyütmek yetmez.
+    const hedefler = el.tagName==='CANVAS' ? [el] : [...el.querySelectorAll('canvas')];
+    if(!hedefler.length) return;
+    // En geniş canvas'ı referans al, hepsini aynı oranda büyüt
+    let enGenis=0;
+    hedefler.forEach(c=>{
+      const g=c.getBoundingClientRect().width || parseFloat(c.style.width) || 0;
+      if(g>enGenis) enGenis=g;
+    });
+    if(!enGenis) return;
+    const olcek=Math.min(2.2, kutuGen/enGenis);
+    if(olcek<=1.02) return;
+    hedefler.forEach(c=>{
+      const g=c.getBoundingClientRect().width || parseFloat(c.style.width) || 0;
+      if(g){ c.style.width=Math.round(g*olcek)+'px'; c.style.height='auto'; }
+    });
+  };
+  if(typeof requestAnimationFrame==='function') requestAnimationFrame(uygula);
+  else uygula();
+}
+
 // ---- DURUM ----
 let ETKINLIKLER=[], sira=0, dogruSayisi=0, denemeSayisi=0, TEMA={};
 const HEDEF=10;
@@ -90,7 +118,11 @@ function yeniEtkinlik(){
   // Soru görseli (varsa) yönerge ile seçenekler arasında gösterilir
   const ust=document.getElementById('soruGorsel');
   ust.innerHTML='';
-  if(e.ustGorsel){ ust.style.display='flex'; ust.appendChild(e.ustGorsel); }
+  if(e.ustGorsel){
+    ust.style.display='flex';
+    ust.appendChild(e.ustGorsel);
+    gorseliBuyut(e.ustGorsel,ust);
+  }
   else ust.style.display='none';
 
   const kutu=document.getElementById('secenekler');
