@@ -30,6 +30,62 @@
 </div>
 <script src="grade4-engine.js"></script>
 <script>
+
+/* Türkçe okunuş sözlüğü — ilkokul çocuğu telaffuzu görerek de öğrensin */
+const OKUNUS={
+  // Zamirler
+  'I':'ay', 'you':'yu', 'he':'hi', 'she':'şi', 'it':'it', 'we':'vi', 'they':'dey',
+  // To be
+  'am':'em', 'is':'iz', 'are':'ar',
+  // Soru kelimeleri
+  'What':'vat', 'Who':'hu', 'Where':'veır', 'When':'ven', 'Why':'vay',
+  'How':'hav', 'How old':'hav old', 'Which':'viç',
+  // Edatlar
+  'in':'in', 'on':'on', 'under':'andır', 'next to':'nekst tu',
+  'behind':'bihaynd', 'in front of':'in frant ov',
+  // İyelik
+  'my':'may', 'your':'yor', 'his':'hiz', 'her':'hır',
+  'its':'its', 'our':'auır', 'their':'deyr',
+  // this/that
+  'this':'dis', 'that':'det', 'these':'diiz', 'those':'douz',
+  // a/an
+  'a':'ı', 'an':'en',
+  // Sık geçen adlar
+  'cat':'ket','apple':'epıl','ball':'bol','book':'buk','table':'teybıl','box':'boks',
+  'teddy bear':'tedi beır','balloon':'bılun','pen':'pen','bag':'beg','doll':'dol',
+  'bird':'bőrd','dog':'dog','house':'haus','car':'kar','teacher':'tiçır',
+  'orange':'orinc','egg':'eg','umbrella':'ambrela','elephant':'elifınt',
+  'ice cream':'ays krim','island':'aylınd','artist':'artist','bike':'bayk',
+  // Cümlelerde geçen yardımcı kelimeler
+  'the':'dı','The':'dı','This':'dis','That':'det','These':'diiz','Those':'douz',
+  'am':'em','is':'iz','are':'ar','name':'neym','student':'stüdınt','friend':'frend',
+  'happy':'hepi','friends':'frendz','students':'stüdınts','class':'klas',
+  'colour':'kalır','like':'layk','birthday':'bőrsdey','old':'old','live':'liv',
+  'do':'du','you':'yu','your':'yor','bird':'bőrd','pens':'penz','cats':'kets',
+  'Ali':'ali','Mert':'mert','Tom':'tom','Ahmet':'ahmet','Ayşe':'ayşe',
+  'Elif':'elif','Mary':'meri','Zeynep':'zeynep','Mary\u2019s':'meriz'
+};
+function tekOkunus(kelime){
+  const t=kelime.replace(/[.,!?]/g,'').trim();
+  if(!t) return '';
+  if(OKUNUS[t]) return OKUNUS[t];
+  const k=t.toLowerCase();
+  for(const [a,b] of Object.entries(OKUNUS)) if(a.toLowerCase()===k) return b;
+  return null;
+}
+function okunusBul(metin){
+  if(!metin) return null;
+  const t=String(metin).trim();
+  const tek=tekOkunus(t);
+  if(tek) return tek;
+  // Cümle: her kelimeyi ayrı çevir, hepsi bulunursa birleştir
+  const kelimeler=t.split(/\s+/);
+  if(kelimeler.length<2) return null;
+  const parcalar=kelimeler.map(tekOkunus);
+  if(parcalar.some(p=>p===null||p==='')) return null;
+  return parcalar.join(' ');
+}
+
 /* ==================== 1. ŞAHIS ZAMİRLERİ ==================== */
 const ZAMIRLER=[
   {en:'I',    tr:'ben',        kim:'Kendimden bahsederken',      ch:'🙋'},
@@ -49,7 +105,7 @@ function genZamir(){
     return{
       text:'"'+it.en+'" ne demektir?',
       numberDisplay:it.en,
-      ses:it.en, sesEtiket:'"'+it.en+'" nasıl okunur?',
+      ses:it.en, sesEtiket:'"'+it.en+'" nasıl okunur?', okunus:okunusBul(it.en),
       answer:it.tr,
       options:shuffle([it.tr,...w]),
       explain:it.en+' = '+it.tr+'\n'+it.kim+' kullanılır.\n\n💡 Şahıs zamirleri:\nI (ben) · you (sen) · he (o-erkek) · she (o-kadın)\nit (o-nesne) · we (biz) · they (onlar)'
@@ -81,7 +137,7 @@ function genZamir(){
   const w=distractors(q.c,()=>pick(ZAMIRLER).en);
   return{
     text:q.d,
-    ses:q.c,
+    ses:q.c, okunus:okunusBul(q.c),
     answer:q.c,
     options:shuffle([q.c,...w]),
     explain:q.c+' = '+dz.tr+'\n'+dz.kim+' kullanılır.'
@@ -105,7 +161,7 @@ function genToBe(){
     return{
       text:'Boşluğa hangisi gelmelidir?',
       readDisplay:it.z+' ____ ...',
-      ses:it.z+' '+it.f,
+      ses:it.z+' '+it.f, okunus:(okunusBul(it.z)+' '+okunusBul(it.f)),
       answer:it.f,
       options:shuffle(['am','is','are']),
       explain:it.z+' + '+it.f+'\nÖrnek: '+it.ornek+' ('+it.tr+')\n\n💡 Kural:\nI → am\nhe / she / it → is\nyou / we / they → are'
@@ -118,7 +174,7 @@ function genToBe(){
   const yanlis=digerFiiller.map(f=>it.z+' '+f+' '+kuyruk);
   return{
     text:'Hangi cümle DOĞRUDUR?',
-    ses:dogruCumle, sesEtiket:'Doğru cümleyi dinle', otomatikSes:false,
+    ses:dogruCumle, sesEtiket:'Doğru cümleyi dinle', otomatikSes:false, okunus:okunusBul(dogruCumle),
     answer:dogruCumle,
     options:shuffle([dogruCumle,...shuffle(yanlis).slice(0,2)]),
     explain:dogruCumle+'\n'+it.tr+'\n\n💡 '+it.z+' zamiri "'+it.f+'" ile kullanılır.'
@@ -145,7 +201,7 @@ function genSoruKelime(){
     return{
       text:'"'+it.en+'" ne demektir?',
       numberDisplay:it.en,
-      ses:it.en,
+      ses:it.en, okunus:okunusBul(it.en),
       answer:it.tr,
       options:shuffle([it.tr,...w]),
       explain:it.en+' = '+it.tr+'\n'+it.ne+'.\nÖrnek: '+it.ornek+' ('+it.o_tr+')'
@@ -166,7 +222,7 @@ function genSoruKelime(){
   return{
     text:'Boşluğa hangi soru kelimesi gelmelidir?',
     readDisplay:bosluk+'\n('+it.o_tr+')',
-    ses:it.ornek, sesEtiket:'Cümleyi dinle', otomatikSes:false,
+    ses:it.ornek, sesEtiket:'Cümleyi dinle', otomatikSes:false, okunus:okunusBul(it.ornek),
     answer:it.en,
     options:shuffle([it.en,...w]),
     explain:it.ornek+'\n'+it.o_tr+'\n\n💡 '+it.en+' = '+it.tr+' — '+it.ne+'.'
@@ -254,7 +310,7 @@ function genEdat(){
     return{
       text:'"'+it.en+'" ne demektir?',
       numberDisplay:it.en,
-      ses:it.en,
+      ses:it.en, okunus:okunusBul(it.en),
       answer:it.tr,
       options:shuffle([it.tr,...w]),
       explain:it.en+' = '+it.tr+'\n'+it.ip+'.\n\n💡 Yer edatları:\nin (içinde) · on (üstünde) · under (altında)\nnext to (yanında) · behind (arkasında) · in front of (önünde)'
@@ -280,6 +336,7 @@ function genEdat(){
     visual:()=>edatSahne(it.en,'🐱'),
     ses:'The cat is '+it.en+' the '+kap+'.',
     sesEtiket:'Cümleyi dinle', otomatikSes:false,
+    okunus:okunusBul('The cat is '+it.en+' the '+kap+'.'),
     answer:it.en,
     options:shuffle([it.en,...w]),
     explain:'The cat is '+it.en+' the '+kap+'.\nKedi '+kap.replace('box','kutunun').replace('table','masanın')+' '+it.tr+'.'
@@ -305,7 +362,7 @@ function genIyelik(){
     return{
       text:'"'+it.en+'" ne demektir?',
       numberDisplay:it.en,
-      ses:it.en,
+      ses:it.en, okunus:okunusBul(it.en),
       answer:it.tr,
       options:shuffle([it.tr,...w]),
       explain:it.en+' = '+it.tr+'\nÖrnek: '+it.ornek+' ('+it.o_tr+')\n\n💡 Zamir → iyelik:\nI→my · you→your · he→his · she→her\nit→its · we→our · they→their'
@@ -331,6 +388,7 @@ function genIyelik(){
     readDisplay:'This is '+isim+'. This is ____ '+esya.e+'.',
     ses:'This is '+isim+'. This is '+dogru+' '+esya.e+'.',
     sesEtiket:'Cümleyi dinle', otomatikSes:false,
+    okunus:okunusBul('This is '+dogru+' '+esya.e),
     answer:dogru,
     options:shuffle(['his','her','its']),
     explain:isim+' bir '+(erkekMi?'ERKEK':'KIZ')+'. Bu yüzden "'+dogru+'" kullanılır.\n'+
@@ -368,7 +426,7 @@ function genThis(){
     text:it.s,
     answer:it.c,
     options:shuffle([it.c,...it.y]),
-    ses:sesMetni, sesEtiket:'Cümleyi dinle', otomatikSes:false,
+    ses:sesMetni, sesEtiket:'Cümleyi dinle', otomatikSes:false, okunus:okunusBul(sesMetni),
     explain:it.e+'\n\n💡 Özet:\nyakın + tek → this\nuzak + tek → that\nyakın + çok → these\nuzak + çok → those'
   };
 }
@@ -386,6 +444,7 @@ function genArticle(){
     readDisplay:'This is ____ '+kelime+'.',
     ses:'This is '+dogru+' '+kelime+'.',
     sesEtiket:'Cümleyi dinle', otomatikSes:false,
+    okunus:okunusBul('This is '+dogru+' '+kelime),
     answer:dogru,
     options:shuffle(['a','an']),
     explain:'This is '+dogru+' '+kelime+'.\n\n"'+kelime+'" kelimesi "'+ilk+'" harfiyle başlıyor.\n'+

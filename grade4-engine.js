@@ -34,7 +34,14 @@ function initGame(levels,theme){
   const st=document.createElement('style');
   st.textContent=`
     body{background:linear-gradient(135deg,${theme.c1} 0%,${theme.c2} 100%)}
-    .header h1{background:linear-gradient(135deg,${theme.c1},${theme.c2})}
+    /* background KISAYOLU background-clip'i sıfırlıyordu; başlık görünmez oluyordu.
+       background-image kullanılıp clip özellikleri burada tekrar veriliyor. */
+    .header h1{background-image:linear-gradient(135deg,${theme.c1},${theme.c2});
+      -webkit-background-clip:text;background-clip:text;
+      -webkit-text-fill-color:transparent;color:transparent}
+    /* Emoji gradyan kırpmasında kare görünüyordu; kendi renginde bırakılır */
+    .header h1 .bas-emoji{-webkit-text-fill-color:initial;color:initial;
+      background:none;-webkit-background-clip:initial;background-clip:initial}
     .level-btn.active{background:linear-gradient(135deg,${theme.c1},${theme.c2});box-shadow:0 4px 14px ${theme.shadow}}
     .question-box{background:${theme.boxBg};border-color:${theme.boxBorder}}
     .number-display,.read-display{color:${theme.c2};border-color:${theme.boxBorder}}
@@ -43,6 +50,7 @@ function initGame(levels,theme){
     .btn-next{background:linear-gradient(135deg,${theme.c1},${theme.c2});box-shadow:0 4px 14px ${theme.shadow}}
     .btn-back:hover{border-color:${theme.c1};color:${theme.c1}}`;
   document.head.appendChild(st);
+  emojileriAyir();
   buildLevels();newQuestion();
   if(window.IO && levels[0]) IO.asama(levels[0].name,1);
 }
@@ -60,16 +68,41 @@ function buildLevels(){
 }
 
 // ---- İNGİLİZCE SESLENDİRME ----
-let ingSes=true;
+let ingSes=true, secilenSes=null;
+
+// İlkokul çocuğu için: KADIN sesi, yavaş tempo, net telaffuz.
+// Tarayıcılar sesleri geç yükler; voiceschanged olayıyla tekrar denenir.
+const KADIN_ADLAR=/female|woman|samantha|karen|moira|tessa|fiona|serena|zira|susan|linda|heather|catherine|amy|emma|joanna|salli|kimberly|ivy|kendra|aria|jenny|michelle|sonia|libby|hazel|google uk english female|google us english/i;
+const ERKEK_ADLAR=/male|man|daniel|alex|fred|david|mark|guy|ryan|brian|matthew|justin|joey|george|oliver|thomas/i;
+
+function sesSec(){
+  if(!('speechSynthesis' in window)) return null;
+  const hepsi=speechSynthesis.getVoices()||[];
+  const en=hepsi.filter(v=>/^en[-_]/i.test(v.lang));
+  if(!en.length) return null;
+  // 1) Adında kadın ipucu olan ve erkek ipucu olmayan
+  let s=en.find(v=>KADIN_ADLAR.test(v.name)&&!ERKEK_ADLAR.test(v.name));
+  // 2) En azından erkek olmayan bir en-US sesi
+  if(!s) s=en.find(v=>/^en[-_]US/i.test(v.lang)&&!ERKEK_ADLAR.test(v.name));
+  // 3) Erkek olmayan herhangi bir İngilizce ses
+  if(!s) s=en.find(v=>!ERKEK_ADLAR.test(v.name));
+  return s||en[0];
+}
+if('speechSynthesis' in window){
+  secilenSes=sesSec();
+  speechSynthesis.onvoiceschanged=()=>{ secilenSes=sesSec(); };
+}
+
 function ingilizceOku(metin){
   if(!ingSes||!('speechSynthesis' in window))return;
   speechSynthesis.cancel();
+  if(!secilenSes) secilenSes=sesSec();
   const u=new SpeechSynthesisUtterance(String(metin).replace(/[_–—]/g,' ').trim());
-  u.lang='en-US'; u.rate=.78; u.pitch=1;
-  // Cihazda İngilizce ses varsa onu seç
-  const sesler=speechSynthesis.getVoices()||[];
-  const en=sesler.find(v=>/^en[-_]/i.test(v.lang));
-  if(en) u.voice=en;
+  u.lang='en-US';
+  u.rate=0.62;      // ilkokul için belirgin yavaş
+  u.pitch=1.08;     // biraz tiz: çocuk kulağına daha net gelir
+  u.volume=1;
+  if(secilenSes) u.voice=secilenSes;
   speechSynthesis.speak(u);
 }
 function ingSesDegistir(){
@@ -77,6 +110,17 @@ function ingSesDegistir(){
   const b=document.getElementById('ingSesBtn');
   if(b) b.textContent=ingSes?'🔊':'🔇';
   if(!ingSes&&'speechSynthesis' in window) speechSynthesis.cancel();
+}
+
+// Başlıktaki emojileri gradyan kırpmasının dışına çıkarır
+function emojileriAyir(){
+  const h=document.querySelector('.header h1');
+  if(!h) return;
+  const metin=h.textContent;
+  try{
+    h.innerHTML=metin.replace(/(\p{Extended_Pictographic}(?:\uFE0F|\u200D\p{Extended_Pictographic})*)/gu,
+      '<span class="bas-emoji">$1</span>');
+  }catch(e){ /* eski tarayıcı: başlık düz kalır */ }
 }
 
 function newQuestion(){
@@ -101,6 +145,12 @@ function newQuestion(){
     b.innerHTML='🔊 <span>'+(q.sesEtiket||'Dinle')+'</span>';
     b.onclick=()=>ingilizceOku(q.ses);
     d.appendChild(b);vis.appendChild(d);
+    // Türkçe okunuş: çocuk sesi duysa da nasıl söyleyeceğini görmeli
+    if(q.okunus){
+      const o=document.createElement('div');
+      o.className='okunus';o.textContent='okunuşu: '+q.okunus;
+      vis.appendChild(o);
+    }
     if(q.otomatikSes!==false) setTimeout(()=>ingilizceOku(q.ses),350);
   }
 

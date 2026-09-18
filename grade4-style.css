@@ -55,3 +55,10 @@ canvas{max-width:100%;border-radius:12px}
   font-weight:600;font-size:16px;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.18)}
 .btn-dinle:active{transform:scale(.96)}
 .btn-dinle span{font-size:15px}
+
+/* İngilizce kelimenin Türkçe okunuşu */
+.okunus{text-align:center;margin-top:6px;font-size:16px;font-weight:600;
+  color:#6A1B9A;background:#F3E5F5;border:2px dashed #CE93D8;
+  border-radius:12px;padding:7px 14px;display:inline-block;
+  margin-left:auto;margin-right:auto}
+#qVisual{display:flex;flex-direction:column;align-items:center}
