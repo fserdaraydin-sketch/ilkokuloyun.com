@@ -59,6 +59,26 @@ function buildLevels(){
   });
 }
 
+// ---- İNGİLİZCE SESLENDİRME ----
+let ingSes=true;
+function ingilizceOku(metin){
+  if(!ingSes||!('speechSynthesis' in window))return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(String(metin).replace(/[_–—]/g,' ').trim());
+  u.lang='en-US'; u.rate=.78; u.pitch=1;
+  // Cihazda İngilizce ses varsa onu seç
+  const sesler=speechSynthesis.getVoices()||[];
+  const en=sesler.find(v=>/^en[-_]/i.test(v.lang));
+  if(en) u.voice=en;
+  speechSynthesis.speak(u);
+}
+function ingSesDegistir(){
+  ingSes=!ingSes;
+  const b=document.getElementById('ingSesBtn');
+  if(b) b.textContent=ingSes?'🔊':'🔇';
+  if(!ingSes&&'speechSynthesis' in window) speechSynthesis.cancel();
+}
+
 function newQuestion(){
   answered=false;
   const fb=document.getElementById('feedback');fb.textContent='';fb.className='feedback';
@@ -72,6 +92,17 @@ function newQuestion(){
   if(q.visual){const d=document.createElement('div');d.className='visual';d.appendChild(q.visual());vis.appendChild(d);}
   if(q.numberDisplay){const d=document.createElement('div');d.className='number-display';d.textContent=q.numberDisplay;vis.appendChild(d);}
   if(q.readDisplay){const d=document.createElement('div');d.className='read-display';d.textContent=q.readDisplay;vis.appendChild(d);}
+
+  // İngilizce içerik: dinleme düğmesi (yabancı dilde telaffuz görmekle öğrenilmez)
+  if(q.ses){
+    const d=document.createElement('div');d.className='ses-satiri';
+    const b=document.createElement('button');
+    b.className='btn-dinle';b.type='button';
+    b.innerHTML='🔊 <span>'+(q.sesEtiket||'Dinle')+'</span>';
+    b.onclick=()=>ingilizceOku(q.ses);
+    d.appendChild(b);vis.appendChild(d);
+    if(q.otomatikSes!==false) setTimeout(()=>ingilizceOku(q.ses),350);
+  }
 
   const ob=document.getElementById('options');ob.innerHTML='';
   if(q.interactive){

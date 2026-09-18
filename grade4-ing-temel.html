@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>İngilizce Temel Bilgiler - 4. Sınıf</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade4-style.css">
+<script defer src="analytics.js"></script>
+</head>
+<body>
+<div class="container">
+  <div class="header"><h1>🔤 İngilizce Temel Bilgiler</h1><p>Ünitelerden önce: zamirler, soru kelimeleri, edatlar</p></div>
+  <div class="levels" id="levels"></div>
+  <div class="stats">
+    <div class="stat"><div class="stat-l">PUAN</div><div class="stat-v" id="score">0</div></div>
+    <div class="stat"><div class="stat-l">DOĞRU</div><div class="stat-v" id="correct">0</div></div>
+    <div class="stat"><div class="stat-l">SORU</div><div class="stat-v" id="total">0</div></div>
+  </div>
+  <div class="question-box">
+    <div class="q-text" id="qText">Yükleniyor...</div>
+    <div id="qVisual"></div>
+    <div class="options" id="options"></div>
+  </div>
+  <div class="feedback" id="feedback"></div>
+  <div class="explain" id="explain"></div>
+  <button class="btn btn-next" onclick="newQuestion()">Yeni Soru ➜</button>
+  <button class="btn btn-back" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade4-engine.js"></script>
+<script>
+/* ==================== 1. ŞAHIS ZAMİRLERİ ==================== */
+const ZAMIRLER=[
+  {en:'I',    tr:'ben',        kim:'Kendimden bahsederken',      ch:'🙋'},
+  {en:'you',  tr:'sen / siz',  kim:'Karşımdaki kişiye',          ch:'👉'},
+  {en:'he',   tr:'o (erkek)',  kim:'Bir ERKEKTEN bahsederken',   ch:'👦'},
+  {en:'she',  tr:'o (kadın)',  kim:'Bir KADINDAN bahsederken',   ch:'👧'},
+  {en:'it',   tr:'o (nesne/hayvan)',kim:'Bir NESNE ya da HAYVANDAN bahsederken',ch:'🐱'},
+  {en:'we',   tr:'biz',        kim:'Kendim ve başkaları',        ch:'👨‍👩‍👧'},
+  {en:'they', tr:'onlar',      kim:'Birden çok kişi ya da şeyden bahsederken',ch:'👨‍👩‍👧‍👦'}
+];
+function genZamir(){
+  const tip=rnd(0,2);
+  const it=pick(ZAMIRLER);
+
+  if(tip===0){
+    const w=distractors(it.tr,()=>pick(ZAMIRLER).tr);
+    return{
+      text:'"'+it.en+'" ne demektir?',
+      numberDisplay:it.en,
+      ses:it.en, sesEtiket:'"'+it.en+'" nasıl okunur?',
+      answer:it.tr,
+      options:shuffle([it.tr,...w]),
+      explain:it.en+' = '+it.tr+'\n'+it.kim+' kullanılır.\n\n💡 Şahıs zamirleri:\nI (ben) · you (sen) · he (o-erkek) · she (o-kadın)\nit (o-nesne) · we (biz) · they (onlar)'
+    };
+  }
+  if(tip===1){
+    const w=distractors(it.en,()=>pick(ZAMIRLER).en);
+    return{
+      text:'"'+it.tr+'" İngilizcede nasıl söylenir?',
+      numberDisplay:it.tr,
+      answer:it.en,
+      options:shuffle([it.en,...w]),
+      explain:it.tr+' = '+it.en+'\n'+it.kim+' kullanılır.'
+    };
+  }
+  // Durumdan zamir bul
+  const durumlar=[
+    {d:'Ali bir erkek. Onun için hangi zamir kullanılır?',c:'he'},
+    {d:'Ayşe bir kız. Onun için hangi zamir kullanılır?',c:'she'},
+    {d:'Bir kedi var. Onun için hangi zamir kullanılır?',c:'it'},
+    {d:'Kendimden bahsediyorum. Hangi zamiri kullanırım?',c:'I'},
+    {d:'Arkadaşımla ben. Bizim için hangi zamir kullanılır?',c:'we'},
+    {d:'Ali ve Ayşe birlikte. Onlar için hangi zamir kullanılır?',c:'they'},
+    {d:'Karşımdaki arkadaşıma sesleniyorum. Hangi zamiri kullanırım?',c:'you'},
+    {d:'Bir masa var. Onun için hangi zamir kullanılır?',c:'it'}
+  ];
+  const q=pick(durumlar);
+  const dz=ZAMIRLER.find(z=>z.en===q.c);
+  const w=distractors(q.c,()=>pick(ZAMIRLER).en);
+  return{
+    text:q.d,
+    ses:q.c,
+    answer:q.c,
+    options:shuffle([q.c,...w]),
+    explain:q.c+' = '+dz.tr+'\n'+dz.kim+' kullanılır.'
+  };
+}
+
+/* ==================== 2. TO BE (am / is / are) ==================== */
+const TOBE=[
+  {z:'I',   f:'am', ornek:'I am a student.', tr:'Ben bir öğrenciyim.'},
+  {z:'you', f:'are',ornek:'You are my friend.',tr:'Sen benim arkadaşımsın.'},
+  {z:'he',  f:'is', ornek:'He is a teacher.',tr:'O bir öğretmen.'},
+  {z:'she', f:'is', ornek:'She is happy.',   tr:'O mutlu.'},
+  {z:'it',  f:'is', ornek:'It is a cat.',    tr:'O bir kedi.'},
+  {z:'we',  f:'are',ornek:'We are friends.', tr:'Biz arkadaşız.'},
+  {z:'they',f:'are',ornek:'They are students.',tr:'Onlar öğrenci.'}
+];
+function genToBe(){
+  const tip=rnd(0,1);
+  const it=pick(TOBE);
+  if(tip===0){
+    return{
+      text:'Boşluğa hangisi gelmelidir?',
+      readDisplay:it.z+' ____ ...',
+      ses:it.z+' '+it.f,
+      answer:it.f,
+      options:shuffle(['am','is','are']),
+      explain:it.z+' + '+it.f+'\nÖrnek: '+it.ornek+' ('+it.tr+')\n\n💡 Kural:\nI → am\nhe / she / it → is\nyou / we / they → are'
+    };
+  }
+  const dogruCumle=it.ornek;
+  // TOBE listesinde "is" ve "are" birden çok zamirde geçiyor; benzersiz fiilleri al
+  const digerFiiller=[...new Set(TOBE.map(x=>x.f))].filter(f=>f!==it.f);
+  const kuyruk=it.ornek.split(' ').slice(2).join(' ');
+  const yanlis=digerFiiller.map(f=>it.z+' '+f+' '+kuyruk);
+  return{
+    text:'Hangi cümle DOĞRUDUR?',
+    ses:dogruCumle, sesEtiket:'Doğru cümleyi dinle', otomatikSes:false,
+    answer:dogruCumle,
+    options:shuffle([dogruCumle,...shuffle(yanlis).slice(0,2)]),
+    explain:dogruCumle+'\n'+it.tr+'\n\n💡 '+it.z+' zamiri "'+it.f+'" ile kullanılır.'
+  };
+}
+
+/* ==================== 3. SORU KELİMELERİ ==================== */
+const SORULAR=[
+  {en:'What', tr:'Ne / Nedir', ornek:'What is your name?', o_tr:'Adın ne?', ne:'NESNE ya da şey sorar'},
+  {en:'Who',  tr:'Kim',        ornek:'Who is he?',        o_tr:'O kim?',   ne:'KİŞİ sorar'},
+  {en:'Where',tr:'Nerede',     ornek:'Where do you live?',o_tr:'Nerede yaşıyorsun?',ne:'YER sorar'},
+  {en:'When', tr:'Ne zaman',   ornek:'When is your birthday?',o_tr:'Doğum günün ne zaman?',ne:'ZAMAN sorar'},
+  {en:'Why',  tr:'Neden',      ornek:'Why are you happy?',o_tr:'Neden mutlusun?',ne:'SEBEP sorar'},
+  {en:'How',  tr:'Nasıl',      ornek:'How are you?',      o_tr:'Nasılsın?',ne:'DURUM ya da yol sorar'},
+  {en:'How old',tr:'Kaç yaşında',ornek:'How old are you?',o_tr:'Kaç yaşındasın?',ne:'YAŞ sorar'},
+  {en:'Which',tr:'Hangi',      ornek:'Which colour do you like?',o_tr:'Hangi rengi seversin?',ne:'SEÇİM sorar'}
+];
+function genSoruKelime(){
+  const tip=rnd(0,2);
+  const it=pick(SORULAR);
+
+  if(tip===0){
+    const w=distractors(it.tr,()=>pick(SORULAR).tr);
+    return{
+      text:'"'+it.en+'" ne demektir?',
+      numberDisplay:it.en,
+      ses:it.en,
+      answer:it.tr,
+      options:shuffle([it.tr,...w]),
+      explain:it.en+' = '+it.tr+'\n'+it.ne+'.\nÖrnek: '+it.ornek+' ('+it.o_tr+')'
+    };
+  }
+  if(tip===1){
+    const w=distractors(it.en,()=>pick(SORULAR).en);
+    return{
+      text:'"'+it.tr+'" İngilizcede nasıl sorulur?',
+      answer:it.en,
+      options:shuffle([it.en,...w]),
+      explain:it.tr+' = '+it.en+'\nÖrnek: '+it.ornek+' ('+it.o_tr+')'
+    };
+  }
+  // Cümleyi tamamla
+  const bosluk=it.ornek.replace(new RegExp('^'+it.en,'i'),'____');
+  const w=distractors(it.en,()=>pick(SORULAR).en);
+  return{
+    text:'Boşluğa hangi soru kelimesi gelmelidir?',
+    readDisplay:bosluk+'\n('+it.o_tr+')',
+    ses:it.ornek, sesEtiket:'Cümleyi dinle', otomatikSes:false,
+    answer:it.en,
+    options:shuffle([it.en,...w]),
+    explain:it.ornek+'\n'+it.o_tr+'\n\n💡 '+it.en+' = '+it.tr+' — '+it.ne+'.'
+  };
+}
+
+/* ==================== 4. EDATLAR (in / on / under ...) ==================== */
+const EDATLAR=[
+  {en:'in',          tr:'içinde',   ip:'Bir şeyin İÇİNDE olmak'},
+  {en:'on',          tr:'üstünde',  ip:'Bir yüzeyin ÜSTÜNDE olmak'},
+  {en:'under',       tr:'altında',  ip:'Bir şeyin ALTINDA olmak'},
+  {en:'next to',     tr:'yanında',  ip:'Bir şeyin YANINDA olmak'},
+  {en:'behind',      tr:'arkasında',ip:'Bir şeyin ARKASINDA olmak'},
+  {en:'in front of', tr:'önünde',   ip:'Bir şeyin ÖNÜNDE olmak'}
+];
+/* Edat sahnesi — masa/kutu ve nesne */
+function edatSahne(edat,nesne){
+  const{c,ctx,W,H}=newCanvas(1,.62,240);
+  // Zemin
+  ctx.fillStyle='#F4EEE2';
+  ctx.beginPath();
+  ctx.moveTo(W*0.22,H*0.40); ctx.lineTo(W*0.78,H*0.40);
+  ctx.lineTo(W-4,H-6); ctx.lineTo(4,H-6); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle='#E3D8C4'; ctx.lineWidth=2; ctx.stroke();
+
+  const mx=W/2, my=H*0.56;
+  const emo=(ch,x,y,b)=>{ ctx.save(); ctx.font=b+'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(ch,x,y); ctx.restore(); };
+
+  if(edat==='in'){
+    // Açık kutu: arka duvar + iç taban + nesne + ön duvar (nesnenin önüne gelir)
+    const g=76, yuk=52, d=20, ky=my+4;
+    ctx.fillStyle='#D9C4A0';
+    ctx.beginPath();
+    ctx.moveTo(mx-g/2+d,ky-yuk/2-d); ctx.lineTo(mx+g/2+d,ky-yuk/2-d);
+    ctx.lineTo(mx+g/2+d,ky+yuk/2-d); ctx.lineTo(mx-g/2+d,ky+yuk/2-d);
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle='#8D5524'; ctx.lineWidth=2; ctx.stroke();
+    ctx.fillStyle='#C9B38C';
+    ctx.beginPath();
+    ctx.moveTo(mx-g/2,ky+yuk/2); ctx.lineTo(mx+g/2,ky+yuk/2);
+    ctx.lineTo(mx+g/2+d,ky+yuk/2-d); ctx.lineTo(mx-g/2+d,ky+yuk/2-d);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#CDB694';
+    ctx.beginPath();
+    ctx.moveTo(mx-g/2,ky-yuk/2); ctx.lineTo(mx-g/2+d,ky-yuk/2-d);
+    ctx.lineTo(mx-g/2+d,ky+yuk/2-d); ctx.lineTo(mx-g/2,ky+yuk/2);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    emo(nesne,mx+5,ky-4,32);                       // nesne kutunun içinde
+    ctx.fillStyle='#C68642';                       // ön duvar nesnenin ÖNÜNE
+    ctx.beginPath(); ctx.rect(mx-g/2,ky+yuk/2-20,g,20); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#A86A30';
+    ctx.beginPath();
+    ctx.moveTo(mx+g/2,ky+yuk/2-20); ctx.lineTo(mx+g/2+d,ky+yuk/2-20-d);
+    ctx.lineTo(mx+g/2+d,ky+yuk/2-d); ctx.lineTo(mx+g/2,ky+yuk/2);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    return c;
+  }
+  // Masa
+  const cizMasa=()=>{
+    const g=76, d=20, kal=8, y2=my;
+    ctx.fillStyle='#E0AC69';
+    ctx.beginPath(); ctx.moveTo(mx-g/2+d,y2-d); ctx.lineTo(mx+g/2+d,y2-d);
+    ctx.lineTo(mx+g/2,y2); ctx.lineTo(mx-g/2,y2); ctx.closePath();
+    ctx.fill(); ctx.strokeStyle='#7A4B1C'; ctx.lineWidth=2; ctx.stroke();
+    ctx.fillStyle='#C68642'; ctx.fillRect(mx-g/2,y2,g,kal); ctx.strokeRect(mx-g/2,y2,g,kal);
+    ctx.fillStyle='#8D5524';
+    ctx.fillRect(mx-g/2+5,y2+kal,8,32); ctx.strokeRect(mx-g/2+5,y2+kal,8,32);
+    ctx.fillRect(mx+g/2-13,y2+kal,8,32); ctx.strokeRect(mx+g/2-13,y2+kal,8,32);
+  };
+  if(edat==='behind'){ emo(nesne,mx+12,my-32,26); cizMasa(); }
+  else if(edat==='in front of'){ cizMasa(); emo(nesne,mx-2,H-24,46); }
+  else if(edat==='under'){ cizMasa(); emo(nesne,mx,my+26,26); }
+  else if(edat==='on'){ cizMasa(); emo(nesne,mx+6,my-26,32); }
+  else { cizMasa(); emo(nesne,mx+58,my+20,32); }   // next to
+  return c;
+}
+function genEdat(){
+  const tip=rnd(0,2);
+  const nesne=pick(['🐱','🍎','⚽','🧸','📕','🎈']);
+  const it=pick(EDATLAR);
+
+  if(tip===0){
+    const w=distractors(it.tr,()=>pick(EDATLAR).tr);
+    return{
+      text:'"'+it.en+'" ne demektir?',
+      numberDisplay:it.en,
+      ses:it.en,
+      answer:it.tr,
+      options:shuffle([it.tr,...w]),
+      explain:it.en+' = '+it.tr+'\n'+it.ip+'.\n\n💡 Yer edatları:\nin (içinde) · on (üstünde) · under (altında)\nnext to (yanında) · behind (arkasında) · in front of (önünde)'
+    };
+  }
+  if(tip===1){
+    const w=distractors(it.en,()=>pick(EDATLAR).en);
+    return{
+      text:'Resimdeki nesne nerede? Doğru edatı seç.',
+      visual:()=>edatSahne(it.en,nesne),
+      ses:'The '+(nesne==='🐱'?'cat':nesne==='🍎'?'apple':nesne==='⚽'?'ball':nesne==='🧸'?'teddy bear':nesne==='📕'?'book':'balloon')+' is '+it.en+' the '+(it.en==='in'?'box':'table')+'.',
+      sesEtiket:'Cümleyi dinle', otomatikSes:false,
+      answer:it.en,
+      options:shuffle([it.en,...w]),
+      explain:'Nesne '+(it.en==='in'?'kutunun':'masanın')+' '+it.tr+'.\nİngilizcesi: '+it.en+'\n\n💡 '+it.ip+'.'
+    };
+  }
+  const w=distractors(it.en,()=>pick(EDATLAR).en);
+  const kap = it.en==='in'?'box':'table';
+  return{
+    text:'Boşluğa hangi edat gelmelidir?',
+    readDisplay:'The cat is ____ the '+kap+'.\n(Kedi '+kap.replace('box','kutunun').replace('table','masanın')+' '+it.tr+'.)',
+    visual:()=>edatSahne(it.en,'🐱'),
+    ses:'The cat is '+it.en+' the '+kap+'.',
+    sesEtiket:'Cümleyi dinle', otomatikSes:false,
+    answer:it.en,
+    options:shuffle([it.en,...w]),
+    explain:'The cat is '+it.en+' the '+kap+'.\nKedi '+kap.replace('box','kutunun').replace('table','masanın')+' '+it.tr+'.'
+  };
+}
+
+/* ==================== 5. İYELİK SIFATLARI ==================== */
+const IYELIK=[
+  {en:'my',   tr:'benim',   z:'I',    ornek:'This is my book.',    o_tr:'Bu benim kitabım.'},
+  {en:'your', tr:'senin',   z:'you',  ornek:'This is your pen.',   o_tr:'Bu senin kalemin.'},
+  {en:'his',  tr:'onun (erkek)',z:'he',ornek:'This is his bag.',   o_tr:'Bu onun çantası.'},
+  {en:'her',  tr:'onun (kadın)',z:'she',ornek:'This is her doll.', o_tr:'Bu onun oyuncak bebeği.'},
+  {en:'its',  tr:'onun (nesne/hayvan)',z:'it',ornek:'Its name is Tom.',o_tr:'Onun adı Tom.'},
+  {en:'our',  tr:'bizim',   z:'we',   ornek:'This is our class.',  o_tr:'Bu bizim sınıfımız.'},
+  {en:'their',tr:'onların', z:'they', ornek:'This is their house.',o_tr:'Bu onların evi.'}
+];
+function genIyelik(){
+  const tip=rnd(0,2);
+  const it=pick(IYELIK);
+
+  if(tip===0){
+    const w=distractors(it.tr,()=>pick(IYELIK).tr);
+    return{
+      text:'"'+it.en+'" ne demektir?',
+      numberDisplay:it.en,
+      ses:it.en,
+      answer:it.tr,
+      options:shuffle([it.tr,...w]),
+      explain:it.en+' = '+it.tr+'\nÖrnek: '+it.ornek+' ('+it.o_tr+')\n\n💡 Zamir → iyelik:\nI→my · you→your · he→his · she→her\nit→its · we→our · they→their'
+    };
+  }
+  if(tip===1){
+    const w=distractors(it.en,()=>pick(IYELIK).en);
+    return{
+      text:'"'+it.z+'" zamirinin iyelik hâli hangisidir?',
+      numberDisplay:it.z,
+      answer:it.en,
+      options:shuffle([it.en,...w]),
+      explain:it.z+' → '+it.en+' ('+it.tr+')\nÖrnek: '+it.ornek
+    };
+  }
+  // his / her ayrımı (en sık karışan)
+  const erkekMi=rnd(0,1)===0;
+  const isim=erkekMi?pick(['Ali','Mert','Tom','Ahmet']):pick(['Ayşe','Elif','Mary','Zeynep']);
+  const esya=pick([{e:'book',t:'kitap'},{e:'bag',t:'çanta'},{e:'pen',t:'kalem'},{e:'bike',t:'bisiklet'}]);
+  const dogru=erkekMi?'his':'her';
+  return{
+    text:'Boşluğa hangisi gelmelidir?',
+    readDisplay:'This is '+isim+'. This is ____ '+esya.e+'.',
+    ses:'This is '+isim+'. This is '+dogru+' '+esya.e+'.',
+    sesEtiket:'Cümleyi dinle', otomatikSes:false,
+    answer:dogru,
+    options:shuffle(['his','her','its']),
+    explain:isim+' bir '+(erkekMi?'ERKEK':'KIZ')+'. Bu yüzden "'+dogru+'" kullanılır.\n'+
+            'This is '+dogru+' '+esya.e+'. (Bu onun '+esya.t+'ı.)\n\n'+
+            '💡 his = erkek için "onun"\n💡 her = kadın için "onun"\n'+
+            '📌 Türkçede ikisi de "onun" ama İngilizcede AYRIDIR.'
+  };
+}
+
+/* ==================== 6. THIS / THAT / THESE / THOSE ==================== */
+function genThis(){
+  const sorular=[
+    {s:'"This" ne demektir?',c:'Bu (yakındaki tek şey)',
+     y:['Şu (uzaktaki tek şey)','Bunlar (yakındaki çok şey)'],
+     e:'this = bu. YAKINDAKİ tek şey için kullanılır.\nÖrnek: This is my book. (Bu benim kitabım.)'},
+    {s:'"That" ne demektir?',c:'Şu (uzaktaki tek şey)',
+     y:['Bu (yakındaki tek şey)','Şunlar (uzaktaki çok şey)'],
+     e:'that = şu. UZAKTAKİ tek şey için kullanılır.\nÖrnek: That is a bird. (Şu bir kuş.)'},
+    {s:'"These" ne demektir?',c:'Bunlar (yakındaki çok şey)',
+     y:['Bu (yakındaki tek şey)','Şunlar (uzaktaki çok şey)'],
+     e:'these = bunlar. YAKINDAKİ birden çok şey için.\nÖrnek: These are my pens. (Bunlar benim kalemlerim.)'},
+    {s:'"Those" ne demektir?',c:'Şunlar (uzaktaki çok şey)',
+     y:['Bunlar (yakındaki çok şey)','Şu (uzaktaki tek şey)'],
+     e:'those = şunlar. UZAKTAKİ birden çok şey için.\nÖrnek: Those are cats. (Şunlar kedi.)'},
+    {s:'Elimdeki kalemi göstererek ne derim?',c:'This is a pen.',
+     y:['That is a pen.','Those are pens.'],
+     e:'Yakındaki TEK şey için "this" kullanılır.'},
+    {s:'Uzaktaki bir kuşu göstererek ne derim?',c:'That is a bird.',
+     y:['This is a bird.','These are birds.'],
+     e:'Uzaktaki TEK şey için "that" kullanılır.'}
+  ];
+  const it=pick(sorular);
+  const sesMetni=it.c.includes(' is ')||it.c.includes(' are ')?it.c:null;
+  return{
+    text:it.s,
+    answer:it.c,
+    options:shuffle([it.c,...it.y]),
+    ses:sesMetni, sesEtiket:'Cümleyi dinle', otomatikSes:false,
+    explain:it.e+'\n\n💡 Özet:\nyakın + tek → this\nuzak + tek → that\nyakın + çok → these\nuzak + çok → those'
+  };
+}
+
+/* ==================== 7. A / AN ==================== */
+const KELIMELER_AN=['apple','orange','egg','umbrella','elephant','ice cream','island','artist'];
+const KELIMELER_A=['book','cat','dog','pen','table','ball','house','teacher','bird','car'];
+function genArticle(){
+  const anMi=rnd(0,1)===0;
+  const kelime=anMi?pick(KELIMELER_AN):pick(KELIMELER_A);
+  const dogru=anMi?'an':'a';
+  const ilk=kelime[0].toLowerCase();
+  return{
+    text:'Boşluğa "a" mı "an" mı gelmelidir?',
+    readDisplay:'This is ____ '+kelime+'.',
+    ses:'This is '+dogru+' '+kelime+'.',
+    sesEtiket:'Cümleyi dinle', otomatikSes:false,
+    answer:dogru,
+    options:shuffle(['a','an']),
+    explain:'This is '+dogru+' '+kelime+'.\n\n"'+kelime+'" kelimesi "'+ilk+'" harfiyle başlıyor.\n'+
+            (anMi
+              ? '💡 Sesli harfle (a, e, i, o, u) başlayan kelimelerden önce AN kullanılır.'
+              : '💡 Sessiz harfle başlayan kelimelerden önce A kullanılır.')+
+            '\n\nÖrnek: a book, a cat · an apple, an orange'
+  };
+}
+
+initGame([
+  {name:'Zamirler',        gen:genZamir},
+  {name:'am / is / are',   gen:genToBe},
+  {name:'Soru Kelimeleri', gen:genSoruKelime},
+  {name:'Edatlar',         gen:genEdat},
+  {name:'İyelik Sıfatları',gen:genIyelik},
+  {name:'this / that',     gen:genThis},
+  {name:'a / an',          gen:genArticle}
+],{c1:'#C2185B',c2:'#F06292',shadow:'rgba(194,24,91,.35)',boxBg:'linear-gradient(135deg,#fff5f8 0%,#fff0f5 100%)',boxBorder:'#f8bbd0'});
+</script>
+</body>
+</html>
