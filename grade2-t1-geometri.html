@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cisimler ve Şekiller - 2. Sınıf Matematik</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade1-style.css">
+<script defer src="analytics.js"></script>
+</head>
+<body>
+<div class="kutu">
+  <div class="baslik"><h1>🧊 Cisimler ve Şekiller</h1><p>1. Tema · Nesnelerin Geometrisi</p></div>
+  <div class="ilerleme"><div class="ilerleme-dolu" id="ilerlemeDolu"></div></div>
+  <div class="yildizlar" id="yildizlar"></div>
+  <div class="yonerge">
+    <span class="yonerge-metin" id="yonergeMetin">Hazırlanıyor...</span>
+    <button class="btn-ses" id="sesBtn" onclick="sesDegistir()" aria-label="Sesi aç kapat">🔊</button>
+  </div>
+  <div class="soru-gorsel" id="soruGorsel"></div>
+  <div class="secenekler" id="secenekler"></div>
+  <div class="geri" id="geri"></div>
+  <button class="btn-devam" id="devamBtn" onclick="tekrarDinle()">🔊 Tekrar Dinle</button>
+  <button class="btn-geri" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade1-engine.js"></script>
+<script>
+// ===== 3B CİSİM ÇİZİMLERİ (izometrik) =====
+function kutuCiz(ctx,cx,cy,g,y,d,renk,koyu,yan){
+  // g: genişlik, y: yükseklik, d: derinlik
+  const x0=cx-g/2, y0=cy+y/2;
+  ctx.strokeStyle='rgba(0,0,0,.35)'; ctx.lineWidth=2; ctx.lineJoin='round';
+  // Ön yüz
+  ctx.fillStyle=renk;
+  ctx.beginPath(); ctx.rect(x0,y0-y,g,y); ctx.fill(); ctx.stroke();
+  // Üst yüz
+  ctx.fillStyle=koyu;
+  ctx.beginPath();
+  ctx.moveTo(x0,y0-y); ctx.lineTo(x0+d,y0-y-d);
+  ctx.lineTo(x0+g+d,y0-y-d); ctx.lineTo(x0+g,y0-y);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  // Sağ yüz
+  ctx.fillStyle=yan;
+  ctx.beginPath();
+  ctx.moveTo(x0+g,y0-y); ctx.lineTo(x0+g+d,y0-y-d);
+  ctx.lineTo(x0+g+d,y0-d); ctx.lineTo(x0+g,y0);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+}
+function cizCisim(ctx,tip,cx,cy,olcek){
+  const s=olcek||1;
+  if(tip==='küp')               kutuCiz(ctx,cx,cy,52*s,52*s,20*s,'#66BB6A','#A5D6A7','#43A047');
+  else if(tip==='kare prizma')  kutuCiz(ctx,cx,cy,40*s,66*s,18*s,'#42A5F5','#90CAF9','#1E88E5');
+  else if(tip==='dikdörtgen prizma') kutuCiz(ctx,cx,cy,68*s,40*s,20*s,'#FFA726','#FFCC80','#F57C00');
+  else if(tip==='üçgen prizma'){
+    // Derinlik SAĞA ve YUKARI (diğer cisimlerle aynı izometrik yön)
+    const g=52*s, y=44*s, d=19*s, x0=cx-g/2-d/2, y0=cy+y/2+d/2;
+    ctx.strokeStyle='rgba(0,0,0,.35)'; ctx.lineWidth=2; ctx.lineJoin='round';
+    const onSol=[x0,y0], onSag=[x0+g,y0], onTepe=[x0+g/2,y0-y];
+    const arSol=[x0+d,y0-d], arSag=[x0+g+d,y0-d], arTepe=[x0+g/2+d,y0-y-d];
+    const yuz=(p,renk)=>{ ctx.fillStyle=renk; ctx.beginPath();
+      p.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));
+      ctx.closePath(); ctx.fill(); ctx.stroke(); };
+    yuz([arSol,arSag,arTepe],'#7B1FA2');              // arka üçgen
+    yuz([onTepe,arTepe,arSag,onSag],'#CE93D8');       // sağ eğik yüz
+    yuz([onSol,onSag,onTepe],'#AB47BC');              // ön üçgen
+  }
+  else if(tip==='silindir'){
+    const r=28*s, y=58*s;
+    ctx.strokeStyle='rgba(0,0,0,.35)'; ctx.lineWidth=2;
+    ctx.fillStyle='#EF5350';
+    ctx.beginPath(); ctx.rect(cx-r,cy-y/2,r*2,y); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(cx-r,cy-y/2); ctx.lineTo(cx-r,cy+y/2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx+r,cy-y/2); ctx.lineTo(cx+r,cy+y/2); ctx.stroke();
+    ctx.fillStyle='#E57373';
+    ctx.beginPath(); ctx.ellipse(cx,cy+y/2,r,r*0.32,0,0,Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#FFCDD2';
+    ctx.beginPath(); ctx.ellipse(cx,cy-y/2,r,r*0.32,0,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  }
+  else if(tip==='küre'){
+    const r=32*s;
+    const g=ctx.createRadialGradient(cx-r*0.32,cy-r*0.32,r*0.14,cx,cy,r);
+    g.addColorStop(0,'#FFF59D'); g.addColorStop(1,'#F9A825');
+    ctx.fillStyle=g; ctx.strokeStyle='rgba(0,0,0,.35)'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  }
+}
+// ===== 2B ŞEKİL ÇİZİMLERİ =====
+function cizSekil2B(ctx,tip,cx,cy,olcek){
+  const s=olcek||1, r=32*s;
+  ctx.strokeStyle='#37474F'; ctx.lineWidth=3.5; ctx.lineJoin='round';
+  ctx.beginPath();
+  if(tip==='kare'){ ctx.rect(cx-r*0.86,cy-r*0.86,r*1.72,r*1.72); ctx.fillStyle='#81C784'; }
+  else if(tip==='dikdörtgen'){ ctx.rect(cx-r*1.15,cy-r*0.66,r*2.3,r*1.32); ctx.fillStyle='#FFB74D'; }
+  else if(tip==='üçgen'){ ctx.moveTo(cx,cy-r); ctx.lineTo(cx+r*0.92,cy+r*0.72); ctx.lineTo(cx-r*0.92,cy+r*0.72); ctx.closePath(); ctx.fillStyle='#BA68C8'; }
+  else if(tip==='daire'){ ctx.arc(cx,cy,r*0.92,0,Math.PI*2); ctx.fillStyle='#64B5F6'; }
+  else if(tip==='çember'){ ctx.arc(cx,cy,r*0.92,0,Math.PI*2); ctx.fillStyle='transparent'; }
+  if(tip==='çember'){ ctx.strokeStyle='#1565C0'; ctx.lineWidth=5; ctx.stroke(); }
+  else { ctx.fill(); ctx.stroke(); }
+}
+
+const CISIMLER=['küp','kare prizma','dikdörtgen prizma','üçgen prizma','silindir','küre'];
+const SEKILLER=['kare','dikdörtgen','üçgen','daire','çember'];
+
+// Günlük nesneler ve benzedikleri cisimler
+const NESNE_CISIM=[
+  {ch:'🎲',ad:'zar',           c:'küp'},
+  {ch:'🧊',ad:'buz küpü',      c:'küp'},
+  {ch:'📦',ad:'koli',          c:'dikdörtgen prizma'},
+  {ch:'📕',ad:'kitap',         c:'dikdörtgen prizma'},
+  {ch:'🧱',ad:'tuğla',         c:'dikdörtgen prizma'},
+  {ch:'🥫',ad:'konserve kutusu',c:'silindir'},
+  {ch:'🥁',ad:'davul',         c:'silindir'},
+  {ch:'🕯️',ad:'mum',          c:'silindir'},
+  {ch:'⚽',ad:'futbol topu',   c:'küre'},
+  {ch:'🌍',ad:'dünya küresi',  c:'küre'},
+  {ch:'🍊',ad:'portakal',      c:'küre'},
+  {ch:'⛺',ad:'çadır',         c:'üçgen prizma'},
+  {ch:'🧀',ad:'peynir dilimi', c:'üçgen prizma'}
+];
+const YUVARLAK=['silindir','küre'];
+
+function cisimKarti(ad){ const{c,ctx,W,H}=sahne(148,112); cizCisim(ctx,ad,W/2,H/2,0.84); return c; }
+function sekilKarti(ad){ const{c,ctx,W,H}=sahne(148,112); cizSekil2B(ctx,ad,W/2,H/2,0.86); return c; }
+function nesneKarti(ch){ const{c,ctx,W,H}=sahne(148,104); emoji(ctx,ch,W/2,H/2,52); return c; }
+function metinKarti(t,b){
+  const{c,ctx,W,H}=sahne(148,86);
+  ctx.save(); ctx.fillStyle='#37474F'; ctx.font='600 '+(b||16)+'px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  const k=t.split(' ');
+  if(t.length>13&&k.length>1){ const o=Math.ceil(k.length/2);
+    ctx.fillText(k.slice(0,o).join(' '),W/2,H/2-11);
+    ctx.fillText(k.slice(o).join(' '),W/2,H/2+11);
+  } else ctx.fillText(t,W/2,H/2);
+  ctx.restore(); return c;
+}
+function sayiKarti(t){
+  const{c,ctx,W,H}=sahne(148,86);
+  ctx.save(); ctx.fillStyle='#37474F'; ctx.font='700 38px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(t,W/2,H/2); ctx.restore(); return c;
+}
+
+/* ===== 1. NESNE HANGİ CİSME BENZER ===== */
+function etkNesneCisim(){
+  const it=pick(NESNE_CISIM);
+  const w=distractors(it.c,()=>pick(CISIMLER));
+  const g=nesneKarti(it.ch); g.style.width='128px'; g.style.height='90px';
+  return{
+    yonerge:'Bu '+it.ad+' hangi geometrik cisme benzer?',
+    secenek:shuffle([it.c,...w.slice(0,2)]), dogru:it.c,
+    ustGorsel:g, ciz:t=>cisimKarti(t),
+    ipucu:it.ad.charAt(0).toLocaleUpperCase('tr')+it.ad.slice(1)+' bir '+it.c+' modelidir.'
+  };
+}
+
+/* ===== 2. CİSME BENZEYEN NESNE ===== */
+function etkCisimNesne(){
+  const hedef=pick([...new Set(NESNE_CISIM.map(x=>x.c))]);
+  const dogru=pick(NESNE_CISIM.filter(x=>x.c===hedef));
+  const yanlislar=shuffle(NESNE_CISIM.filter(x=>x.c!==hedef)).slice(0,2);
+  const g=cisimKarti(hedef); g.style.width='140px'; g.style.height='106px';
+  return{
+    yonerge:'Yukarıdaki '+hedef+' cismine benzeyen nesne hangisidir?',
+    secenek:shuffle([dogru.ch,...yanlislar.map(x=>x.ch)]), dogru:dogru.ch,
+    ustGorsel:g, ciz:ch=>nesneKarti(ch),
+    ipucu:dogru.ad.charAt(0).toLocaleUpperCase('tr')+dogru.ad.slice(1)+' bir '+hedef+' modelidir.'
+  };
+}
+
+/* ===== 3. YUVARLAK MI KÖŞELİ Mİ ===== */
+function etkYuvarlakKoseli(){
+  const ad=pick(CISIMLER);
+  const yuvarlakMi=YUVARLAK.includes(ad);
+  const g=cisimKarti(ad); g.style.width='140px'; g.style.height='106px';
+  return{
+    yonerge:'Bu cisim YUVARLAK mıdır, KÖŞELİ midir?',
+    secenek:['Yuvarlak cisim','Köşeli cisim'],
+    dogru:yuvarlakMi?'Yuvarlak cisim':'Köşeli cisim',
+    ustGorsel:g, ciz:t=>metinKarti(t,16),
+    ipucu:yuvarlakMi
+      ? ad.charAt(0).toLocaleUpperCase('tr')+ad.slice(1)+' yuvarlaktır, köşesi yoktur. Yuvarlanabilir.'
+      : ad.charAt(0).toLocaleUpperCase('tr')+ad.slice(1)+' köşelidir, köşeleri vardır. Yuvarlanmaz.'
+  };
+}
+
+/* ===== 4. MODELDEKİ ŞEKİLLERİ SAY ===== */
+const MODELLER=[
+  {ad:'ev',   parca:[['kare',0,18,1.0],['üçgen',0,-26,1.05],['dikdörtgen',-14,34,0.42],['kare',16,14,0.32]]},
+  {ad:'robot',parca:[['kare',0,-22,0.72],['dikdörtgen',0,20,0.78],['daire',-12,-26,0.22],['daire',12,-26,0.22],['kare',-30,20,0.26],['kare',30,20,0.26]]},
+  {ad:'araba',parca:[['dikdörtgen',0,4,0.92],['kare',-8,-24,0.5],['daire',-24,32,0.3],['daire',24,32,0.3]]},
+  {ad:'ağaç', parca:[['üçgen',0,-18,0.95],['üçgen',0,4,0.8],['dikdörtgen',0,34,0.3]]},
+  {ad:'gemi', parca:[['üçgen',4,-22,0.85],['dikdörtgen',0,26,0.95],['daire',-22,26,0.2],['daire',22,26,0.2]]}
+];
+function modelCiz(m){
+  const{c,ctx,W,H}=sahne(184,150);
+  m.parca.forEach(([tip,dx,dy,ol])=>cizSekil2B(ctx,tip,W/2+dx,H/2+dy,ol));
+  return c;
+}
+function etkModelSay(){
+  const m=pick(MODELLER);
+  const sayim={};
+  m.parca.forEach(([t])=>sayim[t]=(sayim[t]||0)+1);
+  const hedef=pick(Object.keys(sayim));
+  const dogru=String(sayim[hedef]);
+  const w=distractors(dogru,()=>String(rnd(0,5)));
+  const g=modelCiz(m); g.style.width='176px'; g.style.height='144px';
+  return{
+    yonerge:'Bu modelde kaç tane '+hedef+' kullanılmış?',
+    secenek:shuffle([dogru,...w.slice(0,2)]), dogru,
+    ustGorsel:g, ciz:t=>sayiKarti(t),
+    ipucu:'Modeldeki '+hedef+' şekillerini tek tek say. Bu modelde '+
+      Object.entries(sayim).map(([k,v])=>v+' '+k).join(', ')+' var.'
+  };
+}
+
+/* ===== 5. BİÇİMSEL ÖZELLİK (yön/yer/büyüklük değişse de şekil aynıdır) ===== */
+function etkBicimsel(){
+  const tip=rnd(0,1);
+  if(tip===0){
+    const ad=pick(['kare','dikdörtgen','üçgen','daire']);
+    const durum=pick([
+      {s:'döndürülürse',c:'Adı değişmez'},
+      {s:'büyütülürse',c:'Adı değişmez'},
+      {s:'küçültülürse',c:'Adı değişmez'},
+      {s:'başka bir yere taşınırsa',c:'Adı değişmez'}
+    ]);
+    const g=sekilKarti(ad); g.style.width='140px'; g.style.height='106px';
+    return{
+      yonerge:'Bu '+ad+' '+durum.s+' ne olur?',
+      secenek:shuffle(['Adı değişmez','Başka bir şekil olur','Şekil olmaktan çıkar']),
+      dogru:'Adı değişmez',
+      ustGorsel:g, ciz:t=>metinKarti(t,15),
+      ipucu:'Bir şeklin YERİ, YÖNÜ ve BÜYÜKLÜĞÜ değişse de biçimsel özellikleri değişmez. '+
+            ad.charAt(0).toLocaleUpperCase('tr')+ad.slice(1)+', '+ad+' olarak kalır.'
+    };
+  }
+  const sorular=[
+    {s:'Bir karenin kaç kenarı vardır? Kare büyütülürse bu sayı değişir mi?',c:'4 kenar, değişmez',
+     y:['4 kenar, artar','3 kenar, değişmez'],
+     e:'Kare büyüse de küçülse de her zaman 4 kenarı ve 4 köşesi olur.'},
+    {s:'Üçgen ters çevrilirse kaç köşesi olur?',c:'Yine 3',
+     y:['4 olur','2 olur'],
+     e:'Döndürmek köşe sayısını değiştirmez. Üçgenin her zaman 3 köşesi vardır.'},
+    {s:'İki kare farklı büyüklükte. İkisi de kare midir?',c:'Evet, ikisi de karedir',
+     y:['Hayır, büyük olan dikdörtgendir','Sadece küçük olan karedir'],
+     e:'Büyüklük şeklin adını değiştirmez. Dört kenarı eşit olan her şekil karedir.'},
+    {s:'Bir daire yana yatırılırsa ne olur?',c:'Yine dairedir',
+     y:['Elips olur','Çember olur'],
+     e:'Daire her yönden aynı görünür. Döndürmek onu değiştirmez.'}
+  ];
+  const it=pick(sorular);
+  return{
+    yonerge:it.s,
+    secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ciz:t=>metinKarti(t,14),
+    ipucu:it.e
+  };
+}
+
+/* ===== 6. SIVI MİKTARI (bardak, şişe, sürahi, kova ile ölçme) ===== */
+const KAPLAR=[
+  {ad:'bardak', ch:'🥛', sig:1},
+  {ad:'şişe',   ch:'🍶', sig:3},
+  {ad:'sürahi', ch:'🏺', sig:5},
+  {ad:'kova',   ch:'🪣', sig:10}
+];
+function kapCiz(k,adet){
+  const{c,ctx,W,H}=sahne(150,110);
+  emoji(ctx,k.ch,W/2,H/2-8,48);
+  if(adet){
+    ctx.save(); ctx.fillStyle='#37474F'; ctx.font='700 15px Fredoka,Arial';
+    ctx.textAlign='center'; ctx.fillText(adet+' '+k.ad,W/2,H-20); ctx.restore();
+  }
+  return c;
+}
+function etkSivi(){
+  const tip=rnd(0,2);
+
+  if(tip===0){
+    const [a,b]=shuffle([...KAPLAR]).slice(0,2);
+    const cokMu=rnd(0,1)===0;
+    const dogru = cokMu ? (a.sig>b.sig?a.ad:b.ad) : (a.sig<b.sig?a.ad:b.ad);
+    const{c,ctx,W,H}=sahne(220,104);
+    emoji(ctx,a.ch,W*0.28,H/2-6,46); emoji(ctx,b.ch,W*0.72,H/2-6,46);
+    ctx.save(); ctx.fillStyle='#546E7A'; ctx.font='600 13px Fredoka,Arial'; ctx.textAlign='center';
+    ctx.fillText(a.ad,W*0.28,H-18); ctx.fillText(b.ad,W*0.72,H-18); ctx.restore();
+    c.style.width='210px'; c.style.height='99px';
+    return{
+      yonerge:'Hangisi daha '+(cokMu?'ÇOK':'AZ')+' su alır?',
+      secenek:[a.ad,b.ad], dogru,
+      ustGorsel:c, ciz:t=>metinKarti(t,18),
+      ipucu:'Büyük kaplar daha çok su alır. Sıralama: bardak < şişe < sürahi < kova'
+    };
+  }
+
+  if(tip===1){
+    // Kaç bardak eder?
+    const k=pick(KAPLAR.filter(x=>x.sig>1));
+    const dogru=String(k.sig);
+    const w=distractors(dogru,()=>String(Math.max(2,k.sig+pick([-3,-2,2,3]))));
+    const{c,ctx,W,H}=sahne(220,110);
+    emoji(ctx,k.ch,42,H/2-8,46);
+    ctx.save(); ctx.fillStyle='#546E7A'; ctx.font='700 20px Fredoka,Arial';
+    ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('=',84,H/2-8);
+    ctx.font='600 13px Fredoka,Arial'; ctx.fillText(k.ad,42,H-16);
+    ctx.restore();
+    for(let i=0;i<k.sig;i++) emoji(ctx,'🥛',112+(i%5)*21,H/2-18+Math.floor(i/5)*26,20);
+    ctx.save(); ctx.fillStyle='#546E7A'; ctx.font='600 13px Fredoka,Arial';
+    ctx.textAlign='center'; ctx.fillText('? bardak',165,H-16); ctx.restore();
+    c.style.width='210px'; c.style.height='105px';
+    return{
+      yonerge:'Bir '+k.ad+' kaç bardak su alır? Resimdeki bardakları say.',
+      secenek:shuffle([dogru,...w.slice(0,2)]), dogru,
+      ustGorsel:c, ciz:t=>sayiKarti(t),
+      ipucu:'Bardakları tek tek say. Bir '+k.ad+' = '+k.sig+' bardak.'
+    };
+  }
+
+  // Hangi kapla daha çabuk dolar / daha az sayıda gerekir
+  const buyuk=pick(KAPLAR.filter(x=>x.sig>=5));
+  const [k1,k2]=shuffle(KAPLAR.filter(x=>x.sig<buyuk.sig)).slice(0,2);
+  const azMi=rnd(0,1)===0;
+  const dogru = azMi ? (k1.sig>k2.sig?k1.ad:k2.ad) : (k1.sig<k2.sig?k1.ad:k2.ad);
+  return{
+    yonerge:'Boş bir '+buyuk.ad+'yı dolduracağız. Hangisini kullanırsak daha '+
+            (azMi?'AZ':'ÇOK')+' sayıda taşımak gerekir?',
+    secenek:[k1.ad,k2.ad], dogru,
+    ciz:t=>metinKarti(t,18),
+    ipucu:azMi
+      ? 'Büyük kap kullanırsak az sayıda taşırız. '+(k1.sig>k2.sig?k1.ad:k2.ad)+' daha büyüktür.'
+      : 'Küçük kap kullanırsak çok sayıda taşırız. '+(k1.sig<k2.sig?k1.ad:k2.ad)+' daha küçüktür.'
+  };
+}
+
+initEtkinlik([etkNesneCisim,etkCisimNesne,etkYuvarlakKoseli,etkModelSay,etkBicimsel,etkSivi],
+  {ad:'Cisimler ve Şekiller',c1:'#a8edea',c2:'#fed6e3',koyu:'#00838F',orta:'#26C6DA',acik:'#E0F7FA'});
+</script>
+</body>
+</html>
