@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paralarımız - 2. Sınıf Matematik</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade1-style.css">
+<script defer src="analytics.js"></script>
+</head>
+<body>
+<div class="kutu">
+  <div class="baslik"><h1>💰 Paralarımız</h1><p>4. Tema · Lira ve Kuruş</p></div>
+  <div class="ilerleme"><div class="ilerleme-dolu" id="ilerlemeDolu"></div></div>
+  <div class="yildizlar" id="yildizlar"></div>
+  <div class="yonerge">
+    <span class="yonerge-metin" id="yonergeMetin">Hazırlanıyor...</span>
+    <button class="btn-ses" id="sesBtn" onclick="sesDegistir()" aria-label="Sesi aç kapat">🔊</button>
+  </div>
+  <div class="soru-gorsel" id="soruGorsel"></div>
+  <div class="secenekler" id="secenekler"></div>
+  <div class="geri" id="geri"></div>
+  <button class="btn-devam" id="devamBtn" onclick="tekrarDinle()">🔊 Tekrar Dinle</button>
+  <button class="btn-geri" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade1-engine.js"></script>
+<script>
+/* Türk lirası banknotları — gerçek renkleriyle */
+const BANKNOT={
+  5:  {ust:'#B39DDB',alt:'#7E57C2',yazi:'#4A148C'},
+  10: {ust:'#EF9A9A',alt:'#E57373',yazi:'#B71C1C'},
+  20: {ust:'#A5D6A7',alt:'#81C784',yazi:'#1B5E20'},
+  50: {ust:'#FFCC80',alt:'#FFB74D',yazi:'#E65100'},
+  100:{ust:'#90CAF9',alt:'#64B5F6',yazi:'#0D47A1'},
+  200:{ust:'#F48FB1',alt:'#F06292',yazi:'#880E4F'}
+};
+const MADENI={
+  1:  {d:'#BDBDBD',i:'#E0E0E0',birim:'kuruş'},
+  5:  {d:'#BCAAA4',i:'#D7CCC8',birim:'kuruş'},
+  10: {d:'#B0BEC5',i:'#CFD8DC',birim:'kuruş'},
+  25: {d:'#A1887F',i:'#BCAAA4',birim:'kuruş'},
+  50: {d:'#FFD54F',i:'#FFE082',birim:'kuruş'},
+  100:{d:'#FFB300',i:'#FFCA28',birim:'lira'}   // 1 TL
+};
+
+function banknotCiz(ctx,x,y,g,y2,deger){
+  const r=BANKNOT[deger];
+  const grd=ctx.createLinearGradient(x,y,x,y+y2);
+  grd.addColorStop(0,r.ust); grd.addColorStop(1,r.alt);
+  ctx.fillStyle=grd;
+  ctx.beginPath(); ctx.roundRect(x,y,g,y2,5); ctx.fill();
+  ctx.strokeStyle=r.yazi; ctx.lineWidth=2; ctx.stroke();
+  // İç çerçeve
+  ctx.strokeStyle='rgba(255,255,255,.55)'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.roundRect(x+4,y+4,g-8,y2-8,3); ctx.stroke();
+  ctx.save();
+  ctx.fillStyle=r.yazi; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.font='700 '+Math.round(y2*0.42)+'px Fredoka,Arial';
+  ctx.fillText(String(deger),x+g/2,y+y2*0.44);
+  ctx.font='600 '+Math.round(y2*0.2)+'px Fredoka,Arial';
+  ctx.fillText('TL',x+g/2,y+y2*0.76);
+  ctx.restore();
+}
+function madeniCiz(ctx,cx,cy,r,deger){
+  const m=MADENI[deger];
+  ctx.fillStyle=m.d;
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle=m.i;
+  ctx.beginPath(); ctx.arc(cx,cy,r*0.78,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,.28)'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.stroke();
+  ctx.save();
+  ctx.fillStyle='#4E342E'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.font='700 '+Math.round(r*0.62)+'px Fredoka,Arial';
+  ctx.fillText(deger===100?'1':String(deger),cx,cy-r*0.12);
+  ctx.font='600 '+Math.round(r*0.3)+'px Fredoka,Arial';
+  ctx.fillText(deger===100?'TL':'kr',cx,cy+r*0.42);
+  ctx.restore();
+}
+function paraKarti(deger,madeniMi){
+  const{c,ctx,W,H}=sahne(148,96);
+  if(madeniMi) madeniCiz(ctx,W/2,H/2,34,deger);
+  else banknotCiz(ctx,20,H/2-28,W-40,56,deger);
+  return c;
+}
+function metinKarti(t,b){
+  const{c,ctx,W,H}=sahne(148,86);
+  ctx.save(); ctx.fillStyle='#37474F'; ctx.font='600 '+(b||18)+'px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  const k=t.split(' ');
+  if(t.length>13&&k.length>1){ const o=Math.ceil(k.length/2);
+    ctx.fillText(k.slice(0,o).join(' '),W/2,H/2-11);
+    ctx.fillText(k.slice(o).join(' '),W/2,H/2+11);
+  } else ctx.fillText(t,W/2,H/2);
+  ctx.restore(); return c;
+}
+function sayiKarti(t,b){
+  const{c,ctx,W,H}=sahne(148,86);
+  ctx.save(); ctx.fillStyle='#37474F'; ctx.font='700 '+(b||34)+'px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(t,W/2,H/2); ctx.restore(); return c;
+}
+/* Birkaç parayı yan yana diz */
+function paralarCiz(liste){
+  const n=liste.length;
+  const sut=Math.min(3,n), sat=Math.ceil(n/sut);
+  const W=262, H=18+sat*52;
+  const{c,ctx}=sahne(W,H);
+  liste.forEach((p,i)=>{
+    const s2=Math.min(sut,n-Math.floor(i/sut)*sut);
+    const x=W/2+((i%sut)-(s2-1)/2)*(W/(sut+0.25));
+    const y=26+Math.floor(i/sut)*52;
+    if(p.madeni) madeniCiz(ctx,x,y,21,p.d);
+    else banknotCiz(ctx,x-36,y-16,72,32,p.d);
+  });
+  return c;
+}
+
+const KAGIT=[5,10,20,50,100,200];
+const MADENI_DEGER=[1,5,10,25,50,100];
+
+/* ===== 1. PARA TANIMA ===== */
+function etkTanima(){
+  const kagitMi=rnd(0,1)===0;
+  if(kagitMi){
+    const d=pick(KAGIT);
+    const w=distractors(String(d)+' lira',()=>pick(KAGIT)+' lira');
+    const g=paraKarti(d,false); g.style.width='150px'; g.style.height='97px';
+    return{
+      yonerge:'Bu paranın değeri nedir?',
+      secenek:shuffle([d+' lira',...w.slice(0,2)]), dogru:d+' lira',
+      ustGorsel:g, ciz:t=>metinKarti(t,19),
+      ipucu:'Kâğıt paranın üzerinde '+d+' yazıyor. Değeri '+d+' Türk lirasıdır.'
+    };
+  }
+  const d=pick(MADENI_DEGER);
+  const ad = d===100 ? '1 lira' : d+' kuruş';
+  const w=distractors(ad,()=>{const x=pick(MADENI_DEGER); return x===100?'1 lira':x+' kuruş';});
+  const g=paraKarti(d,true); g.style.width='150px'; g.style.height='97px';
+  return{
+    yonerge:'Bu madeni paranın değeri nedir?',
+    secenek:shuffle([ad,...w.slice(0,2)]), dogru:ad,
+    ustGorsel:g, ciz:t=>metinKarti(t,19),
+    ipucu:d===100?'Bu 1 Türk lirasıdır.':'Madeni paranın üzerinde '+d+' yazıyor. Değeri '+d+' kuruştur.'
+  };
+}
+
+/* ===== 2. HANGİSİ DAHA DEĞERLİ ===== */
+function etkKarsilastir(){
+  let a,b; do{ a=pick(KAGIT); b=pick(KAGIT); }while(a===b);
+  const cokMu=rnd(0,1)===0;
+  const dogru=String(cokMu?Math.max(a,b):Math.min(a,b))+' lira';
+  const{c,ctx,W,H}=sahne(240,88);
+  banknotCiz(ctx,14,H/2-26,96,52,a);
+  banknotCiz(ctx,130,H/2-26,96,52,b);
+  c.style.width='232px'; c.style.height='85px';
+  return{
+    yonerge:'Hangi paranın değeri daha '+(cokMu?'ÇOK':'AZ')+'?',
+    secenek:[a+' lira',b+' lira'], dogru,
+    ustGorsel:c, ciz:t=>metinKarti(t,20),
+    ipucu:a+' lira ile '+b+' lirayı karşılaştır. '+Math.max(a,b)+' lira daha değerlidir.'
+  };
+}
+
+/* ===== 3. SIRALAMA ===== */
+function etkSiralama(){
+  const s=new Set(); while(s.size<3) s.add(pick(KAGIT));
+  const dizi=[...s];
+  const kucuktenMi=rnd(0,1)===0;
+  const dogru=[...dizi].sort((x,y)=>kucuktenMi?x-y:y-x).map(x=>x+' TL').join(' , ');
+  const opts=new Set([dogru]); let g=0;
+  while(opts.size<3&&g++<50) opts.add(shuffle([...dizi]).map(x=>x+' TL').join(' , '));
+  const{c,ctx,W,H}=sahne(262,80);
+  dizi.forEach((d,i)=>banknotCiz(ctx,10+i*86,H/2-24,76,48,d));
+  c.style.width='254px'; c.style.height='78px';
+  return{
+    yonerge:'Bu paraları '+(kucuktenMi?'KÜÇÜKTEN BÜYÜĞE':'BÜYÜKTEN KÜÇÜĞE')+' sıralayalım.',
+    secenek:shuffle([...opts]), dogru,
+    ustGorsel:c, ciz:t=>metinKarti(t,15),
+    ipucu:'Doğru sıra: '+dogru
+  };
+}
+
+/* ===== 4. TOPLAM PARA ===== */
+function etkToplam(){
+  const adet=rnd(2,4);
+  const liste=[];
+  let toplam=0, g=0;
+  do{
+    liste.length=0; toplam=0;
+    for(let i=0;i<adet;i++){ const d=pick([5,10,20,50]); liste.push({d,madeni:false}); toplam+=d; }
+    g++;
+  }while(toplam>200 && g<40);
+  const w=distractors(String(toplam),()=>String(Math.max(5,toplam+pick([-20,-10,-5,5,10,20]))));
+  const c=paralarCiz(liste); c.style.width='254px';
+  return{
+    yonerge:'Toplam kaç lira var?',
+    secenek:shuffle([String(toplam),...w.slice(0,2)]), dogru:String(toplam),
+    ustGorsel:c, ciz:t=>sayiKarti(t),
+    ipucu:liste.map(p=>p.d).join(' + ')+' = '+toplam+' lira'
+  };
+}
+
+/* ===== 5. LİRA - KURUŞ İLİŞKİSİ ===== */
+function etkLiraKurus(){
+  const sorular=[
+    {s:'1 lira kaç kuruştur?',c:'100 kuruş',y:['10 kuruş','50 kuruş'],
+     e:'1 Türk lirası = 100 kuruş'},
+    {s:'100 kuruş kaç liradır?',c:'1 lira',y:['10 lira','100 lira'],
+     e:'100 kuruş bir araya gelince 1 lira olur.'},
+    {s:'2 tane 50 kuruş kaç lira eder?',c:'1 lira',y:['2 lira','5 lira'],
+     e:'50 + 50 = 100 kuruş = 1 lira'},
+    {s:'4 tane 25 kuruş kaç lira eder?',c:'1 lira',y:['2 lira','4 lira'],
+     e:'25 + 25 + 25 + 25 = 100 kuruş = 1 lira'},
+    {s:'50 kuruş 1 liranın ne kadarıdır?',c:'Yarısı',y:['Çeyreği','Tamamı'],
+     e:'100 kuruşun yarısı 50 kuruştur.'},
+    {s:'25 kuruş 1 liranın ne kadarıdır?',c:'Çeyreği',y:['Yarısı','Tamamı'],
+     e:'100 kuruşun çeyreği 25 kuruştur. (100 ÷ 4 = 25)'}
+  ];
+  const it=pick(sorular);
+  return{
+    yonerge:it.s,
+    secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ciz:t=>metinKarti(t,19),
+    ipucu:it.e
+  };
+}
+
+/* ===== 6. ALIŞVERİŞ — YETERLİ Mİ ===== */
+const URUNLER=[
+  {n:'📕',ad:'kitap',f:[15,20,25,30]},
+  {n:'🎒',ad:'çanta',f:[40,50,60,75]},
+  {n:'✏️',ad:'kalem seti',f:[10,15,20]},
+  {n:'⚽',ad:'top',f:[25,30,40,50]},
+  {n:'🧸',ad:'oyuncak ayı',f:[20,35,45]},
+  {n:'🎨',ad:'boya seti',f:[15,25,35]}
+];
+function etkAlisveris(){
+  const u=pick(URUNLER);
+  const fiyat=pick(u.f);
+  const tip=rnd(0,1);
+  if(tip===0){
+    // Yeterli mi
+    const yeterli=rnd(0,1)===0;
+    const para=yeterli?fiyat+pick([5,10,20]):fiyat-pick([5,10]);
+    if(para<=0) return etkAlisveris();
+    const{c,ctx,W,H}=sahne(250,108);
+    emoji(ctx,u.n,44,40,38);
+    ctx.save(); ctx.fillStyle='#37474F'; ctx.font='700 17px Fredoka,Arial';
+    ctx.textAlign='center'; ctx.fillText(fiyat+' TL',44,80);
+    ctx.font='600 12px Fredoka,Arial'; ctx.fillStyle='#78909C';
+    ctx.fillText('fiyat',44,96);
+    ctx.restore();
+    banknotCiz(ctx,142,20,88,44,pick(KAGIT.filter(x=>x>=para))||100);
+    ctx.save(); ctx.fillStyle='#2E7D32'; ctx.font='700 17px Fredoka,Arial';
+    ctx.textAlign='center'; ctx.fillText(para+' TL',186,80);
+    ctx.font='600 12px Fredoka,Arial'; ctx.fillStyle='#78909C';
+    ctx.fillText('cebindeki para',186,96);
+    ctx.restore();
+    c.style.width='242px'; c.style.height='104px';
+    return{
+      yonerge:'Cebinde '+para+' lira var. '+fiyat+' liralık '+u.ad+' alabilir misin?',
+      secenek:['Evet, yeter','Hayır, yetmez'],
+      dogru:para>=fiyat?'Evet, yeter':'Hayır, yetmez',
+      ustGorsel:c, ciz:t=>metinKarti(t,19),
+      ipucu:para>=fiyat
+        ? para+' lira, '+fiyat+' liradan fazla. Alabilirsin, '+(para-fiyat)+' lira da artar.'
+        : para+' lira, '+fiyat+' liradan az. '+(fiyat-para)+' lira daha gerekir.'
+    };
+  }
+  // Para üstü
+  const verilen=pick(KAGIT.filter(x=>x>fiyat));
+  const ustu=verilen-fiyat;
+  const w=distractors(String(ustu),()=>String(Math.max(0,ustu+pick([-10,-5,5,10]))));
+  const{c,ctx,W,H}=sahne(250,104);
+  emoji(ctx,u.n,44,38,36);
+  ctx.save(); ctx.fillStyle='#37474F'; ctx.font='700 17px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.fillText(fiyat+' TL',44,76);
+  ctx.font='600 12px Fredoka,Arial'; ctx.fillStyle='#78909C'; ctx.fillText('fiyat',44,92);
+  ctx.restore();
+  banknotCiz(ctx,142,18,88,44,verilen);
+  ctx.save(); ctx.fillStyle='#546E7A'; ctx.font='600 12px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.fillText('verilen para',186,76); ctx.restore();
+  c.style.width='242px'; c.style.height='100px';
+  return{
+    yonerge:fiyat+' liralık '+u.ad+' için '+verilen+' lira verildi. Kaç lira para üstü alınır?',
+    secenek:shuffle([String(ustu),...w.slice(0,2)]), dogru:String(ustu),
+    ustGorsel:c, ciz:t=>sayiKarti(t),
+    ipucu:'PARA ÜSTÜ = verilen − fiyat\n'+verilen+' − '+fiyat+' = '+ustu+' lira'
+  };
+}
+
+/* ===== 7. AYNI DEĞERİ FARKLI PARALARLA ===== */
+function etkEsdeger(){
+  const hedef=pick([10,20,50,100]);
+  const dogruListe = hedef===10?[5,5] : hedef===20?[10,10] : hedef===50?[20,20,10] : [50,50];
+  const yanlis1 = hedef===10?[5,10] : hedef===20?[10,20] : hedef===50?[20,20,20] : [50,20];
+  const yanlis2 = hedef===10?[20] : hedef===20?[5,5] : hedef===50?[10,10] : [100,50];
+  const secenekler=[dogruListe,yanlis1,yanlis2].map(l=>l.join('+'));
+  return{
+    yonerge:hedef+' lirayı hangi paralarla tam olarak oluşturabiliriz?',
+    secenek:shuffle(secenekler), dogru:dogruListe.join('+'),
+    ustGorsel:(()=>{const c=paraKarti(hedef,false);c.style.width='150px';c.style.height='97px';return c;})(),
+    ciz:t=>{
+      const liste=t.split('+').map(x=>({d:+x,madeni:false}));
+      const{c,ctx,W,H}=sahne(150,liste.length>2?96:62);
+      liste.forEach((p,i)=>{
+        const x=W/2+((i%2)-(Math.min(2,liste.length)-1)/2)*72;
+        const y=22+Math.floor(i/2)*38;
+        banknotCiz(ctx,x-33,y-14,66,30,p.d);
+      });
+      return c;
+    },
+    ipucu:dogruListe.join(' + ')+' = '+hedef+' lira'
+  };
+}
+
+initEtkinlik([etkTanima,etkKarsilastir,etkSiralama,etkToplam,
+              etkLiraKurus,etkAlisveris,etkEsdeger],
+  {ad:'Paralarımız',c1:'#d4fc79',c2:'#96e6a1',koyu:'#2E7D32',orta:'#66BB6A',acik:'#E8F5E9'});
+</script>
+</body>
+</html>
