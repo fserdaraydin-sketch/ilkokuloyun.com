@@ -172,6 +172,200 @@ function etkTanisma(){
 }
 
 /* ===== 2. OKUL MEKÂNLARI ===== */
+
+/* ============================================================
+   OKUL MEKÂNI SAHNELERİ
+   Tek nesne emojisi (tabak, sandalye) mekânı anlatmıyor.
+   Her mekân kendi karakteristik öğeleriyle sahne olarak çizilir.
+   ============================================================ */
+function zeminDuvar(ctx,W,H,duvar,zemin){
+  ctx.fillStyle=duvar; ctx.fillRect(0,0,W,H*0.62);
+  ctx.fillStyle=zemin; ctx.fillRect(0,H*0.62,W,H*0.38);
+  ctx.strokeStyle='rgba(0,0,0,.09)'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(0,H*0.62); ctx.lineTo(W,H*0.62); ctx.stroke();
+}
+function kutuCiz(ctx,x,y,g,h,dolgu,cizgi,r){
+  ctx.fillStyle=dolgu; ctx.strokeStyle=cizgi; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.roundRect(x,y,g,h,r||3); ctx.fill(); ctx.stroke();
+}
+function mekanCiz(ad,W,H){
+  const{c,ctx}=sahne(W||210,H||132);
+  const w=W||210, h=H||132;
+
+  if(ad==='sınıf'){
+    zeminDuvar(ctx,w,h,'#EAF4FB','#D7BFA6');
+    // Yazı tahtası
+    kutuCiz(ctx,w*0.22,h*0.10,w*0.56,h*0.32,'#2E7D32','#1B5E20',4);
+    ctx.strokeStyle='#A5D6A7'; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.moveTo(w*0.30,h*0.22); ctx.lineTo(w*0.56,h*0.22);
+    ctx.moveTo(w*0.30,h*0.30); ctx.lineTo(w*0.62,h*0.30); ctx.stroke();
+    // Sıralar
+    [[0.13,0.66],[0.42,0.66],[0.71,0.66]].forEach(([x,y])=>{
+      kutuCiz(ctx,w*x,h*y,w*0.17,h*0.07,'#D9A05B','#7A4B1C',2);
+      ctx.fillStyle='#8D5524';
+      ctx.fillRect(w*x+2,h*(y+0.07),3,h*0.16);
+      ctx.fillRect(w*x+w*0.17-5,h*(y+0.07),3,h*0.16);
+    });
+    // Öğretmen masası
+    kutuCiz(ctx,w*0.36,h*0.47,w*0.28,h*0.055,'#C68642','#7A4B1C',2);
+  }
+  else if(ad==='kütüphane'){
+    zeminDuvar(ctx,w,h,'#F6EFE4','#C9A87C');
+    // İki raf, dikey kitaplar
+    [0.14,0.36].forEach(ry=>{
+      kutuCiz(ctx,w*0.10,h*(ry+0.16),w*0.80,h*0.035,'#8D6E52','#5D4632',2);
+      const renk=['#E53935','#1E88E5','#43A047','#FB8C00','#8E24AA','#00ACC1','#D81B60'];
+      for(let i=0;i<9;i++){
+        const kg=w*0.065, gx=w*0.13+i*kg*1.02;
+        const kh=h*(0.10+(i%3)*0.018);
+        kutuCiz(ctx,gx,h*(ry+0.16)-kh,kg*0.82,kh,renk[i%renk.length],'rgba(0,0,0,.28)',1.5);
+      }
+    });
+    // Okuma masası
+    kutuCiz(ctx,w*0.30,h*0.74,w*0.40,h*0.05,'#C68642','#7A4B1C',2);
+    emoji(ctx,'📖',w*0.50,h*0.70,17);
+  }
+  else if(ad==='yemekhane'){
+    zeminDuvar(ctx,w,h,'#FFF6E8','#D8C3A5');
+    // İki uzun masa, üstünde tabaklar
+    [0.44,0.70].forEach((my,mi)=>{
+      kutuCiz(ctx,w*0.08,h*my,w*0.84,h*0.05,'#EFEBE9','#BCAAA4',3);
+      ctx.fillStyle='#9E9E9E';
+      ctx.fillRect(w*0.14,h*(my+0.05),4,h*0.11);
+      ctx.fillRect(w*0.82,h*(my+0.05),4,h*0.11);
+      for(let i=0;i<4;i++){
+        const px=w*(0.16+i*0.21);
+        ctx.fillStyle='#fff'; ctx.strokeStyle='#B0BEC5'; ctx.lineWidth=1.8;
+        ctx.beginPath(); ctx.ellipse(px,h*(my-0.015),w*0.045,h*0.022,0,0,Math.PI*2);
+        ctx.fill(); ctx.stroke();
+        ctx.fillStyle='#FFB74D';
+        ctx.beginPath(); ctx.ellipse(px,h*(my-0.015),w*0.022,h*0.011,0,0,Math.PI*2); ctx.fill();
+      }
+    });
+    // Tepsi taşıyan öğrenci
+    emoji(ctx,'🧒',w*0.12,h*0.25,22);
+    kutuCiz(ctx,w*0.19,h*0.26,w*0.11,h*0.035,'#90CAF9','#1565C0',2);
+  }
+  else if(ad==='bahçe'){
+    // Gökyüzü + çim
+    ctx.fillStyle='#BFE3F5'; ctx.fillRect(0,0,w,h*0.58);
+    ctx.fillStyle='#8BC34A'; ctx.fillRect(0,h*0.58,w,h*0.42);
+    ctx.fillStyle='#FFE082';
+    ctx.beginPath(); ctx.arc(w*0.86,h*0.14,h*0.085,0,Math.PI*2); ctx.fill();
+    // Ağaç
+    ctx.fillStyle='#795548'; ctx.fillRect(w*0.15,h*0.42,w*0.045,h*0.20);
+    ctx.fillStyle='#2E7D32';
+    [[0.175,0.34,0.115],[0.13,0.40,0.085],[0.225,0.40,0.085]].forEach(([x,y,r])=>{
+      ctx.beginPath(); ctx.arc(w*x,h*y,h*r,0,Math.PI*2); ctx.fill(); });
+    // Kaydırak — salıncaktan daha tanınabilir
+    ctx.strokeStyle='#6D4C41'; ctx.lineWidth=3.5; ctx.lineCap='round';
+    // Merdiven direkleri
+    ctx.beginPath();
+    ctx.moveTo(w*0.50,h*0.62); ctx.lineTo(w*0.50,h*0.32);
+    ctx.moveTo(w*0.57,h*0.62); ctx.lineTo(w*0.57,h*0.32);
+    ctx.stroke();
+    // Basamaklar
+    ctx.lineWidth=2.5;
+    [0.38,0.45,0.52,0.59].forEach(y=>{
+      ctx.beginPath(); ctx.moveTo(w*0.50,h*y); ctx.lineTo(w*0.57,h*y); ctx.stroke(); });
+    // Kayma yüzeyi
+    ctx.fillStyle='#FB8C00'; ctx.strokeStyle='#E65100'; ctx.lineWidth=2;
+    ctx.beginPath();
+    ctx.moveTo(w*0.565,h*0.30); ctx.lineTo(w*0.62,h*0.30);
+    ctx.quadraticCurveTo(w*0.76,h*0.48,w*0.74,h*0.64);
+    ctx.lineTo(w*0.68,h*0.64);
+    ctx.quadraticCurveTo(w*0.70,h*0.48,w*0.565,h*0.36);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    // Üst platform
+    ctx.fillStyle='#8D6E52'; ctx.strokeStyle='#5D4632'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.roundRect(w*0.47,h*0.285,w*0.16,h*0.035,2); ctx.fill(); ctx.stroke();
+    // Oynayan çocuklar ve top
+    emoji(ctx,'🧒',w*0.84,h*0.70,22);
+    emoji(ctx,'⚽',w*0.76,h*0.80,16);
+  }
+  else if(ad==='spor salonu'){
+    zeminDuvar(ctx,w,h,'#E8F1F8','#E8B87A');
+    // Pota
+    ctx.fillStyle='#90A4AE'; ctx.fillRect(w*0.76,h*0.18,4,h*0.44);
+    kutuCiz(ctx,w*0.60,h*0.14,w*0.18,h*0.14,'#FFFFFF','#546E7A',2);
+    ctx.strokeStyle='#E53935'; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.moveTo(w*0.62,h*0.26); ctx.lineTo(w*0.72,h*0.26); ctx.stroke();
+    ctx.strokeStyle='#EF9A9A'; ctx.lineWidth=1.6;
+    for(let i=0;i<4;i++){ ctx.beginPath();
+      ctx.moveTo(w*(0.625+i*0.026),h*0.26); ctx.lineTo(w*(0.645+i*0.018),h*0.32); ctx.stroke(); }
+    // Saha çizgileri
+    ctx.strokeStyle='#C77B3E'; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.moveTo(w*0.06,h*0.80); ctx.lineTo(w*0.94,h*0.80); ctx.stroke();
+    ctx.beginPath(); ctx.arc(w*0.30,h*0.80,h*0.11,Math.PI,0); ctx.stroke();
+    emoji(ctx,'🏀',w*0.46,h*0.72,20);
+    emoji(ctx,'🧒',w*0.18,h*0.66,22);
+  }
+  else if(ad==='revir'){
+    zeminDuvar(ctx,w,h,'#F4FBFF','#DCE7EC');
+    // Yatak
+    kutuCiz(ctx,w*0.14,h*0.50,w*0.50,h*0.14,'#ECEFF1','#90A4AE',4);
+    kutuCiz(ctx,w*0.14,h*0.42,w*0.13,h*0.10,'#FFFFFF','#B0BEC5',4);
+    ctx.fillStyle='#90CAF9';
+    ctx.beginPath(); ctx.roundRect(w*0.30,h*0.50,w*0.34,h*0.09,3); ctx.fill();
+    ctx.fillStyle='#78909C'; ctx.fillRect(w*0.15,h*0.64,4,h*0.09);
+    ctx.fillRect(w*0.61,h*0.64,4,h*0.09);
+    // Duvarda sağlık haçı
+    kutuCiz(ctx,w*0.74,h*0.16,w*0.17,h*0.17,'#FFFFFF','#E53935',4);
+    ctx.fillStyle='#E53935';
+    ctx.fillRect(w*0.805,h*0.19,w*0.045,h*0.11);
+    ctx.fillRect(w*0.765,h*0.225,w*0.125,h*0.04);
+    emoji(ctx,'🩹',w*0.80,h*0.56,20);
+  }
+  else if(ad==='müdür odası'){
+    zeminDuvar(ctx,w,h,'#F3EEF8','#C8A77E');
+    // Kapı + tabela
+    kutuCiz(ctx,w*0.08,h*0.18,w*0.22,h*0.60,'#A1663A','#6E4423',3);
+    ctx.fillStyle='#FFD54F';
+    ctx.beginPath(); ctx.arc(w*0.27,h*0.50,3.5,0,Math.PI*2); ctx.fill();
+    kutuCiz(ctx,w*0.09,h*0.22,w*0.20,h*0.09,'#FFFFFF','#6E4423',2);
+    ctx.save(); ctx.fillStyle='#5D4037'; ctx.font='600 9px Fredoka,Arial';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('MÜDÜR',w*0.19,h*0.265); ctx.restore();
+    // Çalışma masası + koltuk
+    kutuCiz(ctx,w*0.40,h*0.56,w*0.48,h*0.06,'#8D6E52','#5D4632',3);
+    ctx.fillStyle='#6D4C41';
+    ctx.fillRect(w*0.44,h*0.62,4,h*0.14); ctx.fillRect(w*0.83,h*0.62,4,h*0.14);
+    kutuCiz(ctx,w*0.56,h*0.30,w*0.16,h*0.26,'#5C6BC0','#3949AB',4);
+    emoji(ctx,'📋',w*0.50,h*0.53,15);
+  }
+  else if(ad==='kantin'){
+    zeminDuvar(ctx,w,h,'#FFF3E0','#D7B98E');
+    // Tezgah
+    kutuCiz(ctx,w*0.08,h*0.56,w*0.84,h*0.10,'#B0BEC5','#78909C',3);
+    kutuCiz(ctx,w*0.08,h*0.66,w*0.84,h*0.16,'#CFD8DC','#90A4AE',2);
+    // Arka raf + ürünler
+    kutuCiz(ctx,w*0.14,h*0.34,w*0.72,h*0.035,'#8D6E52','#5D4632',2);
+    ['🥪','🧃','🍎','🥛','🍪'].forEach((e,i)=>emoji(ctx,e,w*(0.22+i*0.15),h*0.28,17));
+    emoji(ctx,'🧒',w*0.30,h*0.50,20);
+    emoji(ctx,'🧒',w*0.46,h*0.50,20);
+  }
+  else if(ad==='tuvalet'){
+    zeminDuvar(ctx,w,h,'#EAF6FA','#CFD8DC');
+    // Ayna
+    kutuCiz(ctx,w*0.16,h*0.12,w*0.26,h*0.26,'#E1F5FE','#90A4AE',4);
+    kutuCiz(ctx,w*0.58,h*0.12,w*0.26,h*0.26,'#E1F5FE','#90A4AE',4);
+    // İki lavabo
+    [0.29,0.71].forEach(x=>{
+      ctx.fillStyle='#FFFFFF'; ctx.strokeStyle='#90A4AE'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.ellipse(w*x,h*0.54,w*0.115,h*0.075,0,0,Math.PI*2);
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle='#B0BEC5'; ctx.fillRect(w*x-2.5,h*0.42,5,h*0.09);
+      ctx.beginPath(); ctx.roundRect(w*x-2.5,h*0.41,w*0.05,4,2); ctx.fill();
+      ctx.fillStyle='#90A4AE'; ctx.fillRect(w*x-3,h*0.61,6,h*0.14);
+      // Akan su
+      ctx.strokeStyle='#4FC3F7'; ctx.lineWidth=2.5;
+      ctx.beginPath(); ctx.moveTo(w*x+w*0.02,h*0.44); ctx.lineTo(w*x+w*0.02,h*0.51); ctx.stroke();
+    });
+    emoji(ctx,'🧼',w*0.50,h*0.80,17);
+  }
+  return c;
+}
+
 const MEKANLAR=[
   {ch:'📚',ad:'kütüphane', is:'Kitap okumak ve ödünç almak için gittiğimiz yer'},
   {ch:'🍽️',ad:'yemekhane', is:'Öğle yemeğimizi yediğimiz yer'},
@@ -191,7 +385,7 @@ function etkMekan(){
     return{
       yonerge:it.is+'. Burası neresidir?',
       secenek:shuffle([it.ad,...w.slice(0,2)]), dogru:it.ad,
-      ustGorsel:(()=>{const c=emojiKarti(it.ch);c.style.width='130px';c.style.height='88px';return c;})(),
+      ustGorsel:(()=>{const c=mekanCiz(it.ad);c.style.width='210px';c.style.height='132px';return c;})(),
       ciz:t=>metinKarti(t,16),
       ipucu:it.ad.charAt(0).toLocaleUpperCase('tr')+it.ad.slice(1)+': '+it.is.toLocaleLowerCase('tr')+'.'
     };
@@ -214,7 +408,18 @@ function etkMekan(){
   return{
     yonerge:q.d,
     secenek:shuffle([q.c,...q.y]), dogru:q.c,
-    ciz:t=>metinKarti(t,16),
+    ciz:t=>{
+      const c=mekanCiz(t,148,96);
+      // Mekân adı resmin altında yazsın
+      const ctx=c.getContext('2d');
+      ctx.save();
+      ctx.fillStyle='rgba(255,255,255,.92)';
+      ctx.fillRect(0,96-20,148,20);
+      ctx.fillStyle='#37474F'; ctx.font='700 13px Fredoka,Arial';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(t,74,96-10); ctx.restore();
+      return c;
+    },
     ipucu:q.e
   };
 }
