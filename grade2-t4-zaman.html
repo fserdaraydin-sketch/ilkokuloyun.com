@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zaman Ölçme - 2. Sınıf Matematik</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade1-style.css">
+<script defer src="analytics.js"></script>
+</head>
+<body>
+<div class="kutu">
+  <div class="baslik"><h1>🕐 Zaman Ölçme</h1><p>4. Tema · Saat, Gün, Hafta, Ay, Yıl</p></div>
+  <div class="ilerleme"><div class="ilerleme-dolu" id="ilerlemeDolu"></div></div>
+  <div class="yildizlar" id="yildizlar"></div>
+  <div class="yonerge">
+    <span class="yonerge-metin" id="yonergeMetin">Hazırlanıyor...</span>
+    <button class="btn-ses" id="sesBtn" onclick="sesDegistir()" aria-label="Sesi aç kapat">🔊</button>
+  </div>
+  <div class="soru-gorsel" id="soruGorsel"></div>
+  <div class="secenekler" id="secenekler"></div>
+  <div class="geri" id="geri"></div>
+  <button class="btn-devam" id="devamBtn" onclick="tekrarDinle()">🔊 Tekrar Dinle</button>
+  <button class="btn-geri" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade1-engine.js"></script>
+<script>
+const GUNLER=['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
+const AYLAR=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+const AY_GUN={'Ocak':31,'Şubat':28,'Mart':31,'Nisan':30,'Mayıs':31,'Haziran':30,
+  'Temmuz':31,'Ağustos':31,'Eylül':30,'Ekim':31,'Kasım':30,'Aralık':31};
+const MEVSIM={'İlkbahar':['Mart','Nisan','Mayıs'],'Yaz':['Haziran','Temmuz','Ağustos'],
+  'Sonbahar':['Eylül','Ekim','Kasım'],'Kış':['Aralık','Ocak','Şubat']};
+
+function metinKarti(t,b){
+  const{c,ctx,W,H}=sahne(148,88);
+  ctx.save(); ctx.fillStyle='#37474F'; ctx.font='600 '+(b||18)+'px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  const k=t.split(' ');
+  if(t.length>13&&k.length>1){ const o=Math.ceil(k.length/2);
+    ctx.fillText(k.slice(0,o).join(' '),W/2,H/2-11);
+    ctx.fillText(k.slice(o).join(' '),W/2,H/2+11);
+  } else ctx.fillText(t,W/2,H/2);
+  ctx.restore(); return c;
+}
+function sayiKarti(t,b){
+  const{c,ctx,W,H}=sahne(148,86);
+  ctx.save(); ctx.fillStyle='#37474F'; ctx.font='700 '+(b||34)+'px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(t,W/2,H/2); ctx.restore(); return c;
+}
+
+/* ===== ANALOG SAAT ===== */
+function analogCiz(ctx,cx,cy,r,saat,dakika){
+  // Kadran
+  ctx.fillStyle='#FFFDF6';
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#37474F'; ctx.lineWidth=r*0.09; ctx.stroke();
+  // Dakika çizgileri
+  for(let i=0;i<60;i++){
+    const a=-Math.PI/2+i*Math.PI/30;
+    const buyuk=(i%5===0);
+    const r1=r*(buyuk?0.80:0.87), r2=r*0.92;
+    ctx.strokeStyle=buyuk?'#546E7A':'#CFD8DC'; ctx.lineWidth=buyuk?2.2:1.2;
+    ctx.beginPath();
+    ctx.moveTo(cx+r1*Math.cos(a),cy+r1*Math.sin(a));
+    ctx.lineTo(cx+r2*Math.cos(a),cy+r2*Math.sin(a));
+    ctx.stroke();
+  }
+  // Rakamlar
+  ctx.save(); ctx.fillStyle='#263238'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.font='700 '+Math.round(r*0.22)+'px Fredoka,Arial';
+  for(let i=1;i<=12;i++){
+    const a=-Math.PI/2+i*Math.PI/6;
+    ctx.fillText(String(i),cx+r*0.68*Math.cos(a),cy+r*0.68*Math.sin(a));
+  }
+  ctx.restore();
+  // Yelkovan (uzun, ince) — dakika
+  const da=-Math.PI/2+dakika*Math.PI/30;
+  ctx.strokeStyle='#1565C0'; ctx.lineWidth=r*0.065; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(cx,cy);
+  ctx.lineTo(cx+r*0.76*Math.cos(da),cy+r*0.76*Math.sin(da)); ctx.stroke();
+  // Akrep (kısa, kalın) — saat, dakikaya göre kayar
+  const sa=-Math.PI/2+((saat%12)+dakika/60)*Math.PI/6;
+  ctx.strokeStyle='#C62828'; ctx.lineWidth=r*0.095;
+  ctx.beginPath(); ctx.moveTo(cx,cy);
+  ctx.lineTo(cx+r*0.48*Math.cos(sa),cy+r*0.48*Math.sin(sa)); ctx.stroke();
+  // Merkez
+  ctx.fillStyle='#37474F';
+  ctx.beginPath(); ctx.arc(cx,cy,r*0.07,0,Math.PI*2); ctx.fill();
+}
+function saatKarti(saat,dakika,boyut){
+  const b=boyut||150;
+  const{c,ctx,W,H}=sahne(b,b);
+  analogCiz(ctx,W/2,H/2,b*0.44,saat,dakika);
+  return c;
+}
+/* ===== DİJİTAL SAAT ===== */
+function dijitalCiz(ctx,x,y,g,y2,saat,dakika){
+  ctx.fillStyle='#263238';
+  ctx.beginPath(); ctx.roundRect(x,y,g,y2,10); ctx.fill();
+  ctx.strokeStyle='#455A64'; ctx.lineWidth=2; ctx.stroke();
+  ctx.save();
+  ctx.fillStyle='#4FC3F7'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.font='700 '+Math.round(y2*0.5)+'px Fredoka,Arial';
+  const s=String(saat).padStart(2,'0')+':'+String(dakika).padStart(2,'0');
+  ctx.fillText(s,x+g/2,y+y2/2);
+  ctx.restore();
+}
+function dijitalKarti(saat,dakika){
+  const{c,ctx,W,H}=sahne(148,80);
+  dijitalCiz(ctx,16,H/2-26,W-32,52,saat,dakika);
+  return c;
+}
+
+/* Saatin sözle okunuşu (2. sınıf düzeyi: tam, buçuk, çeyrek) */
+function saatOkunus(saat,dakika){
+  if(dakika===0)  return saat+' tam';
+  if(dakika===30) return saat+' buçuk';
+  if(dakika===15) return saat+'\u2019i çeyrek geçiyor';
+  if(dakika===45) return ((saat%12)+1)+'\u2019e çeyrek var';
+  return saat+'\u2019i '+dakika+' geçiyor';
+}
+const DAKIKALAR=[0,15,30,45];
+
+/* ===== 1. ANALOG SAAT OKUMA ===== */
+function etkAnalogOku(){
+  const saat=rnd(1,12), dk=pick(DAKIKALAR);
+  const dogru=saatOkunus(saat,dk);
+  const w=new Set(); let g=0;
+  while(w.size<2&&g++<60){
+    const s2=rnd(1,12), d2=pick(DAKIKALAR);
+    const o=saatOkunus(s2,d2);
+    if(o!==dogru) w.add(o);
+  }
+  const c=saatKarti(saat,dk,158); c.style.width='158px'; c.style.height='158px';
+  return{
+    yonerge:'Saat kaç?',
+    secenek:shuffle([dogru,...w]), dogru,
+    ustGorsel:c, ciz:t=>metinKarti(t,16),
+    ipucu:'KIRMIZI akrep saati, MAVİ yelkovan dakikayı gösterir.\n'+
+          'Akrep '+saat+' civarında, yelkovan '+
+          (dk===0?'12\u2019de: tam saat.':dk===15?'3\u2019te: çeyrek geçiyor.':
+           dk===30?'6\u2019da: buçuk.':'9\u2019da: çeyrek var.')
+  };
+}
+
+/* ===== 2. DİJİTAL SAAT OKUMA ===== */
+function etkDijitalOku(){
+  const saat=rnd(1,12), dk=pick(DAKIKALAR);
+  const dogru=saatOkunus(saat,dk);
+  const w=new Set(); let g=0;
+  while(w.size<2&&g++<60){
+    const o=saatOkunus(rnd(1,12),pick(DAKIKALAR));
+    if(o!==dogru) w.add(o);
+  }
+  const c=dijitalKarti(saat,dk); c.style.width='150px'; c.style.height='81px';
+  return{
+    yonerge:'Dijital saatte gösterilen zaman nedir?',
+    secenek:shuffle([dogru,...w]), dogru,
+    ustGorsel:c, ciz:t=>metinKarti(t,16),
+    ipucu:'Dijital saatte iki noktadan ÖNCE saat, SONRA dakika yazar.\n'+
+          saat+' : '+String(dk).padStart(2,'0')+' → '+dogru
+  };
+}
+
+/* ===== 3. ANALOG ↔ DİJİTAL EŞLEŞTİRME ===== */
+function etkEslestir(){
+  const saat=rnd(1,12), dk=pick(DAKIKALAR);
+  const c=saatKarti(saat,dk,150); c.style.width='150px'; c.style.height='150px';
+  const yanlislar=new Set(); let g=0;
+  while(yanlislar.size<2&&g++<60){
+    const s2=rnd(1,12), d2=pick(DAKIKALAR);
+    if(s2!==saat||d2!==dk) yanlislar.add(s2+':'+d2);
+  }
+  const secenek=[saat+':'+dk,...yanlislar];
+  return{
+    yonerge:'Bu analog saate hangi dijital saat uyar?',
+    secenek:shuffle(secenek), dogru:saat+':'+dk,
+    ustGorsel:c,
+    ciz:t=>{const [s2,d2]=t.split(':').map(Number); return dijitalKarti(s2,d2);},
+    ipucu:'Akrep '+saat+'\u2019i, yelkovan '+dk+' dakikayı gösteriyor → '+
+          String(saat).padStart(2,'0')+':'+String(dk).padStart(2,'0')
+  };
+}
+
+/* ===== 4. SAAT - DAKİKA İLİŞKİSİ ===== */
+function etkSaatDakika(){
+  const sorular=[
+    {s:'1 saat kaç dakikadır?',c:'60 dakika',y:['30 dakika','100 dakika'],e:'1 saat = 60 dakika'},
+    {s:'Yarım saat kaç dakikadır?',c:'30 dakika',y:['15 dakika','60 dakika'],e:'Saatin yarısı: 60 ÷ 2 = 30 dakika'},
+    {s:'Çeyrek saat kaç dakikadır?',c:'15 dakika',y:['30 dakika','25 dakika'],e:'Saatin çeyreği: 60 ÷ 4 = 15 dakika'},
+    {s:'Yarım saat kaç çeyrek saattir?',c:'2',y:['4','3'],e:'Yarım saat 30 dakika, çeyrek saat 15 dakika. 30 ÷ 15 = 2'},
+    {s:'1 saat kaç çeyrek saattir?',c:'4',y:['2','6'],e:'60 ÷ 15 = 4 çeyrek saat'},
+    {s:'1 gün kaç saattir?',c:'24 saat',y:['12 saat','60 saat'],e:'1 gün = 24 saat'},
+    {s:'Bir saatin yelkovanı 6 rakamını gösteriyorsa kaç dakika geçmiştir?',
+     c:'30 dakika',y:['6 dakika','15 dakika'],e:'Yelkovan 6\u2019da ise yarım saat, yani 30 dakika geçmiştir.'},
+    {s:'Bir saatin yelkovanı 3 rakamını gösteriyorsa kaç dakika geçmiştir?',
+     c:'15 dakika',y:['3 dakika','30 dakika'],e:'Yelkovan 3\u2019te ise çeyrek saat, yani 15 dakika geçmiştir.'}
+  ];
+  const it=pick(sorular);
+  return{
+    yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ciz:t=>metinKarti(t,18), ipucu:it.e
+  };
+}
+
+/* ===== 5. GÜN, HAFTA, AY, YIL ===== */
+function etkTakvimBirim(){
+  const tip=rnd(0,2);
+  if(tip===0){
+    const sorular=[
+      {s:'1 hafta kaç gündür?',c:'7 gün',y:['5 gün','30 gün'],e:'1 hafta = 7 gün'},
+      {s:'1 yıl kaç aydır?',c:'12 ay',y:['10 ay','7 ay'],e:'1 yıl = 12 ay'},
+      {s:'1 yıl kaç mevsimdir?',c:'4 mevsim',y:['2 mevsim','12 mevsim'],e:'1 yıl = 4 mevsim'},
+      {s:'Bir yılda yaklaşık kaç hafta vardır?',c:'52 hafta',y:['12 hafta','30 hafta'],e:'1 yıl yaklaşık 52 haftadır.'},
+      {s:'1 ay kaç haftadır?',c:'Yaklaşık 4 hafta',y:['2 hafta','7 hafta'],e:'Bir ay yaklaşık 4 hafta sürer.'}
+    ];
+    const it=pick(sorular);
+    return{yonerge:it.s,secenek:shuffle([it.c,...it.y]),dogru:it.c,ciz:t=>metinKarti(t,17),ipucu:it.e};
+  }
+  if(tip===1){
+    const i=rnd(0,6);
+    const soruSonraki=rnd(0,1)===0;
+    const dogru=GUNLER[(i+(soruSonraki?1:6))%7];
+    const w=distractors(dogru,()=>pick(GUNLER));
+    return{
+      yonerge:'"'+GUNLER[i]+'" gününden '+(soruSonraki?'SONRAKİ':'ÖNCEKİ')+' gün hangisidir?',
+      secenek:shuffle([dogru,...w.slice(0,2)]), dogru,
+      ustGorsel:(()=>{const c=metinKarti(GUNLER[i],24);c.style.width='160px';c.style.height='92px';return c;})(),
+      ciz:t=>metinKarti(t,18),
+      ipucu:'Haftanın günleri: '+GUNLER.join(', ')
+    };
+  }
+  const ay=pick(AYLAR);
+  const dogru=String(AY_GUN[ay])+' gün';
+  const w=distractors(dogru,()=>pick([28,30,31])+' gün');
+  return{
+    yonerge:'"'+ay+'" ayı kaç gündür?',
+    secenek:shuffle([dogru,...w.slice(0,2)]), dogru,
+    ustGorsel:(()=>{const c=metinKarti(ay,26);c.style.width='160px';c.style.height='92px';return c;})(),
+    ciz:t=>metinKarti(t,20),
+    ipucu:ay+' ayı '+AY_GUN[ay]+' gündür.\n'+
+          '31 gün: Ocak, Mart, Mayıs, Temmuz, Ağustos, Ekim, Aralık\n'+
+          '30 gün: Nisan, Haziran, Eylül, Kasım\n'+
+          'Şubat: 28 gün (4 yılda bir 29)'
+  };
+}
+
+/* ===== 6. MEVSİMLER ===== */
+function etkMevsim(){
+  const tip=rnd(0,1);
+  if(tip===0){
+    const m=pick(Object.keys(MEVSIM));
+    const ay=pick(MEVSIM[m]);
+    const w=distractors(m,()=>pick(Object.keys(MEVSIM)));
+    return{
+      yonerge:'"'+ay+'" ayı hangi mevsimdedir?',
+      secenek:shuffle([m,...w.slice(0,2)]), dogru:m,
+      ustGorsel:(()=>{const c=metinKarti(ay,26);c.style.width='160px';c.style.height='92px';return c;})(),
+      ciz:t=>metinKarti(t,19),
+      ipucu:m+' mevsimi: '+MEVSIM[m].join(', ')
+    };
+  }
+  const m=pick(Object.keys(MEVSIM));
+  const dogru=MEVSIM[m].join(', ');
+  const w=Object.keys(MEVSIM).filter(x=>x!==m).map(x=>MEVSIM[x].join(', '));
+  return{
+    yonerge:'"'+m+'" mevsiminin ayları hangileridir?',
+    secenek:shuffle([dogru,...shuffle(w).slice(0,2)]), dogru,
+    ciz:t=>metinKarti(t,14),
+    ipucu:m+' mevsimi: '+dogru
+  };
+}
+
+/* ===== 7. SÜRE HESABI ===== */
+function etkSure(){
+  const tip=rnd(0,1);
+  if(tip===0){
+    const bas=rnd(1,10), sure=pick([1,2,3]);
+    const bit=bas+sure;
+    const w=distractors(String(bit),()=>String(Math.max(1,bit+pick([-2,-1,1,2]))));
+    const{c,ctx,W,H}=sahne(240,132);
+    analogCiz(ctx,62,62,52,bas,0);
+    ctx.save(); ctx.fillStyle='#546E7A'; ctx.font='600 13px Fredoka,Arial';
+    ctx.textAlign='center'; ctx.fillText('başlangıç',62,126);
+    ctx.font='700 22px Fredoka,Arial'; ctx.fillStyle='#37474F';
+    ctx.fillText('+'+sure+' saat',176,62);
+    ctx.restore();
+    c.style.width='232px'; c.style.height='128px';
+    return{
+      yonerge:'Saat '+bas+'.00\u2019da başlayan etkinlik '+sure+' saat sürdü. Saat kaçta biter?',
+      secenek:shuffle([String(bit)+'.00',...w.slice(0,2).map(x=>x+'.00')]), dogru:bit+'.00',
+      ustGorsel:c, ciz:t=>metinKarti(t,20),
+      ipucu:bas+' + '+sure+' = '+bit+'. Etkinlik saat '+bit+'.00\u2019da biter.'
+    };
+  }
+  const sorular=[
+    {s:'Bir film 14.00\u2019te başladı, 16.00\u2019da bitti. Kaç saat sürdü?',c:'2 saat',y:['1 saat','3 saat'],e:'16 − 14 = 2 saat'},
+    {s:'Ders 09.00\u2019da başladı, 09.30\u2019da bitti. Kaç dakika sürdü?',c:'30 dakika',y:['15 dakika','60 dakika'],e:'Yarım saat, yani 30 dakika.'},
+    {s:'Teneffüs 10.15\u2019te başladı, 10.30\u2019da bitti. Kaç dakika sürdü?',c:'15 dakika',y:['30 dakika','45 dakika'],e:'Çeyrek saat, yani 15 dakika.'},
+    {s:'Bir yolculuk sabah 08.00\u2019da başladı, öğlen 12.00\u2019da bitti. Kaç saat sürdü?',c:'4 saat',y:['2 saat','6 saat'],e:'12 − 8 = 4 saat'}
+  ];
+  const it=pick(sorular);
+  return{yonerge:it.s,secenek:shuffle([it.c,...it.y]),dogru:it.c,ciz:t=>metinKarti(t,19),ipucu:it.e};
+}
+
+initEtkinlik([etkAnalogOku,etkDijitalOku,etkEslestir,etkSaatDakika,
+              etkTakvimBirim,etkMevsim,etkSure],
+  {ad:'Zaman Ölçme',c1:'#a1c4fd',c2:'#c2e9fb',koyu:'#1565C0',orta:'#42A5F5',acik:'#E3F2FD'});
+</script>
+</body>
+</html>
