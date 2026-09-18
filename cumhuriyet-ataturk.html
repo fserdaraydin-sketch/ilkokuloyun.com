@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cumhuriyet ve Atatürk - İlkokul Oyun</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script defer src="analytics.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Fredoka',Arial,sans-serif;
+  background:linear-gradient(165deg,#c31432 0%,#8e0e00 100%);
+  min-height:100vh;padding:14px;display:flex;justify-content:center}
+.kutu{background:#fffdfb;border-radius:28px;padding:20px;
+  box-shadow:0 20px 50px rgba(0,0,0,.25);max-width:720px;width:100%}
+
+.baslik{text-align:center;margin-bottom:16px}
+.baslik h1{font-size:25px;font-weight:700;color:#B91C1C}
+.baslik p{color:#9C7B76;font-size:14px;font-weight:500;margin-top:3px}
+
+.sekmeler{display:flex;gap:7px;overflow-x:auto;padding-bottom:9px;margin-bottom:16px}
+.sekme{flex-shrink:0;padding:10px 16px;border-radius:18px;border:2.5px solid #FBD5D5;
+  background:#fff;font-family:inherit;font-weight:600;font-size:14px;color:#9B3232;cursor:pointer}
+.sekme.aktif{background:#B91C1C;border-color:#B91C1C;color:#fff}
+
+.bolum{display:none}
+.bolum.acik{display:block}
+
+.metin-kart{background:linear-gradient(160deg,#FFF8F5 0%,#FFF1EC 100%);
+  border:3px solid #F5C6C6;border-radius:22px;padding:20px;margin-bottom:14px}
+.metin-kart h2{font-size:19px;font-weight:700;color:#B91C1C;text-align:center;margin-bottom:4px}
+.metin-kart .altbilgi{text-align:center;font-size:13px;color:#A08080;margin-bottom:15px}
+.siir{font-size:16.5px;line-height:2;color:#3B2B28;text-align:center;font-weight:500}
+.siir .kita{margin-bottom:15px}
+.siir b{font-weight:700;color:#B91C1C;cursor:pointer;border-bottom:2px dotted #E88;padding-bottom:1px}
+.duz{font-size:16px;line-height:1.85;color:#3B2B28;font-weight:500}
+.duz b{font-weight:700;color:#B91C1C;cursor:pointer;border-bottom:2px dotted #E88}
+.imza{text-align:right;font-size:14px;color:#8B6B66;margin-top:12px;font-style:italic}
+
+.btn-dinle{width:100%;padding:13px;border:2.5px solid #B91C1C;border-radius:16px;
+  background:#fff;color:#B91C1C;font-family:inherit;font-weight:600;font-size:15px;
+  cursor:pointer;margin-bottom:12px}
+.btn-dinle:active{transform:scale(.98)}
+
+.kutucuk{background:#fff;border:2.5px solid #E8E0DC;border-radius:18px;
+  padding:16px;margin-bottom:12px}
+.kutucuk h4{font-size:14.5px;font-weight:700;color:#B91C1C;margin-bottom:7px;
+  display:flex;align-items:center;gap:6px}
+.kutucuk p{font-size:15px;line-height:1.7;color:#43332F}
+.kutucuk ul{list-style:none;margin-top:5px}
+.kutucuk li{font-size:14.5px;line-height:1.8;color:#43332F;padding-left:21px;position:relative}
+.kutucuk li::before{content:'●';position:absolute;left:3px;color:#D97706;font-size:11px;top:5px}
+
+.sozluk{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px;margin-top:6px}
+.kelime{background:#FFF7ED;border:2px solid #FED7AA;border-radius:13px;padding:10px 12px;cursor:pointer}
+.kelime .k{font-weight:700;color:#C2410C;font-size:14.5px}
+.kelime .a{font-size:13px;color:#5B4A44;line-height:1.45;margin-top:3px}
+
+.zaman{position:relative;padding-left:28px}
+.zaman::before{content:'';position:absolute;left:8px;top:6px;bottom:6px;width:3px;
+  background:linear-gradient(#FCA5A5,#B91C1C);border-radius:2px}
+.olay{position:relative;margin-bottom:15px}
+.olay::before{content:'';position:absolute;left:-24px;top:5px;width:13px;height:13px;
+  border-radius:50%;background:#B91C1C;border:3px solid #fff;box-shadow:0 0 0 2px #FCA5A5}
+.olay .yil{font-weight:700;color:#B91C1C;font-size:15px}
+.olay .ne{font-size:14.5px;color:#43332F;line-height:1.55;margin-top:2px}
+
+.balon{position:fixed;inset:0;background:rgba(50,15,10,.6);display:none;
+  align-items:center;justify-content:center;padding:20px;z-index:100}
+.balon.acik{display:flex}
+.balon-ic{background:#fff;border-radius:22px;padding:22px;max-width:380px;width:100%}
+.balon-ic .k{font-size:22px;font-weight:700;color:#C2410C;text-align:center;margin-bottom:8px}
+.balon-ic .a{font-size:16px;line-height:1.7;color:#43332F;text-align:center}
+.balon-ic button{width:100%;padding:13px;border:none;border-radius:15px;background:#B91C1C;
+  color:#fff;font-family:inherit;font-weight:600;font-size:15px;cursor:pointer;margin-top:15px}
+
+.kaynak{font-size:12px;color:#A99490;text-align:center;margin-top:10px;line-height:1.5}
+.btn-geri{width:100%;padding:14px;background:transparent;color:#A08080;
+  border:2.5px solid #F5DDD9;border-radius:17px;font-family:inherit;font-weight:600;
+  font-size:15px;cursor:pointer;margin-top:14px}
+@media(max-width:600px){
+  .kutu{padding:15px}.baslik h1{font-size:20px}
+  .siir{font-size:15px;line-height:1.95}.duz{font-size:15px}
+  .metin-kart{padding:15px}
+}
+</style>
+</head>
+<body>
+<div class="kutu">
+  <div class="baslik">
+    <h1>🇹🇷 Cumhuriyet ve Atatürk</h1>
+    <p>Millî metinlerimiz · anlamlarıyla birlikte</p>
+  </div>
+
+  <div class="sekmeler" id="sekmeler"></div>
+  <div id="icerik"></div>
+
+  <div class="kaynak">
+    Metinler MEB 1. Sınıf Hayat Bilgisi ders kitabından alınmıştır.<br>
+    İstiklâl Marşı: Mehmet Âkif Ersoy · Gençliğe Hitabe: Mustafa Kemal Atatürk
+  </div>
+  <button class="btn-geri" onclick="history.back()">← Geri Dön</button>
+</div>
+
+<div class="balon" id="balon" onclick="if(event.target===this)balonKapat()">
+  <div class="balon-ic" id="balonIc"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cumhuriyet ve Atatürk — millî metinler ve anlamları
+   İstiklâl Marşı (M. Âkif Ersoy, 1921) ve Gençliğe Hitabe
+   (M. K. Atatürk, 1927) kamuya mal olmuş metinlerdir.
+   Kalın yazılan kelimeye dokununca anlamı açılır.
+   ============================================================ */
+
+const SOZLUK={
+  // İstiklâl Marşı
+  'şafak':'Sabah güneş doğmadan önceki kızıllık.',
+  'sancak':'Bayrak. Şiirde Türk bayrağı anlatılıyor.',
+  'sönmeden':'Sönmeden, yanmaya devam ederken.',
+  'tüten':'Dumanı çıkan, yanmaya devam eden.',
+  'ocak':'Ateş yakılan yer. Burada "ev, yuva" anlamında.',
+  'hilâl':'Ay\u2019ın ince hâli. Bayrağımızdaki ay.',
+  'çatma':'Kaşlarını çatma, kızgın bakma.',
+  'celâl':'Öfke, sert bakış.',
+  'helâl':'Hakkı olan, hak edilmiş.',
+  'istiklâl':'Bağımsızlık. Kimsenin boyunduruğu altında olmamak.',
+  'kurban olayım':'Sevgi ve saygı gösteren eski bir söyleyiş.',
+  'kahraman':'Yiğit, cesur.',
+  // Andımız
+  'ilke':'İnandığımız, uyduğumuz temel kural.',
+  'ülkü':'Ulaşmak istediğimiz büyük hedef.',
+  'özümden':'Kendimden, benliğimden.',
+  'ant içerim':'Söz veririm, yemin ederim.',
+  'varlığım':'Sahip olduğum her şey, kendim.',
+  'armağan':'Hediye.',
+  'hedef':'Ulaşmak istenen nokta.',
+  // Gençliğe Hitabe
+  'vazife':'Görev, yapılması gereken iş.',
+  'muhafaza':'Koruma, saklama.',
+  'müdafaa':'Savunma.',
+  'istikbal':'Gelecek.',
+  'cumhuriyet':'Yönetme hakkının halkta olduğu yönetim biçimi.',
+  'millet':'Aynı topraklarda birlikte yaşayan, tarihi ve kültürü ortak insanlar.',
+  'istiklal':'Bağımsızlık.'
+};
+
+/* Metinde **kelime** biçimini tıklanabilir yapar */
+function isaretle(metin){
+  return metin.replace(/\*\*(.+?)\*\*/g,(m,k)=>'<b onclick="kelimeAc(\''+
+    k.replace(/'/g,"\\'")+'\')">'+k+'</b>');
+}
+function kelimeAc(k){
+  const anahtar=Object.keys(SOZLUK).find(x=>x.toLocaleLowerCase('tr')===k.toLocaleLowerCase('tr'));
+  const acik=anahtar?SOZLUK[anahtar]:'Bu kelimenin açıklaması eklenmemiş.';
+  document.getElementById('balonIc').innerHTML=
+    '<div class="k">'+k+'</div><div class="a">'+acik+'</div>'+
+    '<button onclick="balonKapat()">Anladım</button>';
+  document.getElementById('balon').classList.add('acik');
+  oku(k+'. '+acik);
+}
+function balonKapat(){
+  document.getElementById('balon').classList.remove('acik');
+  if('speechSynthesis' in window) speechSynthesis.cancel();
+}
+
+function oku(metin){
+  if(!('speechSynthesis' in window))return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(String(metin).replace(/[🇹🇷✋📜⭐🏛️●]/g,''));
+  u.lang='tr-TR'; u.rate=.82; u.pitch=1.02;
+  speechSynthesis.speak(u);
+}
+
+/* ---- BÖLÜMLER ---- */
+const ISTIKLAL_KITA1=
+ 'Korkma, sönmez bu **şafak**larda yüzen al **sancak**;<br>'+
+ '**Sönmeden** yurdumun üstünde **tüten** en son **ocak**.<br>'+
+ 'O benim milletimin yıldızıdır, parlayacak;<br>'+
+ 'O benimdir, o benim milletimindir ancak.';
+const ISTIKLAL_KITA2=
+ '**Çatma**, **kurban olayım**, çehreni ey nazlı **hilâl**!<br>'+
+ '**Kahraman** ırkıma bir gül! Ne bu şiddet, bu **celâl**?<br>'+
+ 'Sana olmaz dökülen kanlarımız sonra **helâl**.<br>'+
+ 'Hakkıdır Hakk\u2019a tapan milletimin **istiklâl**.';
+
+const ANDIMIZ=
+ 'Türküm, doğruyum, çalışkanım.<br>'+
+ '**İlke**m küçüklerimi korumak, büyüklerimi saymak; yurdumu, milletimi '+
+ '**özümden** çok sevmektir.<br>'+
+ '**Ülkü**m yükselmek, ileri gitmektir.<br>'+
+ 'Ey Büyük Atatürk!<br>'+
+ 'Açtığın yolda, gösterdiğin **hedef**e durmadan yürüyeceğime **ant içerim**.<br>'+
+ '**Varlığım** Türk varlığına **armağan** olsun.<br>'+
+ 'Ne mutlu Türküm diyene!';
+
+const HITABE=
+ 'Ey Türk gençliği! Birinci **vazife**n, Türk **istiklal**ini, Türk '+
+ '**cumhuriyet**ini, ilelebet **muhafaza** ve **müdafaa** etmektir.<br><br>'+
+ 'Muhtaç olduğun kudret, damarlarındaki asil kanda mevcuttur!';
+
+const BOLUMLER=[
+ {id:'marş', ad:'🇹🇷 İstiklâl Marşı', ciz:()=>`
+   <div class="metin-kart">
+     <h2>İSTİKLÂL MARŞI</h2>
+     <div class="altbilgi">Millî Marşımız · ilk iki kıta</div>
+     <div class="siir">
+       <div class="kita">${isaretle(ISTIKLAL_KITA1)}</div>
+       <div class="kita">${isaretle(ISTIKLAL_KITA2)}</div>
+     </div>
+     <div class="imza">Mehmet Âkif Ersoy</div>
+   </div>
+   <button class="btn-dinle" onclick="oku(document.querySelector('.siir').innerText)">🔊 Marşı Dinle</button>
+   <div class="kutucuk">
+     <h4>📖 Ne anlatıyor?</h4>
+     <p>Şair bayrağımıza sesleniyor. “Korkma” diyerek başlıyor: Bu vatanda bir tek ev
+     bile tütmeye devam ettikçe bayrağımız inmeyecek. Bayrak, milletin yıldızıdır ve
+     hep parlayacaktır. İkinci kıtada bayrağa “bize gül, kızma” der gibi sesleniyor;
+     çünkü bu topraklar için can verenler olmuştur.</p>
+   </div>
+   <div class="kutucuk">
+     <h4>💡 Bilmen gerekenler</h4>
+     <ul>
+       <li>Sözlerini <b style="border:none;cursor:auto">Mehmet Âkif Ersoy</b> yazdı.</li>
+       <li><b style="border:none;cursor:auto">12 Mart 1921</b>’de Millî Marşımız olarak kabul edildi.</li>
+       <li>Bestesini <b style="border:none;cursor:auto">Osman Zeki Üngör</b> yaptı.</li>
+       <li>Toplam <b style="border:none;cursor:auto">10 kıtadır</b>; törenlerde ilk iki kıtası okunur.</li>
+       <li>Mehmet Âkif, marş için verilen ödülü kabul etmemiş, parayı bağışlamıştır.</li>
+     </ul>
+   </div>
+   <div class="kutucuk">
+     <h4>🤝 Marş okunurken</h4>
+     <ul>
+       <li>Ayağa kalkarız, hazır ol duruşunda dururuz.</li>
+       <li>Bayrağa döner, sessizce ve saygıyla söyleriz.</li>
+       <li>Konuşmaz, gülmez, hareket etmeyiz.</li>
+     </ul>
+   </div>
+   <div class="kutucuk">
+     <h4>📚 Zor kelimeler</h4>
+     <div class="sozluk">${sozlukCiz(['şafak','sancak','ocak','hilâl','celâl','istiklâl'])}</div>
+   </div>`},
+
+ {id:'and', ad:'✋ Andımız', ciz:()=>`
+   <div class="metin-kart">
+     <h2>ANDIMIZ</h2>
+     <div class="altbilgi">Öğrenci Andı</div>
+     <div class="duz" style="text-align:center">${isaretle(ANDIMIZ)}</div>
+   </div>
+   <button class="btn-dinle" onclick="oku(document.querySelector('.duz').innerText)">🔊 Andımızı Dinle</button>
+   <div class="kutucuk">
+     <h4>📖 Ne anlatıyor?</h4>
+     <p>Bir öğrencinin kendine verdiği sözdür. Doğru olmak, çalışkan olmak,
+     küçükleri korumak ve büyüklere saygı göstermek… Bunlar her gün
+     uygulanabilecek davranışlardır.</p>
+   </div>
+   <div class="kutucuk">
+     <h4>🙌 Günlük hayatta nasıl yaşarız?</h4>
+     <ul>
+       <li><b style="border:none;cursor:auto">Doğruyum:</b> Yanlış yaptığımda doğruyu söylerim.</li>
+       <li><b style="border:none;cursor:auto">Çalışkanım:</b> Ödevimi zamanında yaparım.</li>
+       <li><b style="border:none;cursor:auto">Küçükleri korumak:</b> Benden küçüğe nazik davranırım.</li>
+       <li><b style="border:none;cursor:auto">Büyükleri saymak:</b> Büyüklerime selam veririm, sözlerini dinlerim.</li>
+     </ul>
+   </div>
+   <div class="kutucuk">
+     <h4>📚 Zor kelimeler</h4>
+     <div class="sozluk">${sozlukCiz(['ilke','ülkü','özümden','ant içerim','varlığım','armağan'])}</div>
+   </div>`},
+
+ {id:'hitabe', ad:'📜 Gençliğe Hitabe', ciz:()=>`
+   <div class="metin-kart">
+     <h2>ATATÜRK’ÜN GENÇLİĞE HİTABESİ</h2>
+     <div class="altbilgi">1927 · Nutuk’un son bölümünden</div>
+     <div class="duz">${isaretle(HITABE)}</div>
+     <div class="imza">Mustafa Kemal Atatürk</div>
+   </div>
+   <button class="btn-dinle" onclick="oku(document.querySelectorAll('.duz')[0].innerText)">🔊 Hitabeyi Dinle</button>
+   <div class="kutucuk">
+     <h4>📖 Bugünkü Türkçesiyle</h4>
+     <p>“Ey Türk gençliği! Senin birinci görevin; Türk bağımsızlığını ve Türk
+     Cumhuriyeti’ni sonsuza kadar korumak ve savunmaktır.<br><br>
+     Bunu yapacak güce zaten sahipsin; o güç damarlarındaki soylu kanda vardır.”</p>
+   </div>
+   <div class="kutucuk">
+     <h4>💭 Atatürk neden gençlere seslendi?</h4>
+     <p>Çünkü geleceği gençler kuracaktı. Atatürk, ülkenin bağımsızlığının
+     korunmasını en çok gençlere güvenerek emanet etti. Bu metin, gençlere duyulan
+     güvenin ifadesidir.</p>
+   </div>
+   <div class="kutucuk">
+     <h4>🙌 Bir çocuk bunu nasıl yaşar?</h4>
+     <ul>
+       <li>Öğrenmek de bir görevdir — iyi öğrenen ülkesine faydalı olur.</li>
+       <li>Doğruyu söylemek, hakkını korumak cesarettir.</li>
+       <li>Ülkesini sevmek, çevresini ve insanlarını korumakla başlar.</li>
+     </ul>
+   </div>
+   <div class="kutucuk">
+     <h4>📚 Zor kelimeler</h4>
+     <div class="sozluk">${sozlukCiz(['vazife','istiklal','cumhuriyet','muhafaza','müdafaa','istikbal'])}</div>
+   </div>`},
+
+ {id:'ataturk', ad:'⭐ Atatürk', ciz:()=>`
+   <div class="kutucuk">
+     <h4>⭐ Mustafa Kemal Atatürk kimdir?</h4>
+     <p>Türkiye Cumhuriyeti’nin kurucusudur. Kurtuluş Savaşı’nı yönetmiş,
+     savaştan sonra ülkenin kalkınması için pek çok yenilik yapmıştır.
+     Özellikle okumaya, öğrenmeye ve çocuklara çok önem vermiştir.</p>
+   </div>
+   <div class="kutucuk">
+     <h4>📅 Hayatından önemli tarihler</h4>
+     <div class="zaman">
+       <div class="olay"><div class="yil">1881</div><div class="ne">Selanik’te doğdu.</div></div>
+       <div class="olay"><div class="yil">19 Mayıs 1919</div><div class="ne">Samsun’a çıktı. Kurtuluş Savaşı başladı.</div></div>
+       <div class="olay"><div class="yil">23 Nisan 1920</div><div class="ne">Türkiye Büyük Millet Meclisi açıldı.</div></div>
+       <div class="olay"><div class="yil">30 Ağustos 1922</div><div class="ne">Büyük Zafer kazanıldı.</div></div>
+       <div class="olay"><div class="yil">29 Ekim 1923</div><div class="ne">Cumhuriyet ilan edildi.</div></div>
+       <div class="olay"><div class="yil">1928</div><div class="ne">Yeni Türk harfleri kabul edildi. Atatürk halka tahtada okuma yazma öğretti.</div></div>
+       <div class="olay"><div class="yil">1934</div><div class="ne">“Atatürk” soyadı verildi.</div></div>
+       <div class="olay"><div class="yil">10 Kasım 1938</div><div class="ne">Hayata veda etti.</div></div>
+     </div>
+   </div>
+   <div class="kutucuk">
+     <h4>👧 Atatürk ve çocuklar</h4>
+     <ul>
+       <li><b style="border:none;cursor:auto">23 Nisan</b>’ı dünyada çocuklara armağan eden tek liderdir.</li>
+       <li>Çocuklarla bolca vakit geçirir, onları dinlerdi.</li>
+       <li>Manevi evlatları vardı; Sabiha Gökçen dünyanın ilk kadın savaş pilotlarındandır.</li>
+       <li>“Çocuklar geleceğimizdir” derdi.</li>
+     </ul>
+   </div>
+   <button class="btn-dinle" onclick="oku('Mustafa Kemal Atatürk, Türkiye Cumhuriyetinin kurucusudur. Bin sekiz yüz seksen birde Selanikte doğdu. On dokuz Mayıs bin dokuz yüz on dokuzda Samsuna çıktı. Yirmi dokuz Ekim bin dokuz yüz yirmi üçte Cumhuriyeti ilan etti. On Kasım bin dokuz yüz otuz sekizde hayata veda etti.')">🔊 Dinle</button>`},
+
+ {id:'cumhuriyet', ad:'🏛️ Cumhuriyet', ciz:()=>`
+   <div class="kutucuk">
+     <h4>🏛️ Cumhuriyet ne demek?</h4>
+     <p>Cumhuriyet, ülkeyi yönetme hakkının <b style="border:none;cursor:auto">halka</b>
+     ait olması demektir. Halk kendi temsilcilerini seçer, o temsilciler ülkeyi yönetir.
+     Kimse doğduğu için yönetici olmaz; halk seçer.</p>
+   </div>
+   <div class="kutucuk">
+     <h4>📅 29 Ekim 1923</h4>
+     <p>Türkiye Büyük Millet Meclisi 29 Ekim 1923’te Cumhuriyeti ilan etti.
+     Her yıl bu günü <b style="border:none;cursor:auto">Cumhuriyet Bayramı</b> olarak
+     sevinç ve coşkuyla kutlarız.</p>
+   </div>
+   <div class="kutucuk">
+     <h4>🗳️ Sınıfta cumhuriyet nasıl olur?</h4>
+     <ul>
+       <li>Sınıf başkanını oylama ile seçmek bir cumhuriyet alışkanlığıdır.</li>
+       <li>Herkesin söz hakkı vardır; sıranı beklersin.</li>
+       <li>Çoğunluğun kararına uyulur ama azınlığın da hakkı korunur.</li>
+     </ul>
+   </div>
+   <div class="kutucuk">
+     <h4>🎉 Bayramda neler yaparız?</h4>
+     <ul>
+       <li>Bayrağımızı asarız.</li>
+       <li>Törenlere ve gösterilere katılırız.</li>
+       <li>Şiirler okur, şarkılar söyleriz.</li>
+       <li>Ailemizle bayramın anlamını konuşuruz.</li>
+     </ul>
+   </div>
+   <button class="btn-dinle" onclick="oku('Cumhuriyet, ülkeyi yönetme hakkının halka ait olması demektir. Halk kendi temsilcilerini seçer. Türkiye Büyük Millet Meclisi yirmi dokuz Ekim bin dokuz yüz yirmi üçte Cumhuriyeti ilan etti.')">🔊 Dinle</button>`}
+];
+
+function sozlukCiz(liste){
+  return liste.map(k=>{
+    const a=SOZLUK[k]||'';
+    return '<div class="kelime" onclick="kelimeAc(\''+k.replace(/'/g,"\\'")+'\')">'+
+           '<div class="k">'+k+'</div><div class="a">'+a+'</div></div>';
+  }).join('');
+}
+
+let aktif=BOLUMLER[0].id;
+function sekmeleriCiz(){
+  const k=document.getElementById('sekmeler'); k.innerHTML='';
+  BOLUMLER.forEach(b=>{
+    const d=document.createElement('button');
+    d.className='sekme'+(b.id===aktif?' aktif':'');
+    d.textContent=b.ad;
+    d.onclick=()=>{ aktif=b.id; if('speechSynthesis' in window) speechSynthesis.cancel();
+      sekmeleriCiz(); icerikCiz();
+      if(window.IO) IO.olay('cumhuriyet-bolum',{bolum:b.id}); };
+    k.appendChild(d);
+  });
+}
+function icerikCiz(){
+  const b=BOLUMLER.find(x=>x.id===aktif);
+  document.getElementById('icerik').innerHTML=b.ciz();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') balonKapat(); });
+sekmeleriCiz(); icerikCiz();
+</script>
+</body>
+</html>
