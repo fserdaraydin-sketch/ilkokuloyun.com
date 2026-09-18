@@ -66,7 +66,7 @@ function duyguYuz(ctx,cx,cy,r,tip){
   if(tip==='kızgın'){
     ctx.moveTo(cx-gz-r*0.18,gy-r*0.42); ctx.lineTo(cx-gz+r*0.16,gy-r*0.25);
     ctx.moveTo(cx+gz+r*0.18,gy-r*0.42); ctx.lineTo(cx+gz-r*0.16,gy-r*0.25);
-  }else if(tip==='üzgün'||tip==='korkmuş'){
+  }else if(tip==='üzgün'||tip==='korkmuş'||tip==='endişeli'){
     ctx.moveTo(cx-gz-r*0.18,gy-r*0.26); ctx.lineTo(cx-gz+r*0.16,gy-r*0.42);
     ctx.moveTo(cx+gz+r*0.18,gy-r*0.26); ctx.lineTo(cx+gz-r*0.16,gy-r*0.42);
   }else if(tip==='şaşkın'){
@@ -95,6 +95,11 @@ function duyguYuz(ctx,cx,cy,r,tip){
     ctx.ellipse(cx,cy+r*0.30,r*0.17,r*0.24,0,0,Math.PI*2);
   }else if(tip==='korkmuş'){
     ctx.ellipse(cx,cy+r*0.32,r*0.20,r*0.16,0,0,Math.PI*2);
+  }else if(tip==='endişeli'){
+    // Dalgalı ağız — kararsızlık, tedirginlik
+    ctx.moveTo(cx-r*0.30,cy+r*0.34);
+    ctx.quadraticCurveTo(cx-r*0.10,cy+r*0.20,cx,cy+r*0.32);
+    ctx.quadraticCurveTo(cx+r*0.10,cy+r*0.44,cx+r*0.30,cy+r*0.28);
   }else{ // sakin
     ctx.moveTo(cx-r*0.26,cy+r*0.30); ctx.lineTo(cx+r*0.26,cy+r*0.30);
   }
@@ -121,7 +126,8 @@ const DUYGULAR=[
   {ad:'kızgın',   tip:'kızgın',   ne:'Haksızlığa uğradığımızda ya da bir şey ters gittiğinde kızabiliriz.'},
   {ad:'şaşkın',   tip:'şaşkın',   ne:'Beklemediğimiz bir şey olduğunda şaşırırız.'},
   {ad:'korkmuş',  tip:'korkmuş',  ne:'Tehlike hissettiğimizde ya da bilmediğimiz bir durumda korkarız.'},
-  {ad:'heyecanlı',tip:'heyecanlı',ne:'Güzel bir şey olacağını beklerken heyecanlanırız.'}
+  {ad:'heyecanlı',tip:'heyecanlı',ne:'Güzel bir şey olacağını beklerken heyecanlanırız.'},
+  {ad:'endişeli', tip:'endişeli', ne:'Ne olacağını bilmediğimizde içimiz kıpır kıpır olur, endişeleniriz.'}
 ];
 
 /* ===== 1. KENDİNİ TANITMA ===== */
@@ -141,7 +147,22 @@ function etkTanisma(){
      e:'Yeni gelen biri kendini yalnız hissedebilir. Tanışmak onu rahatlatır.'},
     {s:'Herkesin adı, boyu ve saçı aynı mıdır?',c:'Hayır, herkes farklıdır',
      y:['Evet, herkes aynıdır','Sadece adlar farklıdır'],
-     e:'Her insan birbirinden farklıdır. Bu farklılıklar bizi özel yapar.'}
+     e:'Her insan birbirinden farklıdır. Bu farklılıklar bizi özel yapar.'},
+    {s:'Kendini tanıtırken adından sonra ne söylersin?',c:'Soyadımı',
+     y:['Hiçbir şey','Arkadaşımın adını'],
+     e:'“Merhaba” dedikten sonra adımızı ve SOYADIMIZI söyleriz.'},
+    {s:'Tanışırken hangi söz uygundur?',c:'Tanıştığımıza memnun oldum',
+     y:['Sen kimsin ya?','Çekil önümden'],
+     e:'“Senin adın ne?”, “Tanıştığımıza memnun oldum.” gibi ifadeler nazik tanışma sözleridir.'},
+    {s:'Biri konuşurken ne yaparsın?',c:'Sözünü bitirmesini beklerim',
+     y:['Sözünü keserim','Başka yere bakarım'],
+     e:'Konuşan kişinin sözünü bitirmesini bekleriz. Sözünü kesmek nezaketsizliktir.'},
+    {s:'Tanışırken beden dilimiz nasıl olmalı?',c:'Dik durup gülümsemeliyim',
+     y:['Yere bakıp mırıldanmalıyım','Sırtımı dönmeliyim'],
+     e:'Beden dili de konuşur: duruş şeklimiz ve yüz ifademiz uygun olmalıdır.'},
+    {s:'Yeni bir arkadaşla sohbeti nasıl sürdürürsün?',c:'Ortak yönlerimizi bulmaya çalışırım',
+     y:['Sadece kendimi anlatırım','Susarım'],
+     e:'Sevdiğimiz oyunlardan bahsedebilir, arkadaşımızla ortak yönlerimizi bulabiliriz.'}
   ];
   const it=pick(sorular);
   return{
@@ -158,7 +179,9 @@ const MEKANLAR=[
   {ch:'🩹',ad:'revir',      is:'Canımız yandığında ya da rahatsızlandığımızda gittiğimiz yer'},
   {ch:'🪑',ad:'sınıf',      is:'Derslerimizi işlediğimiz yer'},
   {ch:'🌳',ad:'bahçe',      is:'Teneffüste oyun oynadığımız yer'},
-  {ch:'🚪',ad:'müdür odası',is:'Okul müdürünün çalıştığı yer'}
+  {ch:'🚪',ad:'müdür odası',is:'Okul müdürünün çalıştığı yer'},
+  {ch:'🥪',ad:'kantin',     is:'Beslenme alışverişi yaptığımız yer'},
+  {ch:'🚻',ad:'tuvalet',    is:'Ellerimizi yıkadığımız ve ihtiyacımızı gördüğümüz yer'}
 ];
 function etkMekan(){
   const it=pick(MEKANLAR);
@@ -173,12 +196,26 @@ function etkMekan(){
       ipucu:it.ad.charAt(0).toLocaleUpperCase('tr')+it.ad.slice(1)+': '+it.is.toLocaleLowerCase('tr')+'.'
     };
   }
-  const w=shuffle(MEKANLAR.filter(x=>x.ad!==it.ad)).slice(0,2);
+  const durumlar=[
+    {d:'Ders zili çaldı. Nereye gitmelisin?',c:'sınıf',y:['bahçe','kantin'],
+     e:'Zil çalınca sınıfa gideriz. Ders zamanı başlamıştır.'},
+    {d:'Ellerini yıkaman gerekiyor. Nereye gidersin?',c:'tuvalet',y:['kütüphane','spor salonu'],
+     e:'Ellerimizi tuvaletteki lavaboda yıkarız.'},
+    {d:'Kitap okumak istiyorsun. Nereye gidersin?',c:'kütüphane',y:['yemekhane','revir'],
+     e:'Kütüphane, kitap okuduğumuz ve kitap ödünç aldığımız yerdir.'},
+    {d:'Başın ağrıyor, kendini iyi hissetmiyorsun. Nereye gidersin?',c:'revir',
+     y:['kantin','bahçe'],
+     e:'Rahatsızlandığımızda revire gideriz. Önce öğretmenimize haber veririz.'},
+    {d:'Teneffüste oyun oynamak istiyorsun. Nereye gidersin?',c:'bahçe',
+     y:['müdür odası','kütüphane'],
+     e:'Teneffüste bahçede oyun oynarız.'}
+  ];
+  const q=pick(durumlar);
   return{
-    yonerge:'Kitap okumak istiyorsan okulda nereye gidersin?',
-    secenek:shuffle(['kütüphane','yemekhane','spor salonu']), dogru:'kütüphane',
+    yonerge:q.d,
+    secenek:shuffle([q.c,...q.y]), dogru:q.c,
     ciz:t=>metinKarti(t,16),
-    ipucu:'Kütüphane, kitap okuduğumuz ve kitap ödünç aldığımız yerdir.'
+    ipucu:q.e
   };
 }
 
@@ -195,7 +232,13 @@ function etkKisiler(){
      y:['Kimseye söylemem','Sadece arkadaşıma'],
      e:'Bir sorunun olduğunda mutlaka güvendiğin bir yetişkine anlat. Yalnız kalmana gerek yok.'},
     {s:'Okulun temizliğini kim yapar?',c:'Yardımcı personel',y:['Sadece öğrenciler','Hiç kimse'],
-     e:'Yardımcı personel okulumuzu temiz tutar. Biz de kirletmeyerek onlara yardım ederiz.'}
+     e:'Yardımcı personel okulumuzu temiz tutar. Biz de kirletmeyerek onlara yardım ederiz.'},
+    {s:'Okuldan erken ayrılman gerekirse kimden izin alınır?',c:'Müdür yardımcısından',
+     y:['Sınıf başkanından','Arkadaşımdan'],
+     e:'Müdür ve müdür yardımcısı okulun yönetiminden sorumludur. İzin işlemleri onlarla yürütülür.'},
+    {s:'Öğretmenimizin görevi nedir?',c:'Bilgi ve beceri kazanmamıza rehberlik etmek',
+     y:['Sadece not vermek','Sadece ödev vermek'],
+     e:'Öğretmenlerimiz bilgi ve beceri kazanmamıza rehberlik eder.'}
   ];
   const it=pick(sorular);
   return{
@@ -266,7 +309,25 @@ function etkKurallar(){
      e:'Evde, trafikte, parkta, oyunda… Kurallar her yerde vardır.'},
     {s:'Sınıf kurallarını kim belirler?',c:'Öğretmen ve öğrenciler birlikte',
      y:['Sadece müdür','Hiç kimse'],
-     e:'Kuralları birlikte belirlersek onlara uymak daha kolay olur.'}
+     e:'Kuralları birlikte belirlersek onlara uymak daha kolay olur.'},
+    {s:'Arkadaşının silgisini kullanman gerekiyor. Ne yaparsın?',c:'İzin isterim',
+     y:['Habersiz alırım','Saklarım'],
+     e:'Başkalarının eşyalarını kullanmak için İZİN İSTERİZ.'},
+    {s:'Kantinde sıra varsa ne yaparsın?',c:'Sıraya girip sabırla beklerim',
+     y:['Öne geçerim','İtiştiririm'],
+     e:'Kantinde sıraya gireriz. Sıranın bize gelmesini sabırla bekleriz.'},
+    {s:'Merdivenlerden inip çıkarken nasıl davranırsın?',c:'Dikkatli ve yavaş',
+     y:['Atlayarak','Koşarak'],
+     e:'Merdivenlerden inip çıkarken dikkatli oluruz. Acele etmek düşmeye yol açar.'},
+    {s:'Derse geç kalmamak için ne yaparsın?',c:'Zil çalınca sınıfa giderim',
+     y:['Oyunumu bitirmeyi beklerim','Koridorda beklerim'],
+     e:'Derse zamanında gireriz. Zil, dersin başladığını haber verir.'},
+    {s:'Okul eşyalarını nasıl kullanmalıyız?',c:'Özenli kullanmalıyız',
+     y:['Nasıl olsa yenisi gelir','İstediğimiz gibi'],
+     e:'Sınıf ve okul eşyalarını özenli kullanırız. Onlar hepimizin ortak malıdır.'},
+    {s:'Yerdeki çöpü gördün. Ne yaparsın?',c:'Çöp kutusuna atarım',
+     y:['Görmezden gelirim','Ayağımla iterim'],
+     e:'Sınıfımızı ve okulumuzu temiz tutarız. Temizlik hepimizin işidir.'}
   ];
   const it=pick(sorular);
   return{
@@ -347,7 +408,19 @@ function etkBeden(){
      e:'Kendimizi tanıtırken hem fiziksel hem de sevdiğimiz şeyleri anlatabiliriz.'},
     {s:'“Ben iyi resim yaparım” demek ne anlama gelir?',c:'Bir becerimi tanıtmak',
      y:['Övünmek','Yalan söylemek'],
-     e:'Becerilerimizi bilmek ve söylemek kendimizi tanımaktır. Herkesin iyi olduğu bir şey vardır.'}
+     e:'Becerilerimizi bilmek ve söylemek kendimizi tanımaktır. Herkesin iyi olduğu bir şey vardır.'},
+    {s:'Hangisi fiziksel özelliğimizdir?',c:'Saç rengimiz',
+     y:['Sevdiğimiz oyun','En iyi arkadaşımız'],
+     e:'Saç ve göz rengimiz, boyumuz fiziksel özelliklerimizdir. Sevdiğimiz oyun ise duygusal özelliğimizdir.'},
+    {s:'Büyüdükçe fiziksel özelliklerimiz değişir mi?',c:'Evet, örneğin boyumuz uzar',
+     y:['Hayır, hiç değişmez','Sadece adımız değişir'],
+     e:'Biz büyürken bazı fiziksel özelliklerimiz değişir. Boyumuz uzar, ayakkabı numaramız büyür.'},
+    {s:'Arkadaşın gözlük kullanıyor. Bu ne anlama gelir?',c:'Onun fiziksel bir özelliğidir',
+     y:['Onunla oynamamalıyım','O bizden farklı biridir'],
+     e:'Gözlük kullanmak da bir fiziksel özelliktir. Hiç kimseyi bundan dolayı ayırmayız.'},
+    {s:'Kendini tanıtırken sadece görünüşünü mü anlatırsın?',c:'Hayır, duygularımı ve sevdiklerimi de anlatırım',
+     y:['Evet, sadece görünüşümü','Hiçbir şey anlatmam'],
+     e:'Fiziksel ve duygusal özelliklerimizi biliriz. Kendimizi tanıtırken ikisini de ifade ederiz.'}
   ];
   const it=pick(sorular);
   return{
