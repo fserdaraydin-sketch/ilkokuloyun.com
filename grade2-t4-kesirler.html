@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kesirler - 2. Sınıf Matematik</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade1-style.css">
+<script defer src="analytics.js"></script>
+</head>
+<body>
+<div class="kutu">
+  <div class="baslik"><h1>🍰 Kesirler</h1><p>4. Tema · Bütün, Yarım, Çeyrek</p></div>
+  <div class="ilerleme"><div class="ilerleme-dolu" id="ilerlemeDolu"></div></div>
+  <div class="yildizlar" id="yildizlar"></div>
+  <div class="yonerge">
+    <span class="yonerge-metin" id="yonergeMetin">Hazırlanıyor...</span>
+    <button class="btn-ses" id="sesBtn" onclick="sesDegistir()" aria-label="Sesi aç kapat">🔊</button>
+  </div>
+  <div class="soru-gorsel" id="soruGorsel"></div>
+  <div class="secenekler" id="secenekler"></div>
+  <div class="geri" id="geri"></div>
+  <button class="btn-devam" id="devamBtn" onclick="tekrarDinle()">🔊 Tekrar Dinle</button>
+  <button class="btn-geri" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade1-engine.js"></script>
+<script>
+const DOLU='#EF7D57', BOS='#FFF3E8', CIZGI='#B85C38';
+
+function metinKarti(t,b){
+  const{c,ctx,W,H}=sahne(148,86);
+  ctx.save(); ctx.fillStyle='#37474F'; ctx.font='600 '+(b||18)+'px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  const k=t.split(' ');
+  if(t.length>13&&k.length>1){ const o=Math.ceil(k.length/2);
+    ctx.fillText(k.slice(0,o).join(' '),W/2,H/2-11);
+    ctx.fillText(k.slice(o).join(' '),W/2,H/2+11);
+  } else ctx.fillText(t,W/2,H/2);
+  ctx.restore(); return c;
+}
+function sayiKarti(t){
+  const{c,ctx,W,H}=sahne(148,86);
+  ctx.save(); ctx.fillStyle='#37474F'; ctx.font='700 38px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(t,W/2,H/2); ctx.restore(); return c;
+}
+
+/* ===== DAİRE (pasta) — n eş parçaya böl, k tanesini boya ===== */
+function daireCiz(ctx,cx,cy,r,parca,dolu){
+  for(let i=0;i<parca;i++){
+    const a1=-Math.PI/2+i*2*Math.PI/parca, a2=a1+2*Math.PI/parca;
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,r,a1,a2); ctx.closePath();
+    ctx.fillStyle=(i<dolu)?DOLU:BOS; ctx.fill();
+    ctx.strokeStyle=CIZGI; ctx.lineWidth=2.5; ctx.stroke();
+  }
+  if(parca===1){
+    ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
+    ctx.fillStyle=dolu?DOLU:BOS; ctx.fill();
+    ctx.strokeStyle=CIZGI; ctx.lineWidth=2.5; ctx.stroke();
+  }
+}
+/* ===== DİKDÖRTGEN (çikolata) ===== */
+function dikCiz(ctx,x,y,g,y2,parca,dolu){
+  const pg=g/parca;
+  for(let i=0;i<parca;i++){
+    ctx.beginPath(); ctx.rect(x+i*pg,y,pg,y2);
+    ctx.fillStyle=(i<dolu)?DOLU:BOS; ctx.fill();
+    ctx.strokeStyle=CIZGI; ctx.lineWidth=2.5; ctx.stroke();
+  }
+}
+/* ===== EŞİT OLMAYAN BÖLME (çeldirici için) ===== */
+function esitsizCiz(ctx,x,y,g,y2,tip){
+  const oranlar = tip===0?[0.28,0.72] : tip===1?[0.18,0.30,0.52] : [0.12,0.20,0.28,0.40];
+  let ofs=0;
+  oranlar.forEach((o,i)=>{
+    ctx.beginPath(); ctx.rect(x+ofs*g,y,o*g,y2);
+    ctx.fillStyle=(i===0)?DOLU:BOS; ctx.fill();
+    ctx.strokeStyle=CIZGI; ctx.lineWidth=2.5; ctx.stroke();
+    ofs+=o;
+  });
+}
+
+function kesirKarti(parca,dolu,daireMi){
+  const{c,ctx,W,H}=sahne(148,112);
+  if(daireMi) daireCiz(ctx,W/2,H/2,40,parca,dolu);
+  else dikCiz(ctx,16,H/2-26,W-32,52,parca,dolu);
+  return c;
+}
+
+const AD={1:'bütün',2:'yarım',4:'çeyrek'};
+
+/* ===== 1. BÜTÜN / YARIM / ÇEYREK TANIMA ===== */
+function etkTanima(){
+  const parca=pick([1,2,4]);
+  const dolu=1;
+  const daireMi=rnd(0,1)===0;
+  const g=kesirKarti(parca,parca===1?1:dolu,daireMi);
+  g.style.width='150px'; g.style.height='114px';
+  const dogru=AD[parca];
+  return{
+    yonerge:parca===1?'Boyalı kısım bütünün ne kadarıdır?':'Boyalı kısım bütünün ne kadarıdır?',
+    secenek:shuffle(['bütün','yarım','çeyrek']), dogru,
+    ustGorsel:g, ciz:t=>metinKarti(t,20),
+    ipucu:parca===1
+      ? 'Hiç bölünmemiş, tamamı boyalı. Buna BÜTÜN denir.'
+      : parca===2
+        ? 'İki EŞ parçaya bölünmüş, biri boyalı. Buna YARIM denir.'
+        : 'Dört EŞ parçaya bölünmüş, biri boyalı. Buna ÇEYREK denir.'
+  };
+}
+
+/* ===== 2. KAÇ EŞ PARÇAYA BÖLÜNMÜŞ ===== */
+function etkParcaSayisi(){
+  const parca=pick([2,3,4,5,6,8]);
+  const daireMi=rnd(0,1)===0;
+  const g=kesirKarti(parca,1,daireMi);
+  g.style.width='150px'; g.style.height='114px';
+  const w=distractors(String(parca),()=>String(Math.max(2,parca+pick([-2,-1,1,2]))));
+  return{
+    yonerge:'Bütün kaç EŞ parçaya bölünmüş?',
+    secenek:shuffle([String(parca),...w.slice(0,2)]), dogru:String(parca),
+    ustGorsel:g, ciz:t=>sayiKarti(t),
+    ipucu:'Parçaları tek tek say. '+parca+' eş parçaya bölünmüş.'+
+          (AD[parca]?' Her bir parçaya '+AD[parca]+' denir.':'')
+  };
+}
+
+/* ===== 3. EŞ PARÇA MI DEĞİL Mİ (kritik kavram) ===== */
+function etkEsParca(){
+  const esMi=rnd(0,1)===0;
+  const{c,ctx,W,H}=sahne(150,104);
+  if(esMi) dikCiz(ctx,14,H/2-26,W-28,52,pick([2,3,4]),1);
+  else esitsizCiz(ctx,14,H/2-26,W-28,52,rnd(0,2));
+  c.style.width='150px'; c.style.height='104px';
+  return{
+    yonerge:'Bu bütün EŞ parçalara bölünmüş müdür?',
+    secenek:['Evet, eş parçalara bölünmüş','Hayır, parçalar eşit değil'],
+    dogru:esMi?'Evet, eş parçalara bölünmüş':'Hayır, parçalar eşit değil',
+    ustGorsel:c, ciz:t=>metinKarti(t,14),
+    ipucu:esMi
+      ? 'Bütün parçalar aynı büyüklükte. Kesir için parçalar EŞ olmalıdır.'
+      : 'Parçalar farklı büyüklükte. Kesirden söz edebilmek için parçalar EŞ olmalıdır.'
+  };
+}
+
+/* ===== 4. DOĞRU GÖRSELİ BUL ===== */
+function etkGorselBul(){
+  const hedef=pick(['yarım','çeyrek','bütün']);
+  const parca = hedef==='bütün'?1 : hedef==='yarım'?2 : 4;
+  const daireMi=rnd(0,1)===0;
+  const secenekler=[{p:1,d:1},{p:2,d:1},{p:4,d:1}];
+  return{
+    yonerge:'Hangi görselde boyalı kısım '+hedef.toUpperCase()+' kadardır?',
+    secenek:secenekler.map(o=>String(o.p)), dogru:String(parca),
+    ciz:t=>kesirKarti(+t,1,daireMi),
+    ipucu:hedef==='bütün'?'Bütün, hiç bölünmemiş tamamıdır.'
+        : hedef==='yarım'?'Yarım için bütün İKİ eş parçaya bölünür, biri alınır.'
+        : 'Çeyrek için bütün DÖRT eş parçaya bölünür, biri alınır.'
+  };
+}
+
+/* ===== 5. YARIM + YARIM = BÜTÜN ===== */
+function etkBirlestir(){
+  const sorular=[
+    {s:'İki YARIM bir araya gelirse ne olur?',c:'Bir bütün',y:['Bir çeyrek','İki bütün'],
+     e:'Yarım + yarım = bir bütün. İki eş parçanın ikisi de alınırsa bütün olur.'},
+    {s:'Dört ÇEYREK bir araya gelirse ne olur?',c:'Bir bütün',y:['Bir yarım','İki bütün'],
+     e:'Çeyrek + çeyrek + çeyrek + çeyrek = bir bütün.'},
+    {s:'İki ÇEYREK bir araya gelirse ne olur?',c:'Bir yarım',y:['Bir bütün','Bir çeyrek'],
+     e:'İki çeyrek bir yarıma eşittir. Dört parçanın ikisi, iki parçanın biri kadardır.'},
+    {s:'Bir bütün kaç yarımdan oluşur?',c:'2',y:['4','3'],
+     e:'Bütün iki eş parçaya bölünürse her biri yarım olur. 2 yarım = 1 bütün.'},
+    {s:'Bir bütün kaç çeyrekten oluşur?',c:'4',y:['2','3'],
+     e:'Bütün dört eş parçaya bölünürse her biri çeyrek olur. 4 çeyrek = 1 bütün.'},
+    {s:'Bir yarım kaç çeyrekten oluşur?',c:'2',y:['4','1'],
+     e:'Yarım, iki çeyreğe eşittir.'}
+  ];
+  const it=pick(sorular);
+  return{
+    yonerge:it.s,
+    secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ciz:t=>metinKarti(t,19),
+    ipucu:it.e
+  };
+}
+
+/* ===== 6. GÜNLÜK YAŞAM ===== */
+function etkGunluk(){
+  const durumlar=[
+    {n:'🍕',s:'Bir pizza 4 eş dilime bölündü. Ali bir dilim yedi. Ali pizzanın ne kadarını yedi?',
+     c:'Çeyreğini',y:['Yarısını','Tamamını'],p:4,
+     e:'4 eş parçanın biri ÇEYREKTİR.'},
+    {n:'🍫',s:'Bir çikolata 2 eş parçaya bölündü. Zeynep bir parçasını yedi. Ne kadarını yedi?',
+     c:'Yarısını',y:['Çeyreğini','Tamamını'],p:2,
+     e:'2 eş parçanın biri YARIMDIR.'},
+    {n:'🍉',s:'Bir karpuz 4 eş dilime bölündü. Mehmet 2 dilim yedi. Ne kadarını yedi?',
+     c:'Yarısını',y:['Çeyreğini','Tamamını'],p:4,
+     e:'4 parçanın 2 tanesi, bütünün yarısıdır. 2 çeyrek = 1 yarım.'},
+    {n:'🎂',s:'Bir pasta hiç bölünmeden Elif\u2019e verildi. Elif pastanın ne kadarını aldı?',
+     c:'Tamamını',y:['Yarısını','Çeyreğini'],p:1,
+     e:'Hiç bölünmemiş, tamamı BÜTÜNDÜR.'},
+    {n:'🥖',s:'Bir ekmek 2 eş parçaya bölündü, ikisi de alındı. Ne kadar alınmış olur?',
+     c:'Tamamını',y:['Yarısını','Çeyreğini'],p:2,
+     e:'2 yarım bir BÜTÜN eder.'}
+  ];
+  const it=pick(durumlar);
+  const{c,ctx,W,H}=sahne(240,120);
+  emoji(ctx,it.n,40,44,40);
+  daireCiz(ctx,160,44,32,it.p,it.p===1?1:(it.s.includes('2 dilim')?2:1));
+  ctx.save(); ctx.fillStyle='#546E7A'; ctx.font='600 12px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.fillText(it.p===1?'bölünmemiş':it.p+' eş parça',160,96);
+  ctx.restore();
+  c.style.width='232px'; c.style.height='116px';
+  return{
+    yonerge:it.s,
+    secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ustGorsel:c, ciz:t=>metinKarti(t,18),
+    ipucu:it.e
+  };
+}
+
+/* ===== 7. KARŞILAŞTIRMA ===== */
+function etkKarsilastir(){
+  const ciftler=[
+    {a:'yarım',b:'çeyrek',buyuk:'yarım',pa:2,pb:4,
+     e:'Bütün ne kadar AZ parçaya bölünürse her parça o kadar BÜYÜK olur. Yarım, çeyrekten büyüktür.'},
+    {a:'bütün',b:'yarım',buyuk:'bütün',pa:1,pb:2,
+     e:'Bütün, yarımdan büyüktür. Yarım bütünün sadece iki parçasından biridir.'},
+    {a:'bütün',b:'çeyrek',buyuk:'bütün',pa:1,pb:4,
+     e:'Bütün, çeyrekten büyüktür.'}
+  ];
+  const it=pick(ciftler);
+  const buyukMu=rnd(0,1)===0;
+  const dogru = buyukMu ? it.buyuk : (it.buyuk===it.a?it.b:it.a);
+  const{c,ctx,W,H}=sahne(230,110);
+  daireCiz(ctx,62,52,34,it.pa,1);
+  daireCiz(ctx,168,52,34,it.pb,1);
+  ctx.save(); ctx.fillStyle='#546E7A'; ctx.font='600 13px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.fillText(it.a,62,100); ctx.fillText(it.b,168,100);
+  ctx.restore();
+  c.style.width='222px'; c.style.height='106px';
+  return{
+    yonerge:'Boyalı kısımlardan hangisi daha '+(buyukMu?'BÜYÜK':'KÜÇÜK')+'?',
+    secenek:[it.a,it.b], dogru,
+    ustGorsel:c, ciz:t=>metinKarti(t,20),
+    ipucu:it.e
+  };
+}
+
+initEtkinlik([etkTanima,etkParcaSayisi,etkEsParca,etkGorselBul,
+              etkBirlestir,etkGunluk,etkKarsilastir],
+  {ad:'Kesirler',c1:'#ffecd2',c2:'#fcb69f',koyu:'#D84315',orta:'#FF7043',acik:'#FBE9E7'});
+</script>
+</body>
+</html>
