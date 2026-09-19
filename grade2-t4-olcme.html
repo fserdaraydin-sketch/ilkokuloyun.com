@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uzunluk ve Kütle Ölçme - 2. Sınıf Matematik</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade1-style.css">
+<script defer src="analytics.js"></script>
+</head>
+<body>
+<div class="kutu">
+  <div class="baslik"><h1>📏 Uzunluk ve Kütle Ölçme</h1><p>4. Tema · Metre, santimetre, kilogram, gram</p></div>
+  <div class="ilerleme"><div class="ilerleme-dolu" id="ilerlemeDolu"></div></div>
+  <div class="yildizlar" id="yildizlar"></div>
+  <div class="yonerge">
+    <span class="yonerge-metin" id="yonergeMetin">Hazırlanıyor...</span>
+    <button class="btn-ses" id="sesBtn" onclick="sesDegistir()" aria-label="Sesi aç kapat">🔊</button>
+  </div>
+  <div class="soru-gorsel" id="soruGorsel"></div>
+  <div class="secenekler" id="secenekler"></div>
+  <div class="geri" id="geri"></div>
+  <button class="btn-devam" id="devamBtn" onclick="tekrarDinle()">🔊 Tekrar Dinle</button>
+  <button class="btn-geri" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade1-engine.js"></script>
+<script>
+function metinKarti(t,b){
+  const{c,ctx,W,H}=sahne(148,94);
+  ctx.save(); ctx.fillStyle='#37474F'; ctx.font='600 '+(b||16)+'px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  const kel=t.split(' '); const sat=[]; let s='';
+  kel.forEach(k=>{ const d=s?s+' '+k:k;
+    if(ctx.measureText(d).width>130){ sat.push(s); s=k; } else s=d; });
+  if(s) sat.push(s);
+  const bas=H/2-(sat.length-1)*9.5;
+  sat.forEach((x,i)=>ctx.fillText(x,W/2,bas+i*19));
+  ctx.restore(); return c;
+}
+function sayiKarti(t,b){
+  const{c,ctx,W,H}=sahne(148,88);
+  ctx.save(); ctx.fillStyle='#37474F'; ctx.font='700 '+(b||32)+'px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(t,W/2,H/2); ctx.restore(); return c;
+}
+function emojiKarti(ch){
+  const{c,ctx,W,H}=sahne(148,98); emoji(ctx,ch,W/2,H/2,50); return c;
+}
+
+/* ===== CETVEL ===== */
+function cetvelCiz(uzunlukCm,nesne){
+  const{c,ctx,W,H}=sahne(260,120);
+  const sol=18, sag=W-18, cetvelY=H*0.62;
+  const gen=sag-sol, birim=gen/15;          // 0-15 cm cetvel
+  // Cetvel gövdesi
+  ctx.fillStyle='#FFE082'; ctx.strokeStyle='#F9A825'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.roundRect(sol,cetvelY,gen,30,3); ctx.fill(); ctx.stroke();
+  // Çizgiler ve rakamlar
+  ctx.strokeStyle='#6D4C41'; ctx.fillStyle='#4E342E';
+  for(let i=0;i<=15;i++){
+    const x=sol+i*birim, buyuk=(i%5===0);
+    ctx.lineWidth=buyuk?1.8:1;
+    ctx.beginPath(); ctx.moveTo(x,cetvelY); ctx.lineTo(x,cetvelY+(buyuk?13:8)); ctx.stroke();
+    if(buyuk){ ctx.save(); ctx.font='600 10px Fredoka,Arial'; ctx.textAlign='center';
+      ctx.textBaseline='top'; ctx.fillText(String(i),x,cetvelY+15); ctx.restore(); }
+  }
+  // Ölçülen nesne — cetvelin üstünde, 0'dan başlayarak
+  ctx.fillStyle='#42A5F5'; ctx.strokeStyle='#1565C0'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.roundRect(sol,cetvelY-26,uzunlukCm*birim,18,5); ctx.fill(); ctx.stroke();
+  if(nesne) emoji(ctx,nesne,sol+uzunlukCm*birim/2,cetvelY-17,14);
+  ctx.save(); ctx.fillStyle='#546E7A'; ctx.font='600 11px Fredoka,Arial';
+  ctx.textAlign='left'; ctx.fillText('0’dan başlayarak ölç',sol,cetvelY-36); ctx.restore();
+  return c;
+}
+
+/* ===== TAHTEREVALLİ (ağır - hafif) ===== */
+function tahterevalliCiz(solAgir,chSol,chSag){
+  const{c,ctx,W,H}=sahne(250,130);
+  ctx.fillStyle='#E3F2FD'; ctx.fillRect(0,0,W,H*0.72);
+  ctx.fillStyle='#8BC34A'; ctx.fillRect(0,H*0.72,W,H*0.28);
+  const mx=W/2, my=H*0.58;
+  // Destek üçgeni
+  ctx.fillStyle='#8D6E63';
+  ctx.beginPath(); ctx.moveTo(mx-16,H*0.78); ctx.lineTo(mx+16,H*0.78); ctx.lineTo(mx,my); ctx.closePath(); ctx.fill();
+  // Tahta — ağır taraf aşağıda
+  // AĞIR olan taraf AŞAĞI iner: sol ağırsa tahta sola doğru alçalır
+  const aci=solAgir?-0.20:0.20;
+  const kol=W*0.36;
+  const sx=mx-kol*Math.cos(aci), sy=my-kol*Math.sin(aci);
+  const gx=mx+kol*Math.cos(aci), gy=my+kol*Math.sin(aci);
+  ctx.strokeStyle='#A1663A'; ctx.lineWidth=9; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(gx,gy); ctx.stroke();
+  emoji(ctx,chSol,sx,sy-20,30);
+  emoji(ctx,chSag,gx,gy-20,30);
+  ctx.save(); ctx.fillStyle='#546E7A'; ctx.font='600 11px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('sol',sx,H*0.93); ctx.fillText('sağ',gx,H*0.93); ctx.restore();
+  return c;
+}
+
+/* ===== TERAZİ ===== */
+function teraziCiz(solAgir,chSol,chSag,denge){
+  const{c,ctx,W,H}=sahne(250,132);
+  const mx=W/2, my=40, kol=84;
+  ctx.fillStyle='#8D6E63'; ctx.fillRect(mx-5,my,10,64);
+  ctx.fillStyle='#6D4C41';
+  ctx.beginPath(); ctx.moveTo(mx-32,H-8); ctx.lineTo(mx+32,H-8);
+  ctx.lineTo(mx+18,H-24); ctx.lineTo(mx-18,H-24); ctx.closePath(); ctx.fill();
+  const aci = denge?0:(solAgir?-0.16:0.16);
+  const cosA=Math.cos(aci), sinA=Math.sin(aci);
+  const sK={x:mx-kol*cosA,y:my-kol*sinA}, gK={x:mx+kol*cosA,y:my+kol*sinA};
+  ctx.strokeStyle='#5D4037'; ctx.lineWidth=5; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(sK.x,sK.y); ctx.lineTo(gK.x,gK.y); ctx.stroke();
+  [[sK,chSol],[gK,chSag]].forEach(([k,ch])=>{
+    ctx.strokeStyle='#8D6E63'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(k.x,k.y); ctx.lineTo(k.x,k.y+24); ctx.stroke();
+    emoji(ctx,ch,k.x,k.y+8,26);
+    ctx.fillStyle='#BCAAA4';
+    ctx.beginPath(); ctx.ellipse(k.x,k.y+26,26,7,0,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='#795548'; ctx.stroke();
+  });
+  return c;
+}
+
+/* ===== ELEKTRONİK TERAZİ ===== */
+function elektronikTerazi(deger,birim,nesne){
+  const{c,ctx,W,H}=sahne(220,124);
+  ctx.fillStyle='#ECEFF1'; ctx.fillRect(0,0,W,H);
+  // Gövde
+  ctx.fillStyle='#CFD8DC'; ctx.strokeStyle='#90A4AE'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.roundRect(W*0.18,H*0.52,W*0.64,H*0.30,7); ctx.fill(); ctx.stroke();
+  // Tabla
+  ctx.fillStyle='#B0BEC5';
+  ctx.beginPath(); ctx.roundRect(W*0.14,H*0.44,W*0.72,H*0.08,4); ctx.fill(); ctx.stroke();
+  // Ekran
+  ctx.fillStyle='#263238';
+  ctx.beginPath(); ctx.roundRect(W*0.30,H*0.58,W*0.40,H*0.17,4); ctx.fill();
+  ctx.save(); ctx.fillStyle='#4FC3F7'; ctx.font='700 17px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(deger+' '+birim,W/2,H*0.665); ctx.restore();
+  if(nesne) emoji(ctx,nesne,W/2,H*0.28,40);
+  return c;
+}
+
+/* ===== 1. UZUN - KISA / AĞIR - HAFİF ===== */
+function etkKarsilastir(){
+  const uzunlukMu=rnd(0,1)===0;
+  if(uzunlukMu){
+    const nesneler=[
+      {a:'kalem',b:'cetvel',uzun:'cetvel'},
+      {a:'silgi',b:'kalem',uzun:'kalem'},
+      {a:'defter',b:'kitap',uzun:'kitap'},
+      {a:'ayakkabı',b:'çanta',uzun:'çanta'},
+      {a:'kaşık',b:'süpürge',uzun:'süpürge'}
+    ];
+    const it=pick(nesneler);
+    const uzunMu=rnd(0,1)===0;
+    const dogru=uzunMu?it.uzun:(it.uzun===it.a?it.b:it.a);
+    return{
+      yonerge:'"'+it.a+'" ile "'+it.b+'" karşılaştırılırsa hangisi daha '+(uzunMu?'UZUNDUR':'KISADIR')+'?',
+      secenek:[it.a,it.b], dogru,
+      ciz:t=>metinKarti(t,19),
+      ipucu:'Uzunluk karşılaştırırken iki nesneyi yan yana, aynı hizadan koyarız.'
+    };
+  }
+  const AGIR=[{ch:'🍉',ad:'karpuz'},{ch:'📚',ad:'kitap yığını'},{ch:'🎒',ad:'dolu çanta'}];
+  const HAFIF=[{ch:'🪶',ad:'tüy'},{ch:'🎈',ad:'balon'},{ch:'📄',ad:'kâğıt'}];
+  const solAgir=rnd(0,1)===0;
+  const a=pick(AGIR), h=pick(HAFIF);
+  const chSol=solAgir?a.ch:h.ch, chSag=solAgir?h.ch:a.ch;
+  const agirMi=rnd(0,1)===0;
+  const dogru=agirMi?(solAgir?'sol':'sağ'):(solAgir?'sağ':'sol');
+  const g=tahterevalliCiz(solAgir,chSol,chSag); g.style.width='240px'; g.style.height='125px';
+  return{
+    yonerge:'Tahterevallide hangi taraftaki daha '+(agirMi?'AĞIRDIR':'HAFİFTİR')+'?',
+    secenek:['sol','sağ'], dogru,
+    ustGorsel:g, ciz:t=>metinKarti(t,20),
+    ipucu:agirMi?'Ağır olan taraf AŞAĞI iner.':'Hafif olan taraf YUKARI kalkar.'
+  };
+}
+
+/* ===== 2. STANDART OLMAYAN BİRİM ===== */
+function etkStandartOlmayan(){
+  const sorular=[
+    {s:'Sıranın boyunu karışla ölçtük. Herkesin karışı aynı uzunlukta mıdır?',
+     c:'Hayır, herkesin karışı farklıdır',y:['Evet, hepsi aynıdır','Sadece çocuklarda farklı'],
+     e:'Karış, adım ve ayak kişiden kişiye değişir. Bu yüzden herkes farklı sonuç bulur.'},
+    {s:'İki kişi aynı masayı karışla ölçtü, farklı sayı buldu. Neden?',
+     c:'Karışları farklı uzunlukta olduğu için',
+     y:['Biri yanlış saydı','Masa değişti'],
+     e:'Standart olmayan birimlerle ölçüm yapan herkes farklı sonuç bulabilir.'},
+    {s:'Herkesin aynı sonucu bulması için ne kullanmalıyız?',
+     c:'Standart ölçme araçları',y:['Karışımızı','Adımımızı'],
+     e:'Cetvel, şerit metre gibi STANDART araçlar kullanırsak herkes aynı sonucu bulur.'},
+    {s:'Hangisi standart olmayan bir ölçme birimidir?',c:'Adım',y:['Santimetre','Metre'],
+     e:'Karış, adım, ayak ve kulaç standart olmayan birimlerdir. Metre ve santimetre standarttır.'},
+    {s:'Marangoz dolap ölçüsü alırken ne kullanmalıdır?',c:'Şerit metre',
+     y:['Karışını','Adımını'],
+     e:'Doğru ölçüm için standart bir araç gerekir. Marangoz şerit metre kullanır.'}
+  ];
+  const it=pick(sorular);
+  return{
+    yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ciz:t=>metinKarti(t,14), ipucu:it.e
+  };
+}
+
+/* ===== 3. CETVELLE ÖLÇME ===== */
+function etkCetvel(){
+  const uz=rnd(2,13);
+  const nesne=pick(['✏️','📎','🖍️']);
+  const g=cetvelCiz(uz,nesne); g.style.width='250px'; g.style.height='115px';
+  const w=distractors(String(uz),()=>String(Math.max(1,Math.min(15,uz+pick([-2,-1,1,2])))));
+  return{
+    yonerge:'Mavi nesnenin uzunluğu kaç santimetredir?',
+    secenek:shuffle([String(uz),...w.slice(0,2)]), dogru:String(uz),
+    ustGorsel:g, ciz:t=>sayiKarti(t+' cm',26),
+    ipucu:'Ölçüme her zaman cetvelin SIFIR çizgisinden başlarız. Nesnenin bittiği yerdeki sayı uzunluğu verir: '+uz+' cm'
+  };
+}
+
+/* ===== 4. METRE - SANTİMETRE ===== */
+function etkMetreCm(){
+  const tip=rnd(0,2);
+  if(tip===0){
+    const sorular=[
+      {s:'1 metre kaç santimetredir?',c:'100 cm',y:['10 cm','1000 cm'],e:'1 metre = 100 santimetre'},
+      {s:'Yarım metre kaç santimetredir?',c:'50 cm',y:['10 cm','25 cm'],e:'100 ÷ 2 = 50 santimetre'},
+      {s:'100 santimetre kaç metredir?',c:'1 m',y:['10 m','100 m'],e:'100 santimetre = 1 metre'},
+      {s:'2 metre kaç santimetredir?',c:'200 cm',y:['20 cm','2000 cm'],e:'2 × 100 = 200 santimetre'}
+    ];
+    const it=pick(sorular);
+    return{yonerge:it.s,secenek:shuffle([it.c,...it.y]),dogru:it.c,ciz:t=>metinKarti(t,19),ipucu:it.e};
+  }
+  if(tip===1){
+    // Boy karşılaştırma — kitaptaki 90 cm vs 1 m örneği
+    const cm=pick([80,90,95,105,110,120]);
+    const digerM=1;
+    const uzunMu=cm>100;
+    return{
+      yonerge:'Bir çocuğun boyu '+cm+' cm, diğerinin boyu 1 m. Hangisi daha uzundur?',
+      secenek:[cm+' cm olan','1 m olan'],
+      dogru:uzunMu?(cm+' cm olan'):'1 m olan',
+      ciz:t=>metinKarti(t,17),
+      ipucu:'Karşılaştırmak için aynı birime çeviririz: 1 m = 100 cm.\n'+
+            cm+' cm ile 100 cm karşılaştırılır → '+(uzunMu?cm+' cm daha uzundur.':'100 cm (1 m) daha uzundur.')
+    };
+  }
+  // Hangi birim uygun
+  const nesneler=[
+    {ad:'kalemin uzunluğu',b:'santimetre'},
+    {ad:'sınıfın kapısının yüksekliği',b:'metre'},
+    {ad:'silginin uzunluğu',b:'santimetre'},
+    {ad:'okul bahçesinin uzunluğu',b:'metre'},
+    {ad:'defterin kenarı',b:'santimetre'},
+    {ad:'bir ağacın boyu',b:'metre'}
+  ];
+  const it=pick(nesneler);
+  return{
+    yonerge:'"'+it.ad+'" ölçülürken hangi birim daha uygundur?',
+    secenek:shuffle(['santimetre','metre']), dogru:it.b,
+    ciz:t=>metinKarti(t,19),
+    ipucu:'Kısa uzunluklarda SANTİMETRE, uzun mesafelerde METRE kullanmak daha uygundur.'
+  };
+}
+
+/* ===== 5. TERAZİ İLE KARŞILAŞTIRMA ===== */
+function etkTerazi(){
+  const AGIR=['🍉','🎃','🪨'], HAFIF=['🪶','🎈','🍓'];
+  const dengeli=rnd(0,2)===0;
+  if(dengeli){
+    const ch=pick(AGIR);
+    const g=teraziCiz(false,ch,ch,true); g.style.width='240px'; g.style.height='127px';
+    return{
+      yonerge:'Terazi dengede mi?',
+      secenek:['Dengede','Dengede değil'], dogru:'Dengede',
+      ustGorsel:g, ciz:t=>metinKarti(t,19),
+      ipucu:'İki kefe aynı hizadaysa kütleleri EŞİTTİR, terazi dengededir.'
+    };
+  }
+  const solAgir=rnd(0,1)===0;
+  const chSol=solAgir?pick(AGIR):pick(HAFIF);
+  const chSag=solAgir?pick(HAFIF):pick(AGIR);
+  const agirMi=rnd(0,1)===0;
+  const g=teraziCiz(solAgir,chSol,chSag,false); g.style.width='240px'; g.style.height='127px';
+  return{
+    yonerge:'Terazide hangisi daha '+(agirMi?'AĞIRDIR':'HAFİFTİR')+'?',
+    secenek:['sol','sağ'],
+    dogru:agirMi?(solAgir?'sol':'sağ'):(solAgir?'sağ':'sol'),
+    ustGorsel:g, ciz:t=>metinKarti(t,20),
+    ipucu:agirMi?'Ağır olan kefe AŞAĞI iner.':'Hafif olan kefe YUKARI kalkar.'
+  };
+}
+
+/* ===== 6. GRAM MI KİLOGRAM MI ===== */
+function etkGramKg(){
+  const tip=rnd(0,1);
+  if(tip===0){
+    const nesneler=[
+      {ch:'🍎',ad:'elma',b:'gram'},
+      {ch:'✏️',ad:'kalem',b:'gram'},
+      {ch:'🍓',ad:'çilek',b:'gram'},
+      {ch:'🍉',ad:'karpuz',b:'kilogram'},
+      {ch:'🎒',ad:'dolu okul çantası',b:'kilogram'},
+      {ch:'🐕',ad:'köpek',b:'kilogram'},
+      {ch:'🪙',ad:'madeni para',b:'gram'},
+      {ch:'📺',ad:'televizyon',b:'kilogram'}
+    ];
+    const it=pick(nesneler);
+    return{
+      yonerge:'"'+it.ad+'" tartılırken hangi birim daha uygundur?',
+      secenek:shuffle(['gram','kilogram']), dogru:it.b,
+      ustGorsel:(()=>{const c=emojiKarti(it.ch);c.style.width='130px';c.style.height='86px';return c;})(),
+      ciz:t=>metinKarti(t,19),
+      ipucu:'HAFİF şeyler GRAM, AĞIR şeyler KİLOGRAM ile tartılır.\n1 kilogram = 1000 gram'
+    };
+  }
+  const sorular=[
+    {s:'1 kilogram kaç gramdır?',c:'1000 gram',y:['100 gram','10 gram'],e:'1 kilogram = 1000 gram'},
+    {s:'Yarım kilogram kaç gramdır?',c:'500 gram',y:['50 gram','100 gram'],e:'1000 ÷ 2 = 500 gram'},
+    {s:'Hangisi daha ağırdır: 1 kilogram mı, 900 gram mı?',c:'1 kilogram',y:['900 gram','İkisi eşit'],
+     e:'1 kilogram = 1000 gram. 1000 gram, 900 gramdan fazladır.'},
+    {s:'Kütle ölçmek için hangi aracı kullanırız?',c:'Terazi',y:['Cetvel','Şerit metre'],
+     e:'Kütle terazi ile ölçülür. Uzunluk ise cetvel ve şerit metre ile ölçülür.'},
+    {s:'Elektronik terazi ile el kantarı aynı nesneyi tarttı, farklı sonuç çıktı. Bu ne anlama gelir?',
+     c:'Standart ve doğru ölçüm aracı kullanmak önemlidir',
+     y:['Nesnenin kütlesi değişmiştir','Biri yalan söylüyordur'],
+     e:'Doğru ölçüm için düzgün çalışan, standart bir araç kullanmak gerekir.'}
+  ];
+  const it=pick(sorular);
+  return{
+    yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ciz:t=>metinKarti(t,15), ipucu:it.e
+  };
+}
+
+/* ===== 7. ELEKTRONİK TERAZİ OKUMA ===== */
+function etkTartiOku(){
+  const gramMi=rnd(0,1)===0;
+  const nesne=gramMi?pick(['🍎','🍓','✏️','🥚']):pick(['🍉','🎒','🐕','🎃']);
+  const deger=gramMi?pick([50,100,150,200,250,300,500]):pick([2,3,4,5,8,10]);
+  const birim=gramMi?'g':'kg';
+  const g=elektronikTerazi(deger,birim,nesne); g.style.width='215px'; g.style.height='121px';
+  const w=distractors(String(deger),()=>String(gramMi?pick([50,100,150,200,250,300,500,750]):pick([1,2,3,4,5,6,8,10,12])));
+  return{
+    yonerge:'Terazide tartılan nesnenin kütlesi kaçtır?',
+    secenek:shuffle([String(deger),...w.filter(x=>x!==String(deger)).slice(0,2)]), dogru:String(deger),
+    ustGorsel:g, ciz:t=>sayiKarti(t+' '+birim,24),
+    ipucu:'Terazinin ekranındaki sayıyı okuruz: '+deger+' '+(gramMi?'gram':'kilogram')
+  };
+}
+
+/* ===== 8. ÖLÇMEDE TAHMİN ===== */
+function etkTahmin(){
+  const tip=rnd(0,1);
+  if(tip===0){
+    const nesneler=[
+      {ad:'bir kalemin uzunluğu',c:'15 cm',y:['15 m','1 cm']},
+      {ad:'bir kapının yüksekliği',c:'2 m',y:['2 cm','20 m']},
+      {ad:'bir defterin uzun kenarı',c:'30 cm',y:['30 m','3 cm']},
+      {ad:'bir sınıfın uzunluğu',c:'8 m',y:['8 cm','80 m']},
+      {ad:'bir silginin uzunluğu',c:'4 cm',y:['4 m','40 m']},
+      {ad:'bir yetişkinin boyu',c:'170 cm',y:['17 cm','17 m']}
+    ];
+    const it=pick(nesneler);
+    return{
+      yonerge:'"'+it.ad+'" yaklaşık ne kadardır? Tahmin et.',
+      secenek:shuffle([it.c,...it.y]), dogru:it.c,
+      ciz:t=>metinKarti(t,20),
+      ipucu:'Tahmin ederken bildiğimiz uzunluklarla karşılaştırırız. Cetvelimiz 30 cm, bir adımımız yaklaşık yarım metredir.'
+    };
+  }
+  const nesneler=[
+    {ad:'bir elma',c:'150 gram',y:['150 kilogram','15 kilogram']},
+    {ad:'bir karpuz',c:'5 kilogram',y:['5 gram','500 kilogram']},
+    {ad:'bir kalem',c:'10 gram',y:['10 kilogram','1 kilogram']},
+    {ad:'dolu bir okul çantası',c:'3 kilogram',y:['3 gram','300 kilogram']},
+    {ad:'bir yumurta',c:'60 gram',y:['60 kilogram','6 kilogram']}
+  ];
+  const it=pick(nesneler);
+  return{
+    yonerge:'"'+it.ad+'" yaklaşık kaç ağırlığındadır? Tahmin et.',
+    secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ciz:t=>metinKarti(t,19),
+    ipucu:'Hafif şeyler gram, ağır şeyler kilogram ile ölçülür. 1 kg = 1000 g'
+  };
+}
+
+initEtkinlik([etkKarsilastir,etkStandartOlmayan,etkCetvel,etkMetreCm,
+              etkTerazi,etkGramKg,etkTartiOku,etkTahmin],
+  {ad:'Uzunluk ve Kütle',c1:'#d4fc79',c2:'#96e6a1',koyu:'#2E7D32',orta:'#66BB6A',acik:'#E8F5E9'});
+</script>
+</body>
+</html>
