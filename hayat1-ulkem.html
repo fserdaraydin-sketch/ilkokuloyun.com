@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yaşadığım Yer ve Ülkem - 1. Sınıf Hayat Bilgisi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade1-style.css">
+<script defer src="analytics.js"></script>
+</head>
+<body>
+<div class="kutu">
+  <div class="baslik"><h1>🗺️ Yaşadığım Yer ve Ülkem</h1><p>4. Öğrenme Alanı · Evimden ülkeme, bayraklar ve bayramlar</p></div>
+  <div class="ilerleme"><div class="ilerleme-dolu" id="ilerlemeDolu"></div></div>
+  <div class="yildizlar" id="yildizlar"></div>
+  <div class="yonerge">
+    <span class="yonerge-metin" id="yonergeMetin">Hazırlanıyor...</span>
+    <button class="btn-ses" id="sesBtn" onclick="sesDegistir()" aria-label="Sesi aç kapat">🔊</button>
+  </div>
+  <div class="soru-gorsel" id="soruGorsel"></div>
+  <div class="secenekler" id="secenekler"></div>
+  <div class="geri" id="geri"></div>
+  <button class="btn-devam" id="devamBtn" onclick="tekrarDinle()">🔊 Tekrar Dinle</button>
+  <button class="btn-geri" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade1-engine.js"></script>
+<script>
+function metinKarti(t,b){
+  const{c,ctx,W,H}=sahne(148,96);
+  ctx.save(); ctx.fillStyle='#37474F'; ctx.font='600 '+(b||15)+'px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  const kel=t.split(' '); const sat=[]; let s='';
+  kel.forEach(k=>{ const d=s?s+' '+k:k;
+    if(ctx.measureText(d).width>130){ sat.push(s); s=k; } else s=d; });
+  if(s) sat.push(s);
+  const bas=H/2-(sat.length-1)*9.5;
+  sat.forEach((x,i)=>ctx.fillText(x,W/2,bas+i*19));
+  ctx.restore(); return c;
+}
+function emojiKarti(ch){
+  const{c,ctx,W,H}=sahne(148,100); emoji(ctx,ch,W/2,H/2,50); return c;
+}
+
+/* ============================================================
+   YERLEŞİM ÖLÇEĞİ — ev → mahalle → şehir → ülke
+   İç içe halkalarla gösterilir; çocuk "benim yerim" fikrini
+   büyüyen çemberler olarak görür.
+   ============================================================ */
+const OLCEK=[
+  {ad:'ev',      ch:'🏠', ne:'Ailemizle birlikte yaşadığımız yerdir.'},
+  {ad:'mahalle', ch:'🏘️', ne:'Evimizin bulunduğu, komşularımızla birlikte yaşadığımız yerdir.'},
+  {ad:'şehir',   ch:'🏙️', ne:'Birçok mahallenin bir araya gelmesiyle oluşur.'},
+  {ad:'ülke',    ch:'🇹🇷', ne:'Birçok şehrin bir araya gelmesiyle oluşur. Bizim ülkemiz Türkiye’dir.'}
+];
+function olcekSahne(vurgu){
+  const{c,ctx,W,H}=sahne(240,150);
+  ctx.fillStyle='#F4FAFF'; ctx.fillRect(0,0,W,H);
+  const cx=W/2, cy=H*0.50;
+  const renkler=['#FFCC80','#A5D6A7','#90CAF9','#CE93D8'];
+  // Dıştan içe: ülke, şehir, mahalle, ev
+  [4,3,2,1].forEach((k,i)=>{
+    const r=H*(0.14+k*0.085);
+    const idx=k-1;
+    const secili=(OLCEK[idx].ad===vurgu);
+    ctx.fillStyle=secili?renkler[idx]:'#FFFFFF';
+    ctx.globalAlpha=secili?0.95:0.55;
+    ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill();
+    ctx.globalAlpha=1;
+    ctx.strokeStyle=secili?'#37474F':'#CFD8DC';
+    ctx.lineWidth=secili?3:2;
+    ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.stroke();
+    // Etiket halkanın üst kenarında
+    ctx.save();
+    ctx.fillStyle=secili?'#263238':'#90A4AE';
+    ctx.font=(secili?'700 ':'600 ')+'11px Fredoka,Arial';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(OLCEK[idx].ad,cx,cy-r+10);
+    ctx.restore();
+  });
+  emoji(ctx,'🏠',cx,cy+4,20);
+  return c;
+}
+
+/* ===== BAYRAK ÇİZİMİ ===== */
+function bayrakSahne(){
+  const{c,ctx,W,H}=sahne(220,130);
+  ctx.fillStyle='#EAF4FB'; ctx.fillRect(0,0,W,H);
+  // Direk
+  ctx.fillStyle='#90A4AE'; ctx.fillRect(W*0.12,H*0.10,5,H*0.82);
+  // Bayrak
+  ctx.fillStyle='#E30A17';
+  ctx.fillRect(W*0.145,H*0.16,W*0.62,H*0.42);
+  ctx.strokeStyle='#B71C1C'; ctx.lineWidth=1.5;
+  ctx.strokeRect(W*0.145,H*0.16,W*0.62,H*0.42);
+  // Ay
+  const mx=W*0.38, my=H*0.37, r=H*0.125;
+  ctx.fillStyle='#fff';
+  ctx.beginPath(); ctx.arc(mx,my,r,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#E30A17';
+  ctx.beginPath(); ctx.arc(mx+r*0.34,my,r*0.80,0,Math.PI*2); ctx.fill();
+  // Yıldız
+  ctx.fillStyle='#fff';
+  ctx.beginPath();
+  for(let i=0;i<10;i++){
+    const a=-Math.PI/2+i*Math.PI/5, rr=i%2?r*0.22:r*0.52;
+    const x=W*0.52+rr*Math.cos(a), y=my+rr*Math.sin(a);
+    i?ctx.lineTo(x,y):ctx.moveTo(x,y);
+  }
+  ctx.closePath(); ctx.fill();
+  return c;
+}
+
+/* ===== BAYRAM SAHNESİ ===== */
+function bayramSahne(tip){
+  const{c,ctx,W,H}=sahne(230,150);
+  if(tip==='milli'){
+    ctx.fillStyle='#BFE3F5'; ctx.fillRect(0,0,W,H*0.56);
+    ctx.fillStyle='#8BC34A'; ctx.fillRect(0,H*0.56,W,H*0.28);
+    ctx.fillStyle='#FFFDF8'; ctx.fillRect(0,H*0.84,W,H*0.16);
+    // Bayraklar
+    [0.16,0.50,0.84].forEach(x=>{
+      ctx.fillStyle='#90A4AE'; ctx.fillRect(W*x,H*0.16,3,H*0.40);
+      ctx.fillStyle='#E30A17'; ctx.fillRect(W*x+3,H*0.16,W*0.115,H*0.14);
+    });
+    emoji(ctx,'🧒',W*0.32,H*0.68,26);
+    emoji(ctx,'👧',W*0.66,H*0.68,26);
+    ctx.save(); ctx.fillStyle='#37474F'; ctx.font='700 13px Fredoka,Arial';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('millî bayram',W/2,H*0.92); ctx.restore();
+  }else{
+    ctx.fillStyle='#FFF3E0'; ctx.fillRect(0,0,W,H*0.84);
+    ctx.fillStyle='#FFFDF8'; ctx.fillRect(0,H*0.84,W,H*0.16);
+    // Sofra / ziyaret
+    ctx.fillStyle='#C68642'; ctx.strokeStyle='#7A4B1C'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.ellipse(W/2,H*0.64,W*0.34,H*0.09,0,0,Math.PI*2);
+    ctx.fill(); ctx.stroke();
+    emoji(ctx,'🍬',W*0.38,H*0.62,16);
+    emoji(ctx,'🍫',W*0.50,H*0.64,16);
+    emoji(ctx,'🍪',W*0.62,H*0.62,16);
+    emoji(ctx,'🧓',W*0.30,H*0.34,32);
+    emoji(ctx,'🧒',W*0.56,H*0.38,26);
+    ctx.save(); ctx.fillStyle='#8D6E52'; ctx.font='700 13px Fredoka,Arial';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('bayram ziyareti',W/2,H*0.92); ctx.restore();
+  }
+  return c;
+}
+
+/* ===== 1. YAŞADIĞIM YER ===== */
+function etkYer(){
+  const tip=rnd(0,1);
+  if(tip===0){
+    const it=pick(OLCEK);
+    const g=olcekSahne(it.ad); g.style.width='230px'; g.style.height='144px';
+    const w=distractors(it.ad,()=>pick(OLCEK).ad);
+    return{
+      yonerge:it.ne+' Burası neresidir?',
+      secenek:shuffle([it.ad,...w.slice(0,2)]), dogru:it.ad,
+      ustGorsel:g, ciz:t=>metinKarti(t,18),
+      ipucu:'Küçükten büyüğe: ev → mahalle → şehir → ülke'
+    };
+  }
+  const sorular=[
+    {s:'Evimizin bulunduğu, komşularımızla yaşadığımız yere ne denir?',c:'Mahalle',
+     y:['Ülke','Dünya'],e:'Mahalle, evimizin bulunduğu ve komşularımızla birlikte yaşadığımız yerdir.'},
+    {s:'Birçok mahallenin bir araya gelmesiyle ne oluşur?',c:'Şehir',
+     y:['Ev','Oda'],e:'Birçok mahalle bir araya gelerek şehri oluşturur.'},
+    {s:'Bizim ülkemizin adı nedir?',c:'Türkiye',y:['Ankara','İstanbul'],
+     e:'Ülkemizin adı Türkiye’dir. Ankara ise başkentimizdir.'},
+    {s:'Ülkemizin başkenti neresidir?',c:'Ankara',y:['İstanbul','İzmir'],
+     e:'Türkiye’nin başkenti Ankara’dır.'},
+    {s:'Kaybolmamak için hangi bilgiyi bilmeliyiz?',c:'Adresimizi',
+     y:['En sevdiğimiz rengi','Arkadaşımızın adını'],
+     e:'Adresimizi ve bir aile büyüğümüzün telefonunu bilmek bizi güvende tutar.'},
+    {s:'Yaşadığın yeri temiz tutmak kimin görevidir?',c:'Orada yaşayan herkesin',
+     y:['Sadece belediyenin','Sadece büyüklerin'],
+     e:'Yaşadığımız yeri temiz tutmak hepimizin görevidir. Çöpümüzü yere atmayız.'}
+  ];
+  const it=pick(sorular);
+  return{
+    yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ciz:t=>metinKarti(t,15), ipucu:it.e
+  };
+}
+
+/* ===== 2. BAYRAK VE MARŞ ===== */
+function etkBayrak(){
+  const tip=rnd(0,1);
+  if(tip===0){
+    const g=bayrakSahne(); g.style.width='210px'; g.style.height='124px';
+    const sorular=[
+      {s:'Bayrağımızın üzerinde neler vardır?',c:'Ay ve yıldız',y:['Güneş ve bulut','Ağaç ve kuş'],
+       e:'Türk bayrağı kırmızı zemin üzerinde beyaz ay ve yıldızdan oluşur.'},
+      {s:'Bayrağımızın rengi nedir?',c:'Kırmızı ve beyaz',y:['Mavi ve beyaz','Yeşil ve kırmızı'],
+       e:'Bayrağımız kırmızı zeminli, ay ve yıldızı beyazdır.'},
+      {s:'Bayrak göndere çekilirken ne yaparız?',c:'Saygıyla ayakta dururuz',
+       y:['Oturmaya devam ederiz','Konuşuruz'],
+       e:'Bayrak törenlerinde saygıyla, hazır ol duruşunda dururuz.'}
+    ];
+    const it=pick(sorular);
+    return{
+      yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+      ustGorsel:g, ciz:t=>metinKarti(t,15), ipucu:it.e
+    };
+  }
+  const sorular=[
+    {s:'Millî Marşımızın adı nedir?',c:'İstiklâl Marşı',y:['Cumhuriyet Marşı','Zafer Marşı'],
+     e:'Millî Marşımız İstiklâl Marşı’dır. Sözlerini Mehmet Âkif Ersoy yazmıştır.'},
+    {s:'İstiklâl Marşı okunurken ne yaparız?',c:'Ayakta, saygıyla söyleriz',
+     y:['Oturur dinleriz','Sohbet ederiz'],
+     e:'İstiklâl Marşı okunurken ayağa kalkar, hazır ol duruşunda saygıyla söyleriz.'},
+    {s:'İstiklâl Marşı’nın sözlerini kim yazmıştır?',c:'Mehmet Âkif Ersoy',
+     y:['Mustafa Kemal Atatürk','Osman Zeki Üngör'],
+     e:'Sözlerini Mehmet Âkif Ersoy yazmıştır. Bestesini Osman Zeki Üngör yapmıştır.'},
+    {s:'Bayrağımız ve marşımız neyi anlatır?',c:'Bağımsızlığımızı',y:['Bir oyunu','Bir şehri'],
+     e:'Bayrağımız ve İstiklâl Marşımız bağımsızlığımızın simgesidir. Bu yüzden onlara saygı gösteririz.'}
+  ];
+  const it=pick(sorular);
+  return{
+    yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ciz:t=>metinKarti(t,15), ipucu:it.e
+  };
+}
+
+/* ===== 3. ATATÜRK ===== */
+function etkAtaturk(){
+  const sorular=[
+    {s:'Türkiye Cumhuriyeti’ni kim kurmuştur?',c:'Mustafa Kemal Atatürk',
+     y:['Mehmet Âkif Ersoy','Osman Zeki Üngör'],
+     e:'Türkiye Cumhuriyeti’nin kurucusu Mustafa Kemal Atatürk’tür.'},
+    {s:'Atatürk hangi şehirde doğmuştur?',c:'Selanik',y:['Ankara','İzmir'],
+     e:'Mustafa Kemal Atatürk 1881 yılında Selanik’te doğmuştur.'},
+    {s:'Atatürk 23 Nisan’ı kimlere armağan etmiştir?',c:'Çocuklara',
+     y:['Öğretmenlere','Sporculara'],
+     e:'23 Nisan’ı dünyada çocuklara armağan eden tek lider Atatürk’tür.'},
+    {s:'Atatürk 19 Mayıs’ı kimlere armağan etmiştir?',c:'Gençlere',
+     y:['Çocuklara','Ailelere'],
+     e:'19 Mayıs Atatürk’ü Anma, Gençlik ve Spor Bayramı gençlere armağan edilmiştir.'},
+    {s:'Atatürk’ü hangi gün anarız?',c:'10 Kasım',y:['29 Ekim','23 Nisan'],
+     e:'Atatürk 10 Kasım 1938’de hayata veda etmiştir. Her yıl o gün onu anarız.'},
+    {s:'Atatürk neye çok önem vermiştir?',c:'Okumaya ve öğrenmeye',
+     y:['Sadece savaşa','Hiçbir şeye'],
+     e:'Atatürk okumaya, öğrenmeye ve çocuklara çok önem vermiştir. Halka tahtada okuma yazma öğretmiştir.'}
+  ];
+  const it=pick(sorular);
+  return{
+    yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ciz:t=>metinKarti(t,15), ipucu:it.e
+  };
+}
+
+/* ===== 4. MİLLÎ BAYRAMLAR ===== */
+const MILLI=[
+  {tarih:'23 Nisan',ad:'Ulusal Egemenlik ve Çocuk Bayramı',
+   ne:'23 Nisan 1920’de Türkiye Büyük Millet Meclisi açıldı. Atatürk bu günü çocuklara armağan etti.'},
+  {tarih:'19 Mayıs',ad:'Atatürk’ü Anma, Gençlik ve Spor Bayramı',
+   ne:'19 Mayıs 1919’da Atatürk Samsun’a giderek Millî Mücadele’yi başlattı.'},
+  {tarih:'30 Ağustos',ad:'Zafer Bayramı',
+   ne:'30 Ağustos 1922’de Millî Mücadele’miz zaferle sonuçlandı.'},
+  {tarih:'29 Ekim',ad:'Cumhuriyet Bayramı',
+   ne:'29 Ekim 1923’te Cumhuriyet ilan edildi.'},
+  {tarih:'15 Temmuz',ad:'Demokrasi ve Millî Birlik Günü',
+   ne:'15 Temmuz’da milletimiz bağımsızlığına sahip çıktı.'}
+];
+function etkMilliBayram(){
+  const it=pick(MILLI);
+  const yon=rnd(0,1);
+  if(yon===0){
+    const w=distractors(it.ad,()=>pick(MILLI).ad);
+    return{
+      yonerge:'"'+it.tarih+'" hangi bayramımızdır?',
+      secenek:shuffle([it.ad,...w.slice(0,2)]), dogru:it.ad,
+      ustGorsel:(()=>{const c=bayramSahne('milli');c.style.width='220px';c.style.height='143px';return c;})(),
+      ciz:t=>metinKarti(t,13), ipucu:it.ne
+    };
+  }
+  const w=distractors(it.tarih,()=>pick(MILLI).tarih);
+  return{
+    yonerge:'"'+it.ad+'" ne zaman kutlanır?',
+    secenek:shuffle([it.tarih,...w.slice(0,2)]), dogru:it.tarih,
+    ciz:t=>metinKarti(t,17), ipucu:it.ne
+  };
+}
+
+/* ===== 5. BAYRAMLARDA NE YAPARIZ ===== */
+function etkBayramAdet(){
+  const tip=rnd(0,1);
+  if(tip===0){
+    const g=bayramSahne('dini'); g.style.width='220px'; g.style.height='143px';
+    const sorular=[
+      {s:'Bayramda büyüklerimize ne yaparız?',c:'Ziyaret eder, ellerini öperiz',
+       y:['Hiçbir şey yapmayız','Sadece mesaj atarız'],
+       e:'Bayramlarda büyüklerimizi ziyaret eder, ellerini öperiz. Bu güzel bir geleneğimizdir.'},
+      {s:'Uzakta olan yakınlarımıza ne yaparız?',c:'Arar ya da tebrik kartı göndeririz',
+       y:['Unuturuz','Bekleriz'],
+       e:'Uzakta olan yakınlarımızı arar veya onlara tebrik kartı göndeririz.'},
+      {s:'Bayramlar bize ne kazandırır?',c:'Dayanışma ve yardımlaşma',
+       y:['Sadece tatil','Sadece şeker'],
+       e:'Bayramlarda dayanışma ve yardımlaşma içinde oluruz. Küslükler biter, sevgi artar.'},
+      {s:'Bayramda küs olan iki kişi ne yapar?',c:'Barışır',y:['Küs kalır','Uzaklaşır'],
+       e:'Bayramlar barışma zamanıdır. Küslükler bayramda sona erer.'}
+    ];
+    const it=pick(sorular);
+    return{
+      yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+      ustGorsel:g, ciz:t=>metinKarti(t,14), ipucu:it.e
+    };
+  }
+  const sorular=[
+    {s:'Millî bayramlarda neler yaparız?',c:'Törenlere katılır, bayrak asarız',
+     y:['Evde kalır hiçbir şey yapmayız','Alışverişe gideriz'],
+     e:'Millî bayramlarda törenlere katılır, bayrağımızı asar, şiirler okuruz.'},
+    {s:'Bayramda bir komşumuz yalnızsa ne yapabiliriz?',c:'Ziyaret eder, bayramını kutlarız',
+     y:['Karışmayız','Görmezden geliriz'],
+     e:'Bayramlarda yalnız olanları hatırlamak güzel bir davranıştır. Komşuluk önemli bir değerimizdir.'},
+    {s:'Bayram sabahı ilk ne yaparız?',c:'Ailemizle bayramlaşırız',
+     y:['Televizyon izleriz','Uyumaya devam ederiz'],
+     e:'Bayram sabahı önce evdekilerle bayramlaşırız, sonra ziyaretlere gideriz.'},
+    {s:'Bayramda ihtiyacı olan birine ne yapabiliriz?',c:'Yardım edebiliriz',
+     y:['Görmezden geliriz','Bekleriz'],
+     e:'Bayramlarda paylaşmak ve yardımlaşmak sevabı ve sevinci artırır.'}
+  ];
+  const it=pick(sorular);
+  return{
+    yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ciz:t=>metinKarti(t,14), ipucu:it.e
+  };
+}
+
+/* ===== 6. ÜLKEMİZİN GÜZELLİKLERİ ===== */
+function etkGuzellik(){
+  const yerler=[
+    {ch:'🏖️',ad:'deniz',    ne:'Ülkemiz dört bir yanı denizlerle çevrili güzel bir ülkedir.'},
+    {ch:'⛰️',ad:'dağ',      ne:'Ülkemizde pek çok yüksek dağ vardır.'},
+    {ch:'🌳',ad:'orman',    ne:'Ormanlarımız hem havayı temizler hem hayvanlara yuva olur.'},
+    {ch:'🏛️',ad:'tarihî yapı',ne:'Ülkemizde binlerce yıllık tarihî yapılar bulunur.'},
+    {ch:'🌊',ad:'göl',      ne:'Ülkemizde büyük ve güzel göller vardır.'}
+  ];
+  const tip=rnd(0,1);
+  if(tip===0){
+    const it=pick(yerler);
+    const w=distractors(it.ad,()=>pick(yerler).ad);
+    return{
+      yonerge:'Bu doğal güzelliğin adı nedir?',
+      secenek:shuffle([it.ad,...w.slice(0,2)]), dogru:it.ad,
+      ustGorsel:(()=>{const c=emojiKarti(it.ch);c.style.width='130px';c.style.height='88px';return c;})(),
+      ciz:t=>metinKarti(t,17), ipucu:it.ne
+    };
+  }
+  const sorular=[
+    {s:'Ülkemizin güzelliklerini korumak kimin görevidir?',c:'Hepimizin',
+     y:['Sadece büyüklerin','Sadece görevlilerin'],
+     e:'Doğal ve tarihî güzelliklerimizi korumak hepimizin görevidir.'},
+    {s:'Tarihî bir yapıyı gezerken ne yaparız?',c:'Dokunmaz, çizmez, korur ve izleriz',
+     y:['Üzerine yazı yazarız','Parça koparırız'],
+     e:'Tarihî eserler geçmişimizin hatırasıdır. Onlara zarar vermeyiz.'},
+    {s:'Pikniğe gittiğinde çöplerini ne yaparsın?',c:'Toplayıp çöp kutusuna atarım',
+     y:['Orada bırakırım','Toprağa gömerim'],
+     e:'Doğayı temiz bırakmak, onu sevmenin en güzel yoludur.'},
+    {s:'Ülkemizde farklı şehirlerde farklı yemekler var. Bu ne demektir?',
+     c:'Ülkemiz kültür açısından zengindir',
+     y:['Bazıları yanlıştır','Hepsi aynı olmalıdır'],
+     e:'Her yörenin kendine özgü yemekleri, türküleri ve gelenekleri vardır. Bu zenginliğimizdir.'}
+  ];
+  const it=pick(sorular);
+  return{
+    yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ciz:t=>metinKarti(t,14), ipucu:it.e
+  };
+}
+
+initEtkinlik([etkYer,etkBayrak,etkAtaturk,etkMilliBayram,etkBayramAdet,etkGuzellik],
+  {ad:'Yaşadığım Yer ve Ülkem',c1:'#ff9a9e',c2:'#fecfef',koyu:'#C2185B',orta:'#EC407A',acik:'#FCE4EC'});
+</script>
+</body>
+</html>
