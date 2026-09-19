@@ -110,6 +110,8 @@ function gorseliBuyut(el,kap){
 
 // ---- DURUM ----
 let ETKINLIKLER=[], sira=0, dogruSayisi=0, denemeSayisi=0, TEMA={};
+// Son gösterilen sorular — aynı soru kısa aralıkla tekrar gelmesin
+let sonSorular=[];
 const HEDEF=10;
 
 function initEtkinlik(etkinlikler,tema){
@@ -129,7 +131,13 @@ function initEtkinlik(etkinlikler,tema){
 
 function yeniEtkinlik(){
   denemeSayisi=0;
-  const e=pick(ETKINLIKLER)();
+  // Yakın zamanda sorulmuş bir soruyu tekrar seçme; havuz tükenirse
+  // deneme sınırına takılıp yine de bir soru döner.
+  let e, dene=0;
+  do{ e=pick(ETKINLIKLER)(); dene++; }
+  while(sonSorular.indexOf(e.yonerge)!==-1 && dene<40);
+  sonSorular.push(e.yonerge);
+  if(sonSorular.length>14) sonSorular.shift();
   window.__aktif=e;
 
   document.getElementById('yonergeMetin').textContent=e.yonerge;

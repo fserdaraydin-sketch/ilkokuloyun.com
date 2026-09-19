@@ -123,12 +123,18 @@ function emojileriAyir(){
   }catch(e){ /* eski tarayıcı: başlık düz kalır */ }
 }
 
+let sonSorularG4=[];
 function newQuestion(){
   answered=false;
   const fb=document.getElementById('feedback');fb.textContent='';fb.className='feedback';
   document.getElementById('explain').className='explain';
 
-  const q=LEVELS[level].gen();
+  // Yakın zamanda sorulmuş soruyu tekrar seçme
+  let q, dene=0;
+  do{ q=LEVELS[level].gen(); dene++; }
+  while(sonSorularG4.indexOf(q.text)!==-1 && dene<40);
+  sonSorularG4.push(q.text);
+  if(sonSorularG4.length>14) sonSorularG4.shift();
   currentAnswer=q.answer;
   document.getElementById('qText').textContent=q.text;
 

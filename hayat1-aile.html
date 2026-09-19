@@ -215,7 +215,25 @@ function etkGorgu(){
      e:'Misafire selam verip "Hoş geldiniz." demek güzel bir gelenektir. Misafirperverlik önemli bir değerimizdir.'},
     {s:'Bayramda büyükleri ziyaret etmek ne demektir?',c:'Sevgi ve saygı göstermektir',
      y:['Zorunlu bir iştir','Gerekli değildir'],
-     e:'Bayramlarda büyükleri ziyaret etmek, onlara sevgi ve saygı göstermenin güzel bir yoludur.'}
+     e:'Bayramlarda büyükleri ziyaret etmek, onlara sevgi ve saygı göstermenin güzel bir yoludur.'},
+    {s:'Evde telefonla konuşan birinin yanında ne yaparsın?',c:'Sessiz olurum, beklerim',
+     y:['Bağırırım','Telefonu alırım'],
+     e:'Biri konuşurken sessiz olmak nezakettir. Acil bir şey varsa işaretle belli ederiz.'},
+    {s:'Evdeki ortak alanı kullandıktan sonra ne yaparsın?',c:'Toparlayıp bırakırım',
+     y:['Dağınık bırakırım','Başkası toplasın'],
+     e:'Ortak alanları kullandıktan sonra toparlamak herkesin sorumluluğudur.'},
+    {s:'Misafir varken odana çekilmek doğru mudur?',c:'Önce selam verip sohbete katılmalıyım',
+     y:['Evet, hemen çekilirim','Hiç çıkmam'],
+     e:'Misafire selam vermek ve biraz sohbete katılmak güzel bir davranıştır.'},
+    {s:'Birine hediye verildiğinde ne dersin?',c:'Teşekkür ederim',
+     y:['Bunu istemiyordum','Hiçbir şey'],
+     e:'Hediye alınca teşekkür ederiz. Hediyeyi beğenmesek de veren kişiyi kırmayız.'},
+    {s:'Evde yüksek sesle müzik dinlemek doğru mudur?',c:'Hayır, diğerlerini rahatsız eder',
+     y:['Evet, evim benim','Sadece gece'],
+     e:'Birlikte yaşadığımız kişileri düşünerek davranırız. Komşularımızı da rahatsız etmeyiz.'},
+    {s:'Kapıyı çalmadan odaya girdin ve biri rahatsız oldu. Ne yaparsın?',
+     c:'Özür diler, bir daha çalarım',y:['Aldırmam','Kızarım'],
+     e:'Hata yaptığımızda özür dilemek ve davranışımızı düzeltmek olgunluktur.'}
   ];
   const it=pick(sorular);
   return{
@@ -271,7 +289,21 @@ function etkIsBolumu(){
      e:'Sorumluluklarımızı yerine getirdiğimizde işlerimiz hızlı biter, aile yaşantımız düzenli olur ve birbirimize daha fazla zaman ayırırız.'},
     {s:'Sen de evde bir iş üstlenebilir misin?',c:'Evet, yaşıma uygun işler yapabilirim',
      y:['Hayır, ben küçüğüm','Hayır, gerek yok'],
-     e:'Yaşımıza uygun sorumluluklar alabiliriz. Küçük bir yardım bile ailemize destek olur.'}
+     e:'Yaşımıza uygun sorumluluklar alabiliriz. Küçük bir yardım bile ailemize destek olur.'},
+    {s:'Üstlendiğin bir işi unuttun. Ne yaparsın?',c:'Fark edince hemen yaparım',
+     y:['Başkası yapsın','Unuttum deyip geçerim'],
+     e:'Sorumluluk almak, unutunca da telafi etmektir.'},
+    {s:'Alışverişten dönen birine nasıl yardım edebilirsin?',c:'Hafif poşetleri taşıyabilirim',
+     y:['İzlerim','Odama giderim'],
+     e:'Yaşımıza uygun yardımlar yapabiliriz. Hafif bir poşet taşımak bile destektir.'},
+    {s:'Küçük kardeşin ya da bir çocuk oyuncağını dağıttı. Ne yaparsın?',
+     c:'Birlikte toplarız',y:['Kızarım','Ben de dağıtırım'],
+     e:'Birlikte toplamak hem işi kolaylaştırır hem de ona toplamayı öğretir.'},
+    {s:'Odanı toplamak kimin işidir?',c:'Benim',y:['Sadece büyüklerin','Kimsenin'],
+     e:'Kendi eşyalarımızı ve odamızı toplamak bizim sorumluluğumuzdur.'},
+    {s:'Ailedeki biri sana bir iş verdi ama zor geliyor. Ne yaparsın?',
+     c:'Yardım isterim',y:['Hiç yapmam','Kaçarım'],
+     e:'Zorlandığımızda yardım istemek doğaldır. Birlikte yapınca kolaylaşır.'}
   ];
   const it=pick(sorular);
   return{
