@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yer, Yön ve Simetri - 2. Sınıf Matematik</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade1-style.css">
+<script defer src="analytics.js"></script>
+</head>
+<body>
+<div class="kutu">
+  <div class="baslik"><h1>🧭 Yer, Yön ve Simetri</h1><p>5. Tema · Kroki, kodlama, simetri çizgisi</p></div>
+  <div class="ilerleme"><div class="ilerleme-dolu" id="ilerlemeDolu"></div></div>
+  <div class="yildizlar" id="yildizlar"></div>
+  <div class="yonerge">
+    <span class="yonerge-metin" id="yonergeMetin">Hazırlanıyor...</span>
+    <button class="btn-ses" id="sesBtn" onclick="sesDegistir()" aria-label="Sesi aç kapat">🔊</button>
+  </div>
+  <div class="soru-gorsel" id="soruGorsel"></div>
+  <div class="secenekler" id="secenekler"></div>
+  <div class="geri" id="geri"></div>
+  <button class="btn-devam" id="devamBtn" onclick="tekrarDinle()">🔊 Tekrar Dinle</button>
+  <button class="btn-geri" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade1-engine.js"></script>
+<script>
+function metinKarti(t,b){
+  const{c,ctx,W,H}=sahne(148,92);
+  ctx.save(); ctx.fillStyle='#37474F'; ctx.font='600 '+(b||16)+'px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  const kel=t.split(' '); const sat=[]; let s='';
+  kel.forEach(k=>{ const d=s?s+' '+k:k;
+    if(ctx.measureText(d).width>130){ sat.push(s); s=k; } else s=d; });
+  if(s) sat.push(s);
+  const bas=H/2-(sat.length-1)*9.5;
+  sat.forEach((x,i)=>ctx.fillText(x,W/2,bas+i*19));
+  ctx.restore(); return c;
+}
+
+/* ============================================================
+   IZGARA VE KODLAMA
+   Kitabın s.147’deki “Mikrofona ulaşmak için nasıl ilerlemeliyiz?”
+   etkinliğinin karşılığı. Yön okları: ↑ ↓ ← →
+   ============================================================ */
+const OK={'yukarı':'↑','aşağı':'↓','sola':'←','sağa':'→'};
+function izgaraCiz(sut,sat,baslangic,hedef,yol,hedefCh){
+  const W=246, H=Math.min(190,28+sat*34);
+  const{c,ctx}=sahne(W,H);
+  const hucre=Math.min((W-24)/sut,(H-30)/sat);
+  const x0=(W-hucre*sut)/2, y0=14;
+  // Izgara
+  for(let r=0;r<sat;r++) for(let k=0;k<sut;k++){
+    ctx.fillStyle=((r+k)%2===0)?'#F5F8FA':'#FFFFFF';
+    ctx.fillRect(x0+k*hucre,y0+r*hucre,hucre,hucre);
+    ctx.strokeStyle='#B0BEC5'; ctx.lineWidth=1.5;
+    ctx.strokeRect(x0+k*hucre,y0+r*hucre,hucre,hucre);
+  }
+  // Yol izi
+  if(yol&&yol.length){
+    let cx=baslangic[0], cy=baslangic[1];
+    ctx.strokeStyle='#FB8C00'; ctx.lineWidth=3; ctx.lineCap='round';
+    ctx.setLineDash([5,4]);
+    ctx.beginPath();
+    ctx.moveTo(x0+cx*hucre+hucre/2,y0+cy*hucre+hucre/2);
+    yol.forEach(y=>{
+      if(y==='yukarı')cy--; else if(y==='aşağı')cy++;
+      else if(y==='sola')cx--; else cx++;
+      ctx.lineTo(x0+cx*hucre+hucre/2,y0+cy*hucre+hucre/2);
+    });
+    ctx.stroke(); ctx.setLineDash([]);
+  }
+  // Başlangıç ve hedef
+  emoji(ctx,'🐤',x0+baslangic[0]*hucre+hucre/2,y0+baslangic[1]*hucre+hucre/2,hucre*0.6);
+  emoji(ctx,hedefCh||'🎯',x0+hedef[0]*hucre+hucre/2,y0+hedef[1]*hucre+hucre/2,hucre*0.6);
+  return c;
+}
+function okKarti(yol){
+  const{c,ctx,W,H}=sahne(148,88);
+  ctx.save(); ctx.fillStyle='#E65100'; ctx.font='700 26px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(yol.map(y=>OK[y]).join(' '),W/2,H/2);
+  ctx.restore(); return c;
+}
+
+/* ===== KROKİ ===== */
+function krokiCiz(vurgu){
+  const{c,ctx,W,H}=sahne(240,160);
+  ctx.fillStyle='#F1F8E9'; ctx.fillRect(0,0,W,H);
+  // Yollar
+  ctx.strokeStyle='#BDBDBD'; ctx.lineWidth=12;
+  ctx.beginPath(); ctx.moveTo(0,H*0.52); ctx.lineTo(W,H*0.52); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(W*0.50,0); ctx.lineTo(W*0.50,H); ctx.stroke();
+  ctx.strokeStyle='#FFF'; ctx.lineWidth=1.5; ctx.setLineDash([7,6]);
+  ctx.beginPath(); ctx.moveTo(0,H*0.52); ctx.lineTo(W,H*0.52); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(W*0.50,0); ctx.lineTo(W*0.50,H); ctx.stroke();
+  ctx.setLineDash([]);
+  // Yapılar — dört köşe
+  const yapilar=[
+    {ad:'okul',  ch:'🏫', x:0.22, y:0.24},
+    {ad:'market',ch:'🏪', x:0.76, y:0.24},
+    {ad:'park',  ch:'🌳', x:0.22, y:0.78},
+    {ad:'hastane',ch:'🏥',x:0.76, y:0.78}
+  ];
+  yapilar.forEach(y=>{
+    if(y.ad===vurgu){
+      ctx.fillStyle='rgba(255,193,7,.35)';
+      ctx.beginPath(); ctx.arc(W*y.x,H*y.y,24,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle='#F9A825'; ctx.lineWidth=2.5; ctx.stroke();
+    }
+    emoji(ctx,y.ch,W*y.x,H*y.y-4,26);
+    ctx.save(); ctx.fillStyle='#546E7A'; ctx.font='600 10px Fredoka,Arial';
+    ctx.textAlign='center'; ctx.fillText(y.ad,W*y.x,H*y.y+18); ctx.restore();
+  });
+  return c;
+}
+
+/* ============================================================
+   SİMETRİ — kitap "simetri çizgisi" terimini kullanıyor
+   ============================================================ */
+function simetriCiz(tip,dogruMu){
+  const{c,ctx,W,H}=sahne(200,140);
+  ctx.fillStyle='#FFFDF6'; ctx.fillRect(0,0,W,H);
+  const cx=W/2, cy=H*0.50;
+
+  const sekilCiz=(ofsX,ayna)=>{
+    ctx.save();
+    ctx.translate(cx+ofsX,cy);
+    if(ayna) ctx.scale(-1,1);
+    ctx.fillStyle='#7E57C2'; ctx.strokeStyle='#4527A0'; ctx.lineWidth=2;
+    ctx.beginPath();
+    if(tip==='kelebek'){
+      ctx.moveTo(0,-26); ctx.quadraticCurveTo(38,-40,42,-6);
+      ctx.quadraticCurveTo(44,24,6,30); ctx.lineTo(0,26);
+    }else if(tip==='kalp'){
+      ctx.moveTo(0,28); ctx.bezierCurveTo(-4,10,34,4,30,-14);
+      ctx.bezierCurveTo(28,-32,4,-30,0,-14);
+    }else if(tip==='yaprak'){
+      ctx.moveTo(0,30); ctx.quadraticCurveTo(36,10,30,-14);
+      ctx.quadraticCurveTo(22,-34,0,-30);
+    }else{ // ev
+      ctx.moveTo(0,-32); ctx.lineTo(34,-4); ctx.lineTo(34,30); ctx.lineTo(0,30);
+    }
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.restore();
+  };
+  sekilCiz(0,false);
+  if(dogruMu) sekilCiz(0,true);              // doğru simetri: ayna görüntüsü
+  else { // yanlış: ikinci parça kaydırılmış / farklı boyutta
+    ctx.save(); ctx.translate(cx,cy); ctx.scale(-0.72,0.9); ctx.translate(-cx,-cy);
+    ctx.translate(cx*2+14,6); sekilCiz(-cx*2-14,false); ctx.restore();
+  }
+  // Simetri çizgisi
+  ctx.save();
+  ctx.strokeStyle=dogruMu?'#2E7D32':'#C62828'; ctx.lineWidth=3;
+  ctx.setLineDash([7,5]);
+  ctx.beginPath(); ctx.moveTo(cx,10); ctx.lineTo(cx,H-22); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle=dogruMu?'#2E7D32':'#C62828'; ctx.font='600 11px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.fillText('simetri çizgisi',cx,H-8);
+  ctx.restore();
+  return c;
+}
+/* Basit şekilde simetri çizgisi doğru mu */
+function cizgiTestCiz(sekil,dogruCizgi){
+  const{c,ctx,W,H}=sahne(170,140);
+  ctx.fillStyle='#FFFDF6'; ctx.fillRect(0,0,W,H);
+  const cx=W/2, cy=H*0.46, r=44;
+  ctx.fillStyle='#4DB6AC'; ctx.strokeStyle='#00695C'; ctx.lineWidth=2.5;
+  ctx.beginPath();
+  if(sekil==='kare') ctx.rect(cx-r*0.8,cy-r*0.8,r*1.6,r*1.6);
+  else if(sekil==='daire') ctx.arc(cx,cy,r*0.85,0,Math.PI*2);
+  else if(sekil==='dikdörtgen') ctx.rect(cx-r,cy-r*0.58,r*2,r*1.16);
+  else { ctx.moveTo(cx,cy-r*0.9); ctx.lineTo(cx+r*0.85,cy+r*0.7); ctx.lineTo(cx-r*0.85,cy+r*0.7); ctx.closePath(); }
+  ctx.fill(); ctx.stroke();
+  // Çizgi
+  ctx.save();
+  ctx.strokeStyle=dogruCizgi?'#2E7D32':'#C62828'; ctx.lineWidth=3; ctx.setLineDash([7,5]);
+  ctx.beginPath();
+  if(dogruCizgi){ ctx.moveTo(cx,cy-r*1.25); ctx.lineTo(cx,cy+r*1.15); }
+  else { ctx.moveTo(cx-r*1.25,cy-r*0.95); ctx.lineTo(cx+r*1.25,cy+r*0.95); }
+  ctx.stroke(); ctx.setLineDash([]); ctx.restore();
+  return c;
+}
+
+/* ===== 1. KONUM BELİRTME ===== */
+function etkKonum(){
+  const yerler=[
+    {ad:'okul',x:0.22,y:0.24},{ad:'market',x:0.76,y:0.24},
+    {ad:'park',x:0.22,y:0.78},{ad:'hastane',x:0.76,y:0.78}
+  ];
+  const a=pick(yerler);
+  let b; do{ b=pick(yerler); }while(b.ad===a.ad);
+  // a'nın b'ye göre konumu
+  const yatay = a.x<b.x ? 'solunda' : (a.x>b.x ? 'sağında' : null);
+  const dikey = a.y<b.y ? 'üstünde' : (a.y>b.y ? 'altında' : null);
+  const dogru = pick([yatay,dikey].filter(Boolean));
+  const g=krokiCiz(a.ad); g.style.width='230px'; g.style.height='153px';
+  return{
+    yonerge:'Krokiye bak: '+a.ad+', '+b.ad+'\u2019in neresindedir?',
+    secenek:shuffle([dogru,...shuffle(['solunda','sağında','üstünde','altında'].filter(x=>x!==dogru)).slice(0,2)]),
+    dogru,
+    ustGorsel:g, ciz:t=>metinKarti(t,19),
+    ipucu:'Krokide yerleri karşılaştırırken sağ-sol ve üst-alt yönlerine bakarız.'
+  };
+}
+
+/* ===== 2. KROKİ OKUMA ===== */
+function etkKroki(){
+  const sorular=[
+    {s:'Kroki nedir?',c:'Bir yerin kuşbakışı basit çizimi',
+     y:['Bir hikâye','Bir sayı tablosu'],
+     e:'Kroki, bir yerin yukarıdan (kuşbakışı) görünüşünün basitçe çizilmiş hâlidir.'},
+    {s:'Kroki ne işe yarar?',c:'Bir yeri kolayca bulmamıza yarar',
+     y:['Zamanı ölçer','Ağırlığı gösterir'],
+     e:'Kroki sayesinde bir yerin nerede olduğunu ve nasıl gidileceğini anlarız.'},
+    {s:'Krokide yerler nasıl görünür?',c:'Yukarıdan bakılmış gibi',
+     y:['Yandan bakılmış gibi','Alttan bakılmış gibi'],
+     e:'Krokide her şeye kuşbakışı, yani yukarıdan bakılır.'},
+    {s:'Okula giderken yol tarif etmek için ne kullanabiliriz?',c:'Kroki',
+     y:['Terazi','Cetvel'],
+     e:'Yol tarifi için kroki çizmek en kolay yoldur.'}
+  ];
+  const it=pick(sorular);
+  return{
+    yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ustGorsel:(()=>{const c=krokiCiz(null);c.style.width='230px';c.style.height='153px';return c;})(),
+    ciz:t=>metinKarti(t,14), ipucu:it.e
+  };
+}
+
+/* ===== 3. KODLAMA — yol bul ===== */
+function etkKodlama(){
+  const sut=4, sat=4;
+  const bx=rnd(0,sut-1), by=rnd(0,sat-1);
+  let hx,hy,dene=0;
+  do{ hx=rnd(0,sut-1); hy=rnd(0,sat-1); dene++; }
+  while((hx===bx&&hy===by)||(Math.abs(hx-bx)+Math.abs(hy-by))<2 && dene<40);
+  // Doğru yol: önce yatay sonra dikey
+  const yol=[];
+  for(let i=0;i<Math.abs(hx-bx);i++) yol.push(hx>bx?'sağa':'sola');
+  for(let i=0;i<Math.abs(hy-by);i++) yol.push(hy>by?'aşağı':'yukarı');
+  const hedefCh=pick(['🎯','🏠','🍎','⭐']);
+  const g=izgaraCiz(sut,sat,[bx,by],[hx,hy],null,hedefCh);
+  g.style.width='236px';
+  // Çeldirici yollar
+  const yanlis=new Set();
+  let d=0;
+  while(yanlis.size<2&&d++<40){
+    const y2=[...yol];
+    const i=rnd(0,y2.length-1);
+    y2[i]=pick(Object.keys(OK).filter(x=>x!==y2[i]));
+    const s=y2.map(x=>OK[x]).join(' ');
+    if(s!==yol.map(x=>OK[x]).join(' ')) yanlis.add(s);
+  }
+  const dogruStr=yol.map(x=>OK[x]).join(' ');
+  return{
+    yonerge:'Civciv hedefe ulaşmak için nasıl ilerlemelidir?',
+    secenek:shuffle([dogruStr,...yanlis]), dogru:dogruStr,
+    ustGorsel:g,
+    ciz:t=>{const{c,ctx,W,H}=sahne(148,86);
+      ctx.save(); ctx.fillStyle='#E65100'; ctx.font='700 24px Fredoka,Arial';
+      ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(t,W/2,H/2);
+      ctx.restore(); return c;},
+    ipucu:'Önce yatay (sağa/sola), sonra dikey (yukarı/aşağı) ilerle.\n'+
+          'Doğru yol: '+yol.map(x=>OK[x]+' '+x).join(', ')
+  };
+}
+
+/* ===== 4. KODLAMA — yolu takip et ===== */
+function etkKodTakip(){
+  const sut=4, sat=4;
+  const bx=rnd(0,sut-1), by=rnd(0,sat-1);
+  const adim=rnd(2,3);
+  const yol=[]; let cx=bx, cy=by;
+  for(let i=0;i<adim;i++){
+    const secenekler=[];
+    if(cy>0) secenekler.push('yukarı');
+    if(cy<sat-1) secenekler.push('aşağı');
+    if(cx>0) secenekler.push('sola');
+    if(cx<sut-1) secenekler.push('sağa');
+    const y=pick(secenekler); yol.push(y);
+    if(y==='yukarı')cy--; else if(y==='aşağı')cy++;
+    else if(y==='sola')cx--; else cx++;
+  }
+  const g=izgaraCiz(sut,sat,[bx,by],[cx,cy],yol,'🎯');
+  g.style.width='236px';
+  // Satır-sütun ifadesiyle cevap
+  const dogru=(cy+1)+'. satır, '+(cx+1)+'. sütun';
+  const yanlis=new Set();
+  let d=0;
+  while(yanlis.size<2&&d++<40){
+    const r=rnd(1,sat), k=rnd(1,sut);
+    const s=r+'. satır, '+k+'. sütun';
+    if(s!==dogru) yanlis.add(s);
+  }
+  return{
+    yonerge:'Civciv okları takip etti. Hangi kareye ulaştı?',
+    secenek:shuffle([dogru,...yanlis]), dogru,
+    ustGorsel:g, ciz:t=>metinKarti(t,15),
+    ipucu:'Yönergeler: '+yol.map(x=>OK[x]+' '+x).join(', ')+
+          '\nSatırlar yukarıdan, sütunlar soldan sayılır.'
+  };
+}
+
+/* ===== 5. SİMETRİ KAVRAMI ===== */
+function etkSimetriKavram(){
+  const sorular=[
+    {s:'Bir şekil ortadan katlandığında iki parça tam üst üste geliyorsa ne denir?',
+     c:'Simetriktir',y:['Eşit değildir','Büyüktür'],
+     e:'Katlandığında iki parçası tam olarak üst üste gelen şekiller SİMETRİKTİR.'},
+    {s:'Katlama çizgisine ne ad verilir?',c:'Simetri çizgisi',
+     y:['Kenar','Köşe'],
+     e:'Şekli iki eş parçaya ayıran çizgiye SİMETRİ ÇİZGİSİ denir.'},
+    {s:'Simetrik bir şeklin iki parçası nasıldır?',c:'Birbirinin aynısı (eş)',
+     y:['Farklı büyüklükte','Farklı renkte'],
+     e:'Simetri çizgisinin sağındaki ve solundaki parçalar birbirinin eşidir.'},
+    {s:'Aynaya baktığında görüntün nasıldır?',c:'Simetriktir',
+     y:['Bambaşkadır','Daha büyüktür'],
+     e:'Ayna görüntüsü simetriktir. Sağ elimiz aynada sol gibi görünür.'},
+    {s:'Kelebeğin kanatları neden simetriktir?',c:'İki kanadı birbirinin eşidir',
+     y:['Renkleri farklıdır','Biri büyüktür'],
+     e:'Kelebeği ortadan katlarsak iki kanadı tam üst üste gelir.'}
+  ];
+  const it=pick(sorular);
+  return{
+    yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ciz:t=>metinKarti(t,15), ipucu:it.e
+  };
+}
+
+/* ===== 6. SİMETRİK Mİ DEĞİL Mİ ===== */
+function etkSimetrikMi(){
+  const dogruMu=rnd(0,1)===0;
+  const tip=pick(['kelebek','kalp','yaprak','ev']);
+  const g=simetriCiz(tip,dogruMu); g.style.width='195px'; g.style.height='137px';
+  return{
+    yonerge:'Bu şeklin iki parçası birbirinin eşi midir?',
+    secenek:['Evet, simetriktir','Hayır, simetrik değildir'],
+    dogru:dogruMu?'Evet, simetriktir':'Hayır, simetrik değildir',
+    ustGorsel:g, ciz:t=>metinKarti(t,14),
+    ipucu:dogruMu
+      ? 'Çizginin iki yanındaki parçalar birbirinin aynısı. Katlanırsa tam üst üste gelir.'
+      : 'İki parça aynı değil. Katlanırsa üst üste gelmez, bu yüzden simetrik değildir.'
+  };
+}
+
+/* ===== 7. SİMETRİ ÇİZGİSİ DOĞRU MU ===== */
+function etkSimetriCizgisi(){
+  const sekil=pick(['kare','daire','dikdörtgen','üçgen']);
+  const dogruCizgi=rnd(0,1)===0;
+  const g=cizgiTestCiz(sekil,dogruCizgi); g.style.width='168px'; g.style.height='138px';
+  return{
+    yonerge:'Çizilen çizgi bir SİMETRİ ÇİZGİSİ midir?',
+    secenek:['Evet, simetri çizgisidir','Hayır, değildir'],
+    dogru:dogruCizgi?'Evet, simetri çizgisidir':'Hayır, değildir',
+    ustGorsel:g, ciz:t=>metinKarti(t,14),
+    ipucu:dogruCizgi
+      ? 'Bu çizgiden katlarsak iki parça tam üst üste gelir. Bu bir simetri çizgisidir.'
+      : 'Bu çizgiden katlarsak parçalar üst üste gelmez. Simetri çizgisi değildir.'
+  };
+}
+
+/* ===== 8. KAÇ SİMETRİ ÇİZGİSİ VAR ===== */
+function etkKacCizgi(){
+  const sekiller=[
+    {ad:'kare',sayi:4,ne:'Karenin 4 simetri çizgisi vardır: dikey, yatay ve iki köşegen.'},
+    {ad:'dikdörtgen',sayi:2,ne:'Dikdörtgenin 2 simetri çizgisi vardır: dikey ve yatay.'},
+    {ad:'eşkenar üçgen',sayi:3,ne:'Eşkenar üçgenin 3 simetri çizgisi vardır.'}
+  ];
+  const it=pick(sekiller);
+  const w=distractors(String(it.sayi),()=>String(rnd(1,5)));
+  return{
+    yonerge:'"'+it.ad+'" şeklinin kaç simetri çizgisi vardır?',
+    secenek:shuffle([String(it.sayi),...w.slice(0,2)]), dogru:String(it.sayi),
+    ciz:t=>{const{c,ctx,W,H}=sahne(148,86);
+      ctx.save(); ctx.fillStyle='#37474F'; ctx.font='700 34px Fredoka,Arial';
+      ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(t,W/2,H/2);
+      ctx.restore(); return c;},
+    ipucu:it.ne+'\nBir şekli katladığımızda iki parça üst üste geliyorsa o çizgi simetri çizgisidir.'
+  };
+}
+
+initEtkinlik([etkKonum,etkKroki,etkKodlama,etkKodTakip,
+              etkSimetriKavram,etkSimetrikMi,etkSimetriCizgisi,etkKacCizgi],
+  {ad:'Yer, Yön ve Simetri',c1:'#a8edea',c2:'#fed6e3',koyu:'#00695C',orta:'#26A69A',acik:'#E0F2F1'});
+</script>
+</body>
+</html>
