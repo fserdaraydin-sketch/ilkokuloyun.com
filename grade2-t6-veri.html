@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Veri ve Grafik - 2. Sınıf Matematik</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="grade1-style.css">
+<script defer src="analytics.js"></script>
+</head>
+<body>
+<div class="kutu">
+  <div class="baslik"><h1>📊 Veri ve Grafik</h1><p>6. Tema · Çetele, sıklık tablosu, nesne grafiği</p></div>
+  <div class="ilerleme"><div class="ilerleme-dolu" id="ilerlemeDolu"></div></div>
+  <div class="yildizlar" id="yildizlar"></div>
+  <div class="yonerge">
+    <span class="yonerge-metin" id="yonergeMetin">Hazırlanıyor...</span>
+    <button class="btn-ses" id="sesBtn" onclick="sesDegistir()" aria-label="Sesi aç kapat">🔊</button>
+  </div>
+  <div class="soru-gorsel" id="soruGorsel"></div>
+  <div class="secenekler" id="secenekler"></div>
+  <div class="geri" id="geri"></div>
+  <button class="btn-devam" id="devamBtn" onclick="tekrarDinle()">🔊 Tekrar Dinle</button>
+  <button class="btn-geri" onclick="history.back()">← Geri Dön</button>
+</div>
+<script src="grade1-engine.js"></script>
+<script>
+function metinKarti(t,b){
+  const{c,ctx,W,H}=sahne(148,92);
+  ctx.save(); ctx.fillStyle='#37474F'; ctx.font='600 '+(b||16)+'px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  const kel=t.split(' '); const sat=[]; let s='';
+  kel.forEach(k=>{ const d=s?s+' '+k:k;
+    if(ctx.measureText(d).width>130){ sat.push(s); s=k; } else s=d; });
+  if(s) sat.push(s);
+  const bas=H/2-(sat.length-1)*9.5;
+  sat.forEach((x,i)=>ctx.fillText(x,W/2,bas+i*19));
+  ctx.restore(); return c;
+}
+function sayiKarti(t){
+  const{c,ctx,W,H}=sahne(148,86);
+  ctx.save(); ctx.fillStyle='#37474F'; ctx.font='700 36px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(t,W/2,H/2); ctx.restore(); return c;
+}
+
+/* ============================================================
+   ÇETELE İŞARETİ — dörtlü gruplar, beşinci çapraz
+   ============================================================ */
+function ceteleCiz(ctx,x,y,adet,boy){
+  const b=boy||16, ara=5;
+  let cx=x;
+  ctx.strokeStyle='#37474F'; ctx.lineWidth=2.2; ctx.lineCap='round';
+  for(let i=0;i<adet;i++){
+    const grup=i%5;
+    if(grup===4){
+      // Beşinci: önceki dördünün üzerinden çapraz
+      ctx.beginPath();
+      ctx.moveTo(cx-4*ara-3,y+b); ctx.lineTo(cx-2,y);
+      ctx.stroke();
+      cx+=ara+4;
+    }else{
+      ctx.beginPath(); ctx.moveTo(cx,y); ctx.lineTo(cx,y+b); ctx.stroke();
+      cx+=ara;
+    }
+  }
+  return cx-x;
+}
+/* Çetele tablosu */
+function ceteleTablo(veriler){
+  const sat=veriler.length;
+  const W=258, H=26+sat*30;
+  const{c,ctx}=sahne(W,H);
+  ctx.fillStyle='#FFFDF6'; ctx.fillRect(0,0,W,H);
+  // Başlık
+  ctx.save(); ctx.fillStyle='#546E7A'; ctx.font='700 11px Fredoka,Arial';
+  ctx.textAlign='left'; ctx.textBaseline='middle';
+  ctx.fillText('NESNE',14,14); ctx.fillText('ÇETELE',88,14);
+  ctx.restore();
+  ctx.strokeStyle='#B0BEC5'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(8,22); ctx.lineTo(W-8,22); ctx.stroke();
+  veriler.forEach((v,i)=>{
+    const y=34+i*30;
+    emoji(ctx,v.ch,26,y+2,22);
+    ceteleCiz(ctx,88,y-6,v.adet,16);
+    ctx.strokeStyle='#ECEFF1'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(8,y+16); ctx.lineTo(W-8,y+16); ctx.stroke();
+  });
+  return c;
+}
+/* Sıklık tablosu — çetele + sayı */
+function siklikTablo(veriler,gizliIdx){
+  const sat=veriler.length;
+  const W=258, H=28+sat*30;
+  const{c,ctx}=sahne(W,H);
+  ctx.fillStyle='#FFFDF6'; ctx.fillRect(0,0,W,H);
+  ctx.save(); ctx.fillStyle='#546E7A'; ctx.font='700 11px Fredoka,Arial';
+  ctx.textAlign='left'; ctx.textBaseline='middle';
+  ctx.fillText('NESNE',14,14); ctx.fillText('ÇETELE',88,14); ctx.fillText('SIKLIK',200,14);
+  ctx.restore();
+  ctx.strokeStyle='#B0BEC5'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(8,22); ctx.lineTo(W-8,22); ctx.stroke();
+  veriler.forEach((v,i)=>{
+    const y=36+i*30;
+    emoji(ctx,v.ch,26,y+2,22);
+    ceteleCiz(ctx,88,y-6,v.adet,16);
+    ctx.save();
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    if(i===gizliIdx){
+      ctx.fillStyle='#FFF3E0'; ctx.strokeStyle='#FB8C00'; ctx.lineWidth=2.5;
+      ctx.beginPath(); ctx.roundRect(200,y-10,34,22,6); ctx.fill(); ctx.stroke();
+      ctx.fillStyle='#E65100'; ctx.font='700 16px Fredoka,Arial';
+      ctx.fillText('?',217,y+1);
+    }else{
+      ctx.fillStyle='#1565C0'; ctx.font='700 16px Fredoka,Arial';
+      ctx.fillText(String(v.adet),217,y+1);
+    }
+    ctx.restore();
+    ctx.strokeStyle='#ECEFF1'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(8,y+16); ctx.lineTo(W-8,y+16); ctx.stroke();
+  });
+  return c;
+}
+/* Nesne grafiği — her nesne bir birim, dikey sütun */
+function nesneGrafik(veriler){
+  const enCok=Math.max(...veriler.map(v=>v.adet));
+  const sut=veriler.length;
+  const W=250, H=Math.min(190,52+enCok*20);
+  const{c,ctx}=sahne(W,H);
+  ctx.fillStyle='#FFFDF6'; ctx.fillRect(0,0,W,H);
+  const taban=H-26, gen=(W-24)/sut;
+  // Eksen
+  ctx.strokeStyle='#90A4AE'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(12,taban); ctx.lineTo(W-12,taban); ctx.stroke();
+  veriler.forEach((v,i)=>{
+    const cx=16+gen*i+gen/2;
+    for(let k=0;k<v.adet;k++) emoji(ctx,v.ch,cx,taban-10-k*20,17);
+    ctx.save(); ctx.fillStyle='#546E7A'; ctx.font='600 11px Fredoka,Arial';
+    ctx.textAlign='center'; ctx.textBaseline='top';
+    ctx.fillText(v.ad,cx,taban+6); ctx.restore();
+  });
+  return c;
+}
+
+const NESNELER=[
+  {ch:'🍎',ad:'elma'},{ch:'🍌',ad:'muz'},{ch:'🍇',ad:'üzüm'},
+  {ch:'🍓',ad:'çilek'},{ch:'🍊',ad:'portakal'},{ch:'🍐',ad:'armut'}
+];
+const SPOR=[
+  {ch:'⚽',ad:'futbol'},{ch:'🏀',ad:'basketbol'},
+  {ch:'🏐',ad:'voleybol'},{ch:'🎾',ad:'tenis'}
+];
+function veriUret(kac,enAz,enCok,havuz){
+  const secilen=shuffle([...(havuz||NESNELER)]).slice(0,kac);
+  const kullanilan=new Set();
+  return secilen.map(n=>{
+    let a, d=0;
+    do{ a=rnd(enAz,enCok); d++; }while(kullanilan.has(a)&&d<30);
+    kullanilan.add(a);
+    return {...n, adet:a};
+  });
+}
+
+/* ===== 1. ÇETELE OKUMA ===== */
+function etkCeteleOku(){
+  const veri=veriUret(3,2,9);
+  const hedef=pick(veri);
+  const g=ceteleTablo(veri); g.style.width='248px';
+  const w=distractors(String(hedef.adet),()=>String(rnd(1,12)));
+  return{
+    yonerge:hedef.ad.charAt(0).toLocaleUpperCase('tr')+hedef.ad.slice(1)+' için kaç çetele işareti var?',
+    secenek:shuffle([String(hedef.adet),...w.slice(0,2)]), dogru:String(hedef.adet),
+    ustGorsel:g, ciz:t=>sayiKarti(t),
+    ipucu:'Çetelede her çizgi 1 demektir. Beşinci çizgi önceki dördün üzerinden ÇAPRAZ çizilir.\n'+
+          hedef.ad+' için '+hedef.adet+' işaret var.'
+  };
+}
+
+/* ===== 2. ÇETELE YAZMA ===== */
+function etkCeteleYaz(){
+  const sayi=rnd(3,12);
+  const grup=Math.floor(sayi/5), kalan=sayi%5;
+  const dogru=(grup>0?grup+' tam beşli grup':'hiç beşli grup yok')+
+              (kalan>0?' ve '+kalan+' çizgi':'');
+  const yanlis=new Set(); let d=0;
+  while(yanlis.size<2&&d++<40){
+    const s2=rnd(3,12); if(s2===sayi) continue;
+    const g2=Math.floor(s2/5), k2=s2%5;
+    yanlis.add((g2>0?g2+' tam beşli grup':'hiç beşli grup yok')+(k2>0?' ve '+k2+' çizgi':''));
+  }
+  const{c,ctx,W,H}=sahne(250,70);
+  ctx.save(); ctx.fillStyle='#37474F'; ctx.font='700 30px Fredoka,Arial';
+  ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(String(sayi),W*0.22,H/2);
+  ctx.font='600 14px Fredoka,Arial'; ctx.fillStyle='#546E7A';
+  ctx.fillText('→',W*0.36,H/2); ctx.restore();
+  ceteleCiz(ctx,W*0.46,H/2-9,sayi,18);
+  c.style.width='240px'; c.style.height='68px';
+  return{
+    yonerge:'"'+sayi+'" sayısı çetele ile nasıl gösterilir?',
+    secenek:shuffle([dogru,...yanlis]), dogru,
+    ustGorsel:c, ciz:t=>metinKarti(t,13),
+    ipucu:'Çetelede çizgiler BEŞERLİ gruplanır. Beşinci çizgi diğer dördün üzerinden çapraz çizilir.\n'+
+          sayi+' = '+grup+' beşli grup + '+kalan+' çizgi'
+  };
+}
+
+/* ===== 3. SIKLIK TABLOSU ===== */
+function etkSiklik(){
+  const veri=veriUret(3,2,9);
+  const idx=rnd(0,veri.length-1);
+  const g=siklikTablo(veri,idx); g.style.width='248px';
+  const dogru=String(veri[idx].adet);
+  const w=distractors(dogru,()=>String(rnd(1,12)));
+  return{
+    yonerge:'Sıklık tablosunda "?" yerine hangi sayı gelmelidir?',
+    secenek:shuffle([dogru,...w.slice(0,2)]), dogru,
+    ustGorsel:g, ciz:t=>sayiKarti(t),
+    ipucu:'SIKLIK, bir şeyin kaç kez tekrarlandığını gösteren sayıdır.\n'+
+          'Çetele işaretlerini say: '+veri[idx].adet+' tane.'
+  };
+}
+
+/* ===== 4. NESNE GRAFİĞİ OKUMA ===== */
+function etkGrafikOku(){
+  const veri=veriUret(3,2,6,pick([NESNELER,SPOR]));
+  const g=nesneGrafik(veri); g.style.width='240px';
+  const tip=rnd(0,2);
+  if(tip===0){
+    const hedef=pick(veri);
+    const w=distractors(String(hedef.adet),()=>String(rnd(1,8)));
+    return{
+      yonerge:'Grafiğe göre '+hedef.ad+' kaç tanedir?',
+      secenek:shuffle([String(hedef.adet),...w.slice(0,2)]), dogru:String(hedef.adet),
+      ustGorsel:g, ciz:t=>sayiKarti(t),
+      ipucu:'Nesne grafiğinde her şekil 1 tane demektir. '+hedef.ad+' sütununu say: '+hedef.adet
+    };
+  }
+  if(tip===1){
+    const enCok=veri.reduce((a,b)=>b.adet>a.adet?b:a);
+    return{
+      yonerge:'Grafiğe göre en ÇOK olan hangisidir?',
+      secenek:shuffle(veri.map(v=>v.ad)), dogru:enCok.ad,
+      ustGorsel:g, ciz:t=>metinKarti(t,18),
+      ipucu:'En yüksek sütun en çok olanı gösterir: '+enCok.ad+' ('+enCok.adet+' tane)'
+    };
+  }
+  const enAz=veri.reduce((a,b)=>b.adet<a.adet?b:a);
+  return{
+    yonerge:'Grafiğe göre en AZ olan hangisidir?',
+    secenek:shuffle(veri.map(v=>v.ad)), dogru:enAz.ad,
+    ustGorsel:g, ciz:t=>metinKarti(t,18),
+    ipucu:'En kısa sütun en az olanı gösterir: '+enAz.ad+' ('+enAz.adet+' tane)'
+  };
+}
+
+/* ===== 5. GRAFİKTEN HESAPLAMA ===== */
+function etkGrafikHesap(){
+  const veri=veriUret(3,2,6,pick([NESNELER,SPOR]));
+  const g=nesneGrafik(veri); g.style.width='240px';
+  const tip=rnd(0,1);
+  if(tip===0){
+    const toplam=veri.reduce((a,b)=>a+b.adet,0);
+    const w=distractors(String(toplam),()=>String(Math.max(3,toplam+pick([-3,-2,-1,1,2,3]))));
+    return{
+      yonerge:'Grafikte toplam kaç tane var?',
+      secenek:shuffle([String(toplam),...w.slice(0,2)]), dogru:String(toplam),
+      ustGorsel:g, ciz:t=>sayiKarti(t),
+      ipucu:'Bütün sütunları toplarız: '+veri.map(v=>v.adet).join(' + ')+' = '+toplam
+    };
+  }
+  const [a,b]=shuffle([...veri]).slice(0,2);
+  const fark=Math.abs(a.adet-b.adet);
+  const cok=a.adet>b.adet?a:b, az=a.adet>b.adet?b:a;
+  const w=distractors(String(fark),()=>String(Math.max(0,fark+pick([-2,-1,1,2]))));
+  return{
+    yonerge:cok.ad+', '+az.ad+'\u2019dan kaç tane fazladır?',
+    secenek:shuffle([String(fark),...w.slice(0,2)]), dogru:String(fark),
+    ustGorsel:g, ciz:t=>sayiKarti(t),
+    ipucu:'İki sütunu karşılaştırıp farkı buluruz: '+cok.adet+' − '+az.adet+' = '+fark
+  };
+}
+
+/* ===== 6. ARAŞTIRMA SORUSU ===== */
+function etkArastirma(){
+  const sorular=[
+    {s:'Hangisi bir araştırma sorusudur?',c:'Sınıfımızda en çok sevilen meyve hangisidir?',
+     y:['Bugün hava nasıl?','Adın ne?'],
+     e:'Araştırma sorusu, VERİ TOPLAYARAK cevaplanabilen sorudur. Cevabı için herkese sormak gerekir.'},
+    {s:'Araştırma sorusunu cevaplamak için ne yaparız?',c:'Veri toplarız',
+     y:['Tahmin ederiz','Bekleriz'],
+     e:'Önce soruyu sorarız, sonra herkesten cevap alarak veri toplarız.'},
+    {s:'Topladığımız verileri nereye yazarız?',c:'Çetele ve sıklık tablosuna',
+     y:['Deftere karalayarak','Hiçbir yere'],
+     e:'Verileri düzenli kaydetmek için çetele tablosu kullanırız.'},
+    {s:'Veri toplarken kimlere sorarız?',c:'Araştırmamızla ilgili herkese',
+     y:['Sadece bir kişiye','Hiç kimseye'],
+     e:'Doğru sonuç için ilgili herkese sormamız gerekir.'},
+    {s:'"Sınıfımızda kaç kişi kedi besliyor?" sorusu nedir?',c:'Bir araştırma sorusu',
+     y:['Bir matematik işlemi','Bir hikâye'],
+     e:'Cevabı veri toplayarak bulunabilen sorular araştırma sorusudur.'},
+    {s:'Veriler toplandıktan sonra ne yaparız?',c:'Tablo ve grafikle gösteririz',
+     y:['Unuturuz','Sadece aklımızda tutarız'],
+     e:'Verileri tablo ve grafiğe dönüştürünce sonuçları kolayca görürüz.'}
+  ];
+  const it=pick(sorular);
+  return{
+    yonerge:it.s, secenek:shuffle([it.c,...it.y]), dogru:it.c,
+    ciz:t=>metinKarti(t,13), ipucu:it.e
+  };
+}
+
+/* ===== 7. VERİYE DAYALI KARAR ===== */
+function etkKarar(){
+  const veri=veriUret(3,2,6,pick([NESNELER,SPOR]));
+  const enCok=veri.reduce((a,b)=>b.adet>a.adet?b:a);
+  const enAz=veri.reduce((a,b)=>b.adet<a.adet?b:a);
+  const g=nesneGrafik(veri); g.style.width='240px';
+  const durumlar=[
+    {s:'Sınıf için bir tane alınacak. Grafiğe göre hangisi alınmalı?',
+     c:enCok.ad,y:veri.filter(v=>v.ad!==enCok.ad).map(v=>v.ad),
+     e:'En çok tercih edilen '+enCok.ad+' ('+enCok.adet+' kişi). Karar verirken verilere bakarız.'},
+    {s:'Grafiğe göre en az tercih edilen hangisidir?',
+     c:enAz.ad,y:veri.filter(v=>v.ad!==enAz.ad).map(v=>v.ad),
+     e:'En kısa sütun '+enAz.ad+' ('+enAz.adet+' kişi).'}
+  ];
+  const it=pick(durumlar);
+  return{
+    yonerge:it.s, secenek:shuffle([it.c,...shuffle(it.y).slice(0,2)]), dogru:it.c,
+    ustGorsel:g, ciz:t=>metinKarti(t,18), ipucu:it.e
+  };
+}
+
+/* ===== 8. ÇETELE → GRAFİK ===== */
+function etkDonusum(){
+  const veri=veriUret(3,2,6);
+  const hedef=pick(veri);
+  const g=ceteleTablo(veri); g.style.width='248px';
+  const w=distractors(String(hedef.adet),()=>String(rnd(1,8)));
+  return{
+    yonerge:'Bu çetele tablosu grafiğe çevrilecek. '+hedef.ad+' sütununda kaç şekil olmalı?',
+    secenek:shuffle([String(hedef.adet),...w.slice(0,2)]), dogru:String(hedef.adet),
+    ustGorsel:g, ciz:t=>sayiKarti(t),
+    ipucu:'Çeteledeki her işaret grafikte bir şekle karşılık gelir.\n'+
+          hedef.ad+': '+hedef.adet+' işaret → '+hedef.adet+' şekil'
+  };
+}
+
+initEtkinlik([etkCeteleOku,etkCeteleYaz,etkSiklik,etkGrafikOku,
+              etkGrafikHesap,etkArastirma,etkKarar,etkDonusum],
+  {ad:'Veri ve Grafik',c1:'#a1c4fd',c2:'#c2e9fb',koyu:'#1565C0',orta:'#42A5F5',acik:'#E3F2FD'});
+</script>
+</body>
+</html>
