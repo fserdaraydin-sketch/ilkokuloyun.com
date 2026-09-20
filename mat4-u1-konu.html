@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1. Ünite Konu Anlatımı - 4. Sınıf Matematik</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script defer src="analytics.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Fredoka',Arial,sans-serif;
+  background:linear-gradient(170deg,#4527A0 0%,#7B1FA2 100%);
+  min-height:100vh;padding:14px;display:flex;justify-content:center}
+.kutu{background:#fff;border-radius:26px;padding:20px;max-width:780px;width:100%;
+  box-shadow:0 20px 50px rgba(0,0,0,.28)}
+
+.baslik{text-align:center;margin-bottom:14px}
+.baslik h1{font-size:24px;font-weight:700;color:#6A1B9A}
+.baslik p{color:#78909C;font-size:14px;margin-top:3px}
+
+.sekmeler{display:flex;gap:7px;overflow-x:auto;padding-bottom:9px;margin-bottom:16px}
+.sekme{flex-shrink:0;padding:10px 15px;border-radius:16px;border:2.5px solid #E1BEE7;
+  background:#fff;font-family:inherit;font-weight:600;font-size:14px;color:#6A1B9A;cursor:pointer}
+.sekme.aktif{background:#6A1B9A;border-color:#6A1B9A;color:#fff}
+
+h2{font-size:20px;font-weight:700;color:#4A148C;margin:22px 0 10px;
+  display:flex;align-items:center;gap:8px}
+h2:first-child{margin-top:0}
+h3{font-size:16.5px;font-weight:700;color:#6A1B9A;margin:18px 0 7px}
+p{font-size:16px;line-height:1.72;color:#37474F;margin-bottom:10px}
+ul{margin:4px 0 12px 6px;list-style:none}
+li{font-size:15.5px;line-height:1.75;color:#37474F;padding-left:22px;position:relative;margin-bottom:3px}
+li::before{content:'▸';position:absolute;left:3px;color:#AB47BC;font-weight:700}
+
+.gorsel{display:flex;justify-content:center;margin:14px 0}
+.gorsel canvas{border:3px solid #F3E5F5;border-radius:18px;max-width:100%;height:auto}
+
+.tanim{background:linear-gradient(135deg,#F3E5F5,#EDE7F6);border-left:5px solid #6A1B9A;
+  border-radius:0 14px 14px 0;padding:13px 16px;margin:12px 0}
+.tanim b{color:#4A148C}
+.dikkat{background:#FFF8E1;border-left:5px solid #FFA000;border-radius:0 14px 14px 0;
+  padding:13px 16px;margin:12px 0}
+.dikkat b{color:#E65100}
+.ornek{background:#E8F5E9;border-left:5px solid #43A047;border-radius:0 14px 14px 0;
+  padding:13px 16px;margin:12px 0}
+.ornek b{color:#1B5E20}
+
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14.5px}
+th{background:#6A1B9A;color:#fff;padding:9px 10px;text-align:left;font-weight:600}
+th:first-child{border-radius:10px 0 0 0}
+th:last-child{border-radius:0 10px 0 0}
+td{padding:9px 10px;border-bottom:1px solid #F3E5F5;color:#37474F}
+tr:nth-child(even) td{background:#FAF5FB}
+
+.ozet{background:linear-gradient(135deg,#6A1B9A,#8E24AA);color:#fff;border-radius:18px;
+  padding:18px;margin:20px 0}
+.ozet h3{color:#fff;margin-top:0}
+.ozet li{color:#F3E5F5}
+.ozet li::before{color:#CE93D8}
+
+.btn-dinle{width:100%;padding:13px;border:2.5px solid #6A1B9A;border-radius:16px;
+  background:#fff;color:#6A1B9A;font-family:inherit;font-weight:600;font-size:15px;
+  cursor:pointer;margin-bottom:14px}
+.btn-test{display:block;width:100%;padding:16px;border:none;border-radius:18px;
+  background:linear-gradient(135deg,#43A047,#66BB6A);color:#fff;font-family:inherit;
+  font-weight:600;font-size:17px;cursor:pointer;margin-top:18px;text-align:center;
+  text-decoration:none}
+.btn-geri{width:100%;padding:14px;background:transparent;color:#90A4AE;
+  border:2.5px solid #F3E5F5;border-radius:16px;font-family:inherit;font-weight:600;
+  font-size:15px;cursor:pointer;margin-top:10px}
+@media(max-width:600px){
+  .kutu{padding:15px}.baslik h1{font-size:19px}
+  h2{font-size:17px}h3{font-size:15px}p{font-size:15px}li{font-size:14.5px}
+  table{font-size:12.5px}th,td{padding:6px 7px}
+}
+</style>
+</head>
+<body>
+<div class="kutu">
+  <div class="baslik">
+    <h1>🔢 1. Ünite: Doğal Sayılar</h1>
+    <p>4. Sınıf Matematik · Konu Anlatımı</p>
+  </div>
+  <div class="sekmeler" id="sekmeler"></div>
+  <button class="btn-dinle" onclick="bolumuOku()">🔊 Bu bölümü dinle</button>
+  <div id="icerik"></div>
+  <a class="btn-test" href="grade4-unite1-sayilar.html">✏️ Şimdi Test Et — Aşamalar</a>
+  <button class="btn-geri" onclick="history.back()">← Geri Dön</button>
+</div>
+
+<script>
+/* ---------- ÇİZİM YARDIMCILARI ---------- */
+function yeniCanvas(g,h){
+  const c=document.createElement('canvas');
+  const dpr=Math.min(devicePixelRatio||1,2);
+  c.width=g*dpr; c.height=h*dpr;
+  c.style.width=g+'px'; c.style.height=h+'px';
+  const x=c.getContext('2d'); x.scale(dpr,dpr);
+  x.fillStyle='#FFFDF8'; x.fillRect(0,0,g,h);
+  return {c,ctx:x,W:g,H:h};
+}
+function yaz(ctx,t,x,y,b,renk,hiza){
+  ctx.save(); ctx.fillStyle=renk||'#37474F';
+  ctx.font=(b||12)+'px Fredoka,Arial'; ctx.textAlign=hiza||'center';
+  ctx.textBaseline='middle'; ctx.fillText(t,x,y); ctx.restore();
+}
+function kalinYaz(ctx,t,x,y,b,renk,hiza){
+  ctx.save(); ctx.fillStyle=renk||'#37474F';
+  ctx.font='700 '+(b||12)+'px Fredoka,Arial'; ctx.textAlign=hiza||'center';
+  ctx.textBaseline='middle'; ctx.fillText(t,x,y); ctx.restore();
+}
+
+/* ---------- 1) BASAMAK VE BÖLÜK TABLOSU ---------- */
+function cizBasamakTablo(){
+  const{c,ctx,W,H}=yeniCanvas(340,168);
+  const sayi='548392';
+  const basliklar=['Yüz\nBinler','On\nBinler','Binler','Yüzler','Onlar','Birler'];
+  const kw=54, x0=(W-kw*6)/2, y0=44;
+  // Bölük fonları
+  ctx.fillStyle='#EDE7F6'; ctx.fillRect(x0,y0,kw*3,58);         // binler bölüğü
+  ctx.fillStyle='#F3E5F5'; ctx.fillRect(x0+kw*3,y0,kw*3,58);    // birler bölüğü
+  for(let i=0;i<6;i++){
+    const x=x0+i*kw;
+    ctx.strokeStyle='#CE93D8'; ctx.lineWidth=1.6;
+    ctx.strokeRect(x,y0,kw,58);
+    const sat=basliklar[i].split('\n');
+    sat.forEach((s,j)=>yaz(ctx,s,x+kw/2,y0-24+j*12,10.5,'#6A1B9A'));
+    kalinYaz(ctx,sayi[i],x+kw/2,y0+29,24,'#4A148C');
+  }
+  // Bölük etiketleri altta
+  kalinYaz(ctx,'BİNLER BÖLÜĞÜ',x0+kw*1.5,y0+80,12,'#8E24AA');
+  kalinYaz(ctx,'BİRLER BÖLÜĞÜ',x0+kw*4.5,y0+80,12,'#AB47BC');
+  // Bölük ayracı
+  ctx.strokeStyle='#6A1B9A'; ctx.lineWidth=2.5; ctx.setLineDash([5,4]);
+  ctx.beginPath(); ctx.moveTo(x0+kw*3,y0-6); ctx.lineTo(x0+kw*3,y0+64); ctx.stroke();
+  ctx.setLineDash([]);
+  yaz(ctx,'548 392 → "beş yüz kırk sekiz bin üç yüz doksan iki"',W/2,y0+108,11.5,'#546E7A');
+  return c;
+}
+
+/* ---------- 2) BASAMAK DEĞERİ vs SAYI DEĞERİ ---------- */
+function cizBasamakSayiDegeri(){
+  const{c,ctx,W,H}=yeniCanvas(320,150);
+  const sayi='3254', basamaklar=['Binler','Yüzler','Onlar','Birler'];
+  const sayiDeg=[3,2,5,4], basDeg=[3000,200,50,4];
+  const kw=64, x0=(W-kw*4)/2, y0=30;
+  for(let i=0;i<4;i++){
+    const x=x0+i*kw, vurgu=(i===1);
+    ctx.fillStyle=vurgu?'#FFF3E0':'#F3E5F5';
+    ctx.strokeStyle=vurgu?'#FB8C00':'#CE93D8'; ctx.lineWidth=vurgu?2.5:1.6;
+    ctx.beginPath(); ctx.roundRect(x+4,y0,kw-8,42,8); ctx.fill(); ctx.stroke();
+    kalinYaz(ctx,sayi[i],x+kw/2,y0+21,22,vurgu?'#E65100':'#4A148C');
+    yaz(ctx,basamaklar[i],x+kw/2,y0-12,10.5,'#78909C');
+  }
+  yaz(ctx,'Yüzler basamağındaki RAKAM:',W/2,y0+66,12,'#37474F');
+  kalinYaz(ctx,'2  (sayı değeri)',W/2,y0+86,14,'#1565C0');
+  yaz(ctx,'Bu rakamın o basamaktaki DEĞERİ:',W/2,y0+110,12,'#37474F');
+  kalinYaz(ctx,'200  (basamak değeri)',W/2,y0+130,14,'#E65100');
+  return c;
+}
+
+/* ---------- 3) ABAKÜS ---------- */
+function cizAbakus(){
+  const{c,ctx,W,H}=yeniCanvas(320,178);
+  const boncuklar=[3,0,4,1,5,2]; // Yüzbinler..Birler
+  const basliklar=['YB','OB','B','Y','O','Bir'];
+  const cw=48, x0=(W-cw*6)/2, tepe=20, taban=130;
+  ctx.strokeStyle='#8D6E63'; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(x0-10,taban); ctx.lineTo(x0+cw*6+10,taban); ctx.stroke();
+  for(let i=0;i<6;i++){
+    const x=x0+i*cw+cw/2;
+    ctx.strokeStyle='#A1887F'; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.moveTo(x,tepe); ctx.lineTo(x,taban); ctx.stroke();
+    for(let b=0;b<boncuklar[i];b++){
+      ctx.fillStyle=i<3?'#7B1FA2':'#AB47BC';
+      ctx.beginPath(); ctx.arc(x,taban-16-b*17,9,0,7); ctx.fill();
+      ctx.strokeStyle='#4A148C'; ctx.lineWidth=1.2; ctx.stroke();
+    }
+    yaz(ctx,basliklar[i],x,taban+14,11,'#6A1B9A');
+  }
+  yaz(ctx,'304 152',W/2,H-14,14,'#4A148C');
+  return c;
+}
+
+/* ---------- 4) TABAN BLOKLARI ---------- */
+function cizTabanBlok(){
+  const{c,ctx,W,H}=yeniCanvas(320,140);
+  // binlik (küp gibi büyük kare), yüzlük, onluk, birlik
+  const konum=[
+    {x:14, ad:'1 BİNLİK', deg:'1000'},
+    {x:120,ad:'1 YÜZLÜK', deg:'100'},
+    {x:210,ad:'1 ONLUK',  deg:'10'},
+    {x:280,ad:'1 BİRLİK', deg:'1'}
+  ];
+  // Binlik: büyük kare ızgara 10x10 küçük kareden oluşur (basitleştirilmiş)
+  ctx.fillStyle='#7B1FA2'; ctx.strokeStyle='#4A148C'; ctx.lineWidth=1.5;
+  ctx.fillRect(14,20,74,74); ctx.strokeRect(14,20,74,74);
+  ctx.strokeStyle='rgba(255,255,255,.4)';
+  for(let i=1;i<10;i++){
+    ctx.beginPath(); ctx.moveTo(14+i*7.4,20); ctx.lineTo(14+i*7.4,94); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(14,20+i*7.4); ctx.lineTo(88,20+i*7.4); ctx.stroke();
+  }
+  // Yüzlük: 10x10 kare ızgara (küçük)
+  ctx.fillStyle='#AB47BC'; ctx.strokeStyle='#6A1B9A'; ctx.lineWidth=1.2;
+  ctx.fillRect(120,45,42,42); ctx.strokeRect(120,45,42,42);
+  ctx.strokeStyle='rgba(255,255,255,.5)';
+  for(let i=1;i<10;i++){
+    ctx.beginPath(); ctx.moveTo(120+i*4.2,45); ctx.lineTo(120+i*4.2,87); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(120,45+i*4.2); ctx.lineTo(162,45+i*4.2); ctx.stroke();
+  }
+  // Onluk: dikey çubuk
+  ctx.fillStyle='#CE93D8'; ctx.strokeStyle='#8E24AA'; ctx.lineWidth=1.2;
+  ctx.fillRect(210,45,10,42); ctx.strokeRect(210,45,10,42);
+  for(let i=1;i<10;i++){ ctx.strokeStyle='rgba(255,255,255,.6)';
+    ctx.beginPath(); ctx.moveTo(210,45+i*4.2); ctx.lineTo(220,45+i*4.2); ctx.stroke(); }
+  // Birlik: küçük kare
+  ctx.fillStyle='#F3E5F5'; ctx.strokeStyle='#8E24AA'; ctx.lineWidth=1.5;
+  ctx.fillRect(278,75,12,12); ctx.strokeRect(278,75,12,12);
+
+  const merkezX={ '1 BİNLİK':51, '1 YÜZLÜK':141, '1 ONLUK':215, '1 BİRLİK':284 };
+  konum.forEach(k=>{
+    const mx=merkezX[k.ad];
+    kalinYaz(ctx,k.ad,mx,115,10,'#4A148C');
+    yaz(ctx,'= '+k.deg,mx,129,10,'#78909C');
+  });
+  return c;
+}
+
+/* ---------- 5) SAYI DOĞRUSUNDA YUVARLAMA ---------- */
+function cizYuvarlama(sayi,birim,asagi,yukari){
+  const{c,ctx,W,H}=yeniCanvas(300,110);
+  const sol=30, sag=W-30, y=H*0.55;
+  ctx.strokeStyle='#8D6E63'; ctx.lineWidth=2.5; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(sol-10,y); ctx.lineTo(sag+10,y); ctx.stroke();
+  [[sol-10,-1],[sag+10,1]].forEach(([x,d])=>{
+    ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x-d*7,y-4);
+    ctx.moveTo(x,y); ctx.lineTo(x-d*7,y+4); ctx.stroke();
+  });
+  const oran=(sayi-asagi)/(yukari-asagi);
+  const px=sol+(sag-sol)*oran;
+  [[sol,asagi],[sag,yukari]].forEach(([x,v])=>{
+    ctx.strokeStyle='#6A1B9A'; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.moveTo(x,y-8); ctx.lineTo(x,y+8); ctx.stroke();
+    kalinYaz(ctx,String(v),x,y+24,13,'#4A148C');
+  });
+  // Sayı noktası
+  ctx.fillStyle='#E65100';
+  ctx.beginPath(); ctx.arc(px,y,6,0,7); ctx.fill();
+  ctx.strokeStyle='#BF360C'; ctx.lineWidth=1.5; ctx.stroke();
+  kalinYaz(ctx,String(sayi),px,y-20,14,'#E65100');
+  // En yakın olana ok
+  const yakinX = oran<0.5 ? sol : sag;
+  ctx.strokeStyle='#2E7D32'; ctx.lineWidth=2.5;
+  ctx.beginPath(); ctx.moveTo(px,y+34); ctx.lineTo(yakinX,y+34); ctx.stroke();
+  const okYon = yakinX>px?1:-1;
+  ctx.fillStyle='#2E7D32';
+  ctx.beginPath(); ctx.moveTo(yakinX,y+34); ctx.lineTo(yakinX-okYon*8,y+30); ctx.lineTo(yakinX-okYon*8,y+38); ctx.fill();
+  return c;
+}
+
+/* ---------- 6) ÖRÜNTÜ ---------- */
+function cizOruntu(){
+  const{c,ctx,W,H}=yeniCanvas(300,78);
+  const dizi=[3,7,11,15,19,'?'];
+  const kw=(W-16)/dizi.length;
+  dizi.forEach((v,i)=>{
+    const x=8+i*kw, bos=v==='?';
+    ctx.fillStyle=bos?'#FFF3E0':'#F3E5F5';
+    ctx.strokeStyle=bos?'#FB8C00':'#AB47BC'; ctx.lineWidth=bos?2.8:1.8;
+    ctx.beginPath(); ctx.roundRect(x+3,14,kw-8,44,10); ctx.fill(); ctx.stroke();
+    kalinYaz(ctx,String(v),x+kw/2-2,36,17,bos?'#E65100':'#4A148C');
+    if(i<dizi.length-1){
+      ctx.save(); ctx.fillStyle='#8E24AA'; ctx.font='600 9px Fredoka,Arial';
+      ctx.textAlign='center'; ctx.fillText('+4',x+kw-2,10); ctx.restore();
+    }
+  });
+  return c;
+}
+
+/* ============================================================
+   BÖLÜMLER
+   ============================================================ */
+const BOLUMLER=[
+ {id:'basamak', ad:'🔢 Basamak ve Bölük', icerik:()=>`
+   <h2>🔢 Basamak, Bölük ve Okunuş</h2>
+   <p>4. sınıfta 6 basamaklı sayılara kadar çalışırız. Büyük sayıları kolay
+   okuyabilmek için sayıları <b>3’er 3’er gruplara</b> ayırırız. Bu gruplara
+   <b>bölük</b> denir.</p>
+   <div class="gorsel" id="g-basamak"></div>
+
+   <h3>Basamak Adları (sağdan sola)</h3>
+   <ul>
+     <li>Birler, Onlar, Yüzler → <b>BİRLER BÖLÜĞÜ</b></li>
+     <li>Binler, On binler, Yüz binler → <b>BİNLER BÖLÜĞÜ</b></li>
+   </ul>
+
+   <h3>Bir Sayı Nasıl Okunur?</h3>
+   <p>Her bölüğü kendi içinde okuruz, binler bölüğünden sonra <b>"bin"</b>
+   kelimesini söyleriz.</p>
+   <div class="ornek">
+     <b>🧮 Örnek:</b> 548 392<br>
+     Binler bölüğü: 548 → "beş yüz kırk sekiz <b>bin</b>"<br>
+     Birler bölüğü: 392 → "üç yüz doksan iki"<br>
+     Tam okunuşu: <b>beş yüz kırk sekiz bin üç yüz doksan iki</b>
+   </div>
+
+   <div class="dikkat">
+     <b>⚠️ Sık yapılan hata:</b> Binler bölüğü <b>100</b> olsa bile
+     "yüz bin" değil, tam olarak <b>bölükteki sayı + bin</b> okunur.
+     Örnek: 100 245 → "yüz bin iki yüz kırk beş" (100 → "yüz", sonra "bin").
+   </div>`},
+
+ {id:'deger', ad:'💠 Basamak Değeri', icerik:()=>`
+   <h2>💠 Basamak Değeri ve Sayı Değeri</h2>
+   <p>Bu iki kavram sınavlarda en çok karıştırılan konudur. İkisi de aynı
+   rakamla ilgilidir ama <b>anlamları farklıdır</b>.</p>
+   <div class="gorsel" id="g-deger"></div>
+
+   <div class="tanim">
+     <b>Sayı değeri:</b> Bir rakamın <b>tek başına</b> ifade ettiği değerdir.
+     Basamağı önemli değildir.
+   </div>
+   <div class="tanim">
+     <b>Basamak değeri:</b> Bir rakamın <b>bulunduğu basamağa göre</b>
+     kazandığı değerdir. Basamak değerini bulmak için rakamı, basamağındaki
+     sıfır sayısı kadar sıfırla çarparız.
+   </div>
+
+   <div class="ornek">
+     <b>🧮 Örnek:</b> 3254 sayısında yüzler basamağındaki rakam <b>2</b>’dir.<br>
+     • Sayı değeri: <b>2</b><br>
+     • Basamak değeri: 2 × 100 = <b>200</b>
+   </div>
+
+   <div class="dikkat">
+     <b>⚠️ Sık yapılan hata:</b> "Basamak değeri kaçtır?" sorusuna rakamın
+     kendisini (sayı değerini) yazmak. Basamak değeri her zaman
+     <b>o basamağa göre büyütülmüş</b> hâlidir.
+   </div>
+
+   <h3>Modelleme Araçları</h3>
+   <p>Sayıları somutlaştırmak için <b>abaküs</b> ve <b>taban blokları</b> kullanılır.</p>
+   <div class="gorsel" id="g-abakus"></div>
+   <p style="text-align:center;font-size:13px;color:#78909C;margin-top:-6px">
+     Abaküste her çubuktaki boncuk sayısı, o basamaktaki rakamı gösterir.</p>
+
+   <div class="gorsel" id="g-blok"></div>
+   <p style="text-align:center;font-size:13px;color:#78909C;margin-top:-6px">
+     Taban blokları: binlik küp, yüzlük kare, onluk çubuk, birlik küçük kare.</p>`},
+
+ {id:'yuvarlama', ad:'📏 Yuvarlama', icerik:()=>`
+   <h2>📏 En Yakın Onluğa, Yüzlüğe, Binliğe Yuvarlama</h2>
+   <p>Yuvarlama, bir sayıyı <b>yaklaşık</b> değeriyle ifade etmektir.
+   Sayı doğrusunda hangi çoklu sayıya daha yakınsa oraya yuvarlanır.</p>
+
+   <div class="tanim">
+     <b>Kural:</b> Yuvarlanacak basamağın <b>bir sağındaki</b> rakama bakılır.<br>
+     • O rakam <b>5 veya daha büyükse</b> → yukarı yuvarlanır<br>
+     • O rakam <b>5’ten küçükse</b> → aşağı yuvarlanır
+   </div>
+
+   <h3>Örnek: 7395 sayısını yuvarlayalım</h3>
+   <div class="gorsel" id="g-yuvarlama1"></div>
+   <p style="text-align:center;font-size:13px;color:#78909C;margin-top:-6px">
+     En yakın onluğa: onlar basamağının sağındaki rakam (5) → yukarı → <b>7400</b></p>
+
+   <div class="gorsel" id="g-yuvarlama2"></div>
+   <p style="text-align:center;font-size:13px;color:#78909C;margin-top:-6px">
+     En yakın yüzlüğe: yüzler basamağının sağındaki rakam (9) → yukarı → <b>7400</b></p>
+
+   <table>
+     <tr><th>Sayı</th><th>En yakın onluk</th><th>En yakın yüzlük</th><th>En yakın binlik</th></tr>
+     <tr><td>7395</td><td>7400</td><td>7400</td><td>7000</td></tr>
+     <tr><td>12948</td><td>12950</td><td>12900</td><td>13000</td></tr>
+     <tr><td>2673</td><td>2670</td><td>2700</td><td>3000</td></tr>
+   </table>
+
+   <div class="dikkat">
+     <b>⚠️ Sık yapılan hata:</b> Yuvarlarken <b>sadece bir basamağa</b> bakılır —
+     yuvarlanacak basamağın hemen sağındaki rakama. Diğer rakamlar yuvarlama
+     kararını etkilemez.
+   </div>
+
+   <div class="ornek">
+     <b>🧮 Örnek soru:</b> Bir sayı en yakın onluğa yuvarlandığında 1150
+     çıkıyor. Gerçek sayı 115_ ise boşluğa ne gelebilir?<br>
+     <b>Çözüm:</b> 1150’ye yuvarlanabilmesi için birler basamağı
+     <b>5, 6, 7, 8 veya 9</b> olabilir (1145–1149 aşağı, 1150–1154 zaten
+     1150’dir). Birler basamağı 5 ile 9 arası olmalı.
+   </div>`},
+
+ {id:'siralama', ad:'📊 Karşılaştırma ve Örüntü', icerik:()=>`
+   <h2>📊 Sayıları Karşılaştırma ve Sıralama</h2>
+   <div class="tanim">
+     <b>Adım 1:</b> Önce <b>basamak sayısına</b> bakılır. Basamak sayısı
+     fazla olan sayı her zaman daha büyüktür.<br>
+     <b>Adım 2:</b> Basamak sayıları eşitse, <b>en soldaki basamaktan</b>
+     başlanarak karşılaştırma yapılır.
+   </div>
+
+   <div class="ornek">
+     <b>🧮 Örnek:</b> 84 521 ile 84 512 karşılaştıralım.<br>
+     İkisi de 5 basamaklı. Soldan karşılaştır: 8=8, 4=4, 5=5, 2 ile 1 →
+     <b>2 &gt; 1</b>, bu yüzden <b>84 521 &gt; 84 512</b>
+   </div>
+
+   <h2>🔁 Sayı Örüntüleri</h2>
+   <p>Bir örüntüde sayılar belirli bir <b>kurala</b> göre artar ya da azalır.
+   Kuralı bulmak için ardışık iki terim arasındaki farka bakılır.</p>
+   <div class="gorsel" id="g-oruntu"></div>
+
+   <div class="ornek">
+     <b>🧮 Örnek:</b> 3, 7, 11, 15, 19, ...<br>
+     Fark: 7−3=4, 11−7=4 → kural: <b>her terime 4 ekleniyor</b><br>
+     Sıradaki terim: 19 + 4 = <b>23</b>
+   </div>
+
+   <h3>Ritmik Sayma</h3>
+   <p>4. sınıfta <b>yüzer</b> ve <b>biner</b> ileriye/geriye ritmik sayma
+   çalışılır.</p>
+   <div class="ornek">
+     <b>🧮 Örnek:</b> 40’tan başlayarak yüzer ileriye sayarsak:<br>
+     40 → 140 → 240 → 340 → 440 ...
+   </div>`},
+
+ {id:'ozet', ad:'📌 Özet', icerik:()=>`
+   <h2>📌 Ünite Özeti</h2>
+   <div class="ozet">
+     <h3>🔢 Basamak ve Bölük</h3>
+     <ul>
+       <li>6 basamağa kadar sayılar: <b>birler bölüğü</b> (B-O-Y) ve
+       <b>binler bölüğü</b> (Bin-OB-YB)</li>
+       <li>Okunuşta her bölük kendi içinde okunur, binler bölüğünden
+       sonra "bin" denir</li>
+     </ul>
+   </div>
+   <div class="ozet">
+     <h3>💠 Basamak Değeri</h3>
+     <ul>
+       <li><b>Sayı değeri:</b> rakamın kendisi</li>
+       <li><b>Basamak değeri:</b> rakam × (10, 100, 1000...)</li>
+       <li>Abaküs ve taban blokları ile modellenir</li>
+     </ul>
+   </div>
+   <div class="ozet">
+     <h3>📏 Yuvarlama</h3>
+     <ul>
+       <li>Yuvarlanacak basamağın <b>sağındaki rakama</b> bakılır</li>
+       <li>5 ve üzeri → yukarı, 5’ten küçük → aşağı</li>
+     </ul>
+   </div>
+   <div class="ozet">
+     <h3>📊 Karşılaştırma ve Örüntü</h3>
+     <ul>
+       <li>Önce basamak sayısı, sonra soldan sağa karşılaştırılır</li>
+       <li>Örüntüde ardışık terimler arasındaki fark kuralı verir</li>
+     </ul>
+   </div>
+
+   <h3>🎯 En Çok Karıştırılanlar</h3>
+   <table>
+     <tr><th>Yanlış</th><th>Doğru</th></tr>
+     <tr><td>Basamak değeri = rakamın kendisi</td><td>Basamak değeri = <b>rakam × basamağı</b></td></tr>
+     <tr><td>Yuvarlarken tüm sayıya bakılır</td><td>Sadece <b>bir sağdaki rakama</b> bakılır</td></tr>
+     <tr><td>100 245 → "yüz iki yüz kırk beş"</td><td>→ "yüz <b>bin</b> iki yüz kırk beş"</td></tr>
+     <tr><td>Basamak sayısı az olan büyük sanılır</td><td>Basamak sayısı <b>fazla</b> olan büyüktür</td></tr>
+   </table>`}
+];
+
+/* ---------- SESLENDİRME ---------- */
+function bolumuOku(){
+  if(!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const el=document.getElementById('icerik');
+  const metin=el.innerText.replace(/[🔢💠📏📊📌⚠️🧮▸🔁]/g,'').replace(/\s+/g,' ').trim();
+  const u=new SpeechSynthesisUtterance(metin);
+  u.lang='tr-TR'; u.rate=.92; u.pitch=1;
+  speechSynthesis.speak(u);
+}
+
+/* ---------- ARAYÜZ ---------- */
+let aktif=BOLUMLER[0].id;
+function sekmeleriCiz(){
+  const k=document.getElementById('sekmeler'); k.innerHTML='';
+  BOLUMLER.forEach(b=>{
+    const d=document.createElement('button');
+    d.className='sekme'+(b.id===aktif?' aktif':'');
+    d.textContent=b.ad;
+    d.onclick=()=>{ aktif=b.id;
+      if('speechSynthesis' in window) speechSynthesis.cancel();
+      sekmeleriCiz(); icerikCiz();
+      if(window.IO) IO.olay('mat-konu-anlatim',{bolum:b.id}); };
+    k.appendChild(d);
+  });
+}
+function icerikCiz(){
+  const b=BOLUMLER.find(x=>x.id===aktif);
+  document.getElementById('icerik').innerHTML=b.icerik();
+  const yerlesim={
+    'g-basamak':cizBasamakTablo,
+    'g-deger':cizBasamakSayiDegeri,
+    'g-abakus':cizAbakus,
+    'g-blok':cizTabanBlok,
+    'g-yuvarlama1':()=>cizYuvarlama(7395,10,7390,7400),
+    'g-yuvarlama2':()=>cizYuvarlama(7395,100,7300,7400),
+    'g-oruntu':cizOruntu
+  };
+  Object.entries(yerlesim).forEach(([id,fn])=>{
+    const el=document.getElementById(id);
+    if(el) el.appendChild(fn());
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+sekmeleriCiz(); icerikCiz();
+</script>
+</body>
+</html>
