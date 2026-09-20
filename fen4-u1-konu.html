@@ -285,28 +285,60 @@ function cizFosil(){
   return c;
 }
 
-/* ---------- 6) DÜNYA'NIN KATMANLARI ---------- */
+/* ---------- 6) DÜNYA'NIN KATMANLARI — çeyrek dilimi çıkarılmış kesit ---------- */
 function cizKatman(){
-  const{c,ctx,W,H}=yeniCanvas(300,190);
-  const cx=W*0.36, cy=H/2, r=78;
-  const kat=[
-    {r:1.00,renk:'#8D6E63',ad:'Yer kabuğu',aciklama:'En dıştaki ince katman'},
-    {r:0.74,renk:'#FF7043',ad:'Manto',aciklama:'Sıcak ve akışkan'},
-    {r:0.40,renk:'#FFCA28',ad:'Çekirdek',aciklama:'En sıcak iç kısım'}
+  const{c,ctx,W,H}=yeniCanvas(330,262);
+  const cx=W*0.40, cy=H*0.42, rOut=96;
+
+  // Dıştan içe: kabuk (ince), manto (kalın), dış çekirdek, iç çekirdek (katı merkez)
+  const katmanlar=[
+    {ad:'Yer kabuğu',   renk:'#8D6E63', kenar:'#4E342E', rBas:0.90, rBit:1.00},
+    {ad:'Manto',        renk:'#FF7043', kenar:'#BF360C', rBas:0.55, rBit:0.90},
+    {ad:'Dış çekirdek', renk:'#FFB300', kenar:'#E65100', rBas:0.26, rBit:0.55},
+    {ad:'İç çekirdek',  renk:'#FFF176', kenar:'#F9A825', rBas:0.00, rBit:0.26}
   ];
-  kat.forEach(k=>{
-    ctx.fillStyle=k.renk;
-    ctx.beginPath(); ctx.arc(cx,cy,r*k.r,0,7); ctx.fill();
-    ctx.strokeStyle='rgba(0,0,0,.2)'; ctx.lineWidth=1.5; ctx.stroke();
+  // Kesit: doğu (0°) ile güney (90°) arası dilim çıkarılmış — geri kalan 270° görünür
+  const kesimBas=Math.PI/2, kesimBit=Math.PI*2;
+
+  katmanlar.forEach(k=>{
+    const rD=rOut*k.rBit, rI=rOut*k.rBas;
+    ctx.beginPath();
+    ctx.arc(cx,cy,rD,kesimBas,kesimBit,false);
+    if(rI>0.5) ctx.arc(cx,cy,rI,kesimBit,kesimBas,true);
+    else ctx.lineTo(cx,cy);
+    ctx.closePath();
+    ctx.fillStyle=k.renk; ctx.fill();
+    ctx.strokeStyle=k.kenar; ctx.lineWidth=1.4; ctx.stroke();
   });
-  // Etiketler
-  kat.forEach((k,i)=>{
-    const y=cy-48+i*44;
-    ctx.strokeStyle='#78909C'; ctx.lineWidth=1.5;
-    ctx.beginPath(); ctx.moveTo(cx+r*(k.r-0.14),y); ctx.lineTo(W*0.70,y); ctx.stroke();
-    kalinYaz(ctx,k.ad,W*0.72,y-7,12.5,'#37474F','left');
-    yaz(ctx,k.aciklama,W*0.72,y+8,11,'#78909C','left');
+  // Kesim yüzeyini vurgulayan iki düz kenar
+  ctx.strokeStyle='rgba(0,0,0,.4)'; ctx.lineWidth=2.2;
+  [kesimBas,kesimBit].forEach(a=>{
+    ctx.beginPath(); ctx.moveTo(cx,cy);
+    ctx.lineTo(cx+Math.cos(a)*rOut, cy+Math.sin(a)*rOut); ctx.stroke();
   });
+  ctx.strokeStyle='#37474F'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.arc(cx,cy,rOut,kesimBas,kesimBit,false); ctx.stroke();
+
+  // Etiketler — sağ tarafta düz satırlar, her biri kendi renginde nokta ile
+  const etiketY=[H*0.10, H*0.10+22, H*0.10+44, H*0.10+66];
+  const tx=W*0.66;
+  katmanlar.forEach((k,i)=>{
+    const rMid=rOut*(k.rBas+k.rBit)/2;
+    // Bağlantı noktası: her katmanın üst-sağ (kesitten uzak) noktası
+    const a=-Math.PI*0.15;
+    const px=cx+Math.cos(a)*rMid, py=cy+Math.sin(a)*rMid;
+    ctx.strokeStyle='#B0BEC5'; ctx.lineWidth=1.2;
+    ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(tx-14,etiketY[i]); ctx.stroke();
+    ctx.fillStyle=k.kenar;
+    ctx.beginPath(); ctx.arc(px,py,2.8,0,7); ctx.fill();
+    ctx.fillStyle=k.kenar;
+    ctx.beginPath(); ctx.arc(tx-10,etiketY[i],3.2,0,7); ctx.fill();
+    kalinYaz(ctx,k.ad,tx,etiketY[i],12,'#263238','left');
+  });
+
+  // Yer kabuğunun ince olduğunu belirten not (canvas altında, taşmayan konumda)
+  yaz(ctx,'Yer kabuğu çok incedir!',cx,H-10,10.5,'#5D4037');
+
   return c;
 }
 
@@ -397,6 +429,13 @@ const BOLUMLER=[
    <p>Dünya’mızın üzerinde yaşadığımız en dış katmanına <b>yer kabuğu</b> denir.
    Yer kabuğu kayaçlardan oluşur.</p>
    <div class="gorsel" id="g-katman"></div>
+   <div class="tanim">
+     🔎 <b>Ekstra bilgi:</b> Kitabımız bu ünitede yalnızca "yer kabuğu" terimini kullanır.
+     Meraklısına: Dünya'mızın içi 4 katmandan oluşur —
+     <b>yer kabuğu</b> (en ince, en dıştaki katı katman), <b>manto</b> (kalın ve sıcak),
+     <b>dış çekirdek</b> (erimiş/sıvı metal) ve <b>iç çekirdek</b> (katı, en sıcak merkez).
+     Bu bilgi sınavda sorulmaz, sadece merak edenler içindir.
+   </div>
 
    <h3>Kayaç, Mineral ve Maden</h3>
    <div class="gorsel" id="g-kayac"></div>
