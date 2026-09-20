@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1. Ünite Konu Anlatımı - 4. Sınıf Fen Bilimleri</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script defer src="analytics.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Fredoka',Arial,sans-serif;
+  background:linear-gradient(170deg,#1e3c72 0%,#2a5298 100%);
+  min-height:100vh;padding:14px;display:flex;justify-content:center}
+.kutu{background:#fff;border-radius:26px;padding:20px;max-width:780px;width:100%;
+  box-shadow:0 20px 50px rgba(0,0,0,.28)}
+
+.baslik{text-align:center;margin-bottom:14px}
+.baslik h1{font-size:24px;font-weight:700;color:#1565C0}
+.baslik p{color:#78909C;font-size:14px;margin-top:3px}
+
+.sekmeler{display:flex;gap:7px;overflow-x:auto;padding-bottom:9px;margin-bottom:16px}
+.sekme{flex-shrink:0;padding:10px 15px;border-radius:16px;border:2.5px solid #BBDEFB;
+  background:#fff;font-family:inherit;font-weight:600;font-size:14px;color:#1565C0;cursor:pointer}
+.sekme.aktif{background:#1565C0;border-color:#1565C0;color:#fff}
+
+h2{font-size:20px;font-weight:700;color:#0D47A1;margin:22px 0 10px;
+  display:flex;align-items:center;gap:8px}
+h2:first-child{margin-top:0}
+h3{font-size:16.5px;font-weight:700;color:#1565C0;margin:18px 0 7px}
+p{font-size:16px;line-height:1.72;color:#37474F;margin-bottom:10px}
+ul{margin:4px 0 12px 6px;list-style:none}
+li{font-size:15.5px;line-height:1.75;color:#37474F;padding-left:22px;position:relative;margin-bottom:3px}
+li::before{content:'▸';position:absolute;left:3px;color:#42A5F5;font-weight:700}
+
+.gorsel{display:flex;justify-content:center;margin:14px 0}
+.gorsel canvas{border:3px solid #E3F2FD;border-radius:18px;max-width:100%;height:auto}
+
+.tanim{background:linear-gradient(135deg,#E3F2FD,#E1F5FE);border-left:5px solid #1565C0;
+  border-radius:0 14px 14px 0;padding:13px 16px;margin:12px 0}
+.tanim b{color:#0D47A1}
+.dikkat{background:#FFF8E1;border-left:5px solid #FFA000;border-radius:0 14px 14px 0;
+  padding:13px 16px;margin:12px 0}
+.dikkat b{color:#E65100}
+.ornek{background:#E8F5E9;border-left:5px solid #43A047;border-radius:0 14px 14px 0;
+  padding:13px 16px;margin:12px 0}
+.ornek b{color:#1B5E20}
+
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14.5px}
+th{background:#1565C0;color:#fff;padding:9px 10px;text-align:left;font-weight:600}
+th:first-child{border-radius:10px 0 0 0}
+th:last-child{border-radius:0 10px 0 0}
+td{padding:9px 10px;border-bottom:1px solid #E3F2FD;color:#37474F}
+tr:nth-child(even) td{background:#F8FBFF}
+
+.ozet{background:linear-gradient(135deg,#1565C0,#1E88E5);color:#fff;border-radius:18px;
+  padding:18px;margin:20px 0}
+.ozet h3{color:#fff;margin-top:0}
+.ozet li{color:#E3F2FD}
+.ozet li::before{color:#90CAF9}
+
+.btn-dinle{width:100%;padding:13px;border:2.5px solid #1565C0;border-radius:16px;
+  background:#fff;color:#1565C0;font-family:inherit;font-weight:600;font-size:15px;
+  cursor:pointer;margin-bottom:14px}
+.btn-test{display:block;width:100%;padding:16px;border:none;border-radius:18px;
+  background:linear-gradient(135deg,#43A047,#66BB6A);color:#fff;font-family:inherit;
+  font-weight:600;font-size:17px;cursor:pointer;margin-top:18px;text-align:center;
+  text-decoration:none}
+.btn-geri{width:100%;padding:14px;background:transparent;color:#90A4AE;
+  border:2.5px solid #E3F2FD;border-radius:16px;font-family:inherit;font-weight:600;
+  font-size:15px;cursor:pointer;margin-top:10px}
+@media(max-width:600px){
+  .kutu{padding:15px}.baslik h1{font-size:19px}
+  h2{font-size:17px}h3{font-size:15px}p{font-size:15px}li{font-size:14.5px}
+  table{font-size:13px}th,td{padding:7px 8px}
+}
+</style>
+</head>
+<body>
+<div class="kutu">
+  <div class="baslik">
+    <h1>🌍 1. Ünite: Yer Kabuğu ve Dünyamız</h1>
+    <p>4. Sınıf Fen Bilimleri · Konu Anlatımı</p>
+  </div>
+  <div class="sekmeler" id="sekmeler"></div>
+  <button class="btn-dinle" onclick="bolumuOku()">🔊 Bu bölümü dinle</button>
+  <div id="icerik"></div>
+  <a class="btn-test" href="grade4-fen-u1-dunya.html">✏️ Şimdi Test Et — 8 Aşama</a>
+  <button class="btn-geri" onclick="history.back()">← Geri Dön</button>
+</div>
+
+<script>
+/* ---------- ÇİZİM YARDIMCILARI ---------- */
+function yeniCanvas(g,h){
+  const c=document.createElement('canvas');
+  const dpr=Math.min(devicePixelRatio||1,2);
+  c.width=g*dpr; c.height=h*dpr;
+  c.style.width=g+'px'; c.style.height=h+'px';
+  const x=c.getContext('2d'); x.scale(dpr,dpr);
+  x.fillStyle='#FFFDF8'; x.fillRect(0,0,g,h);
+  return {c,ctx:x,W:g,H:h};
+}
+function yaz(ctx,t,x,y,b,renk,hiza){
+  ctx.save(); ctx.fillStyle=renk||'#37474F';
+  ctx.font=(b||12)+'px Fredoka,Arial'; ctx.textAlign=hiza||'center';
+  ctx.textBaseline='middle'; ctx.fillText(t,x,y); ctx.restore();
+}
+function kalinYaz(ctx,t,x,y,b,renk,hiza){
+  ctx.save(); ctx.fillStyle=renk||'#37474F';
+  ctx.font='700 '+(b||12)+'px Fredoka,Arial'; ctx.textAlign=hiza||'center';
+  ctx.textBaseline='middle'; ctx.fillText(t,x,y); ctx.restore();
+}
+
+/* ---------- 1) DÖNME VE DOLANMA ---------- */
+function cizDonmeDolanma(){
+  const{c,ctx,W,H}=yeniCanvas(340,220);
+  ctx.fillStyle='#0D1B3E'; ctx.fillRect(0,0,W,H);
+  // Yıldızlar
+  ctx.fillStyle='rgba(255,255,255,.6)';
+  for(let i=0;i<40;i++){ ctx.beginPath();
+    ctx.arc(Math.random()*W,Math.random()*H,Math.random()*1.3,0,7); ctx.fill(); }
+  // Güneş
+  const gx=W*0.22, gy=H*0.5;
+  const gr=ctx.createRadialGradient(gx,gy,4,gx,gy,30);
+  gr.addColorStop(0,'#FFF59D'); gr.addColorStop(1,'#F9A825');
+  ctx.fillStyle=gr; ctx.beginPath(); ctx.arc(gx,gy,26,0,7); ctx.fill();
+  kalinYaz(ctx,'GÜNEŞ',gx,gy+40,12,'#FFD54F');
+  // Yörünge
+  ctx.strokeStyle='rgba(255,255,255,.35)'; ctx.lineWidth=1.8; ctx.setLineDash([6,5]);
+  ctx.beginPath(); ctx.ellipse(gx,gy,W*0.52,H*0.36,0,0,7); ctx.stroke(); ctx.setLineDash([]);
+  // Dünya
+  const dx=gx+W*0.52, dy=gy;
+  ctx.fillStyle='#1E88E5'; ctx.beginPath(); ctx.arc(dx,dy,22,0,7); ctx.fill();
+  ctx.fillStyle='#43A047';
+  ctx.beginPath(); ctx.ellipse(dx-6,dy-6,9,6,0.4,0,7); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(dx+7,dy+6,7,5,-0.3,0,7); ctx.fill();
+  // Eksen
+  ctx.strokeStyle='#EF5350'; ctx.lineWidth=2; ctx.setLineDash([4,3]);
+  ctx.beginPath(); ctx.moveTo(dx,dy-32); ctx.lineTo(dx,dy+32); ctx.stroke(); ctx.setLineDash([]);
+  kalinYaz(ctx,'DÜNYA',dx,dy+46,12,'#90CAF9');
+  // Dönme oku (kendi ekseni)
+  ctx.strokeStyle='#FFD54F'; ctx.lineWidth=2.5;
+  ctx.beginPath(); ctx.arc(dx,dy,30,-0.6,1.4); ctx.stroke();
+  ctx.fillStyle='#FFD54F';
+  ctx.beginPath(); ctx.moveTo(dx+5,dy+30); ctx.lineTo(dx+12,dy+26); ctx.lineTo(dx+11,dy+34); ctx.fill();
+  yaz(ctx,'dönme · 24 saat',dx,dy-46,11.5,'#FFD54F');
+  // Dolanma oku
+  ctx.strokeStyle='#81C784'; ctx.lineWidth=2.5;
+  ctx.beginPath(); ctx.arc(gx,gy,W*0.52*0.62,-1.5,-0.55); ctx.stroke();
+  yaz(ctx,'dolanma · 365 gün 6 saat',W*0.52,H*0.12,11.5,'#A5D6A7');
+  return c;
+}
+
+/* ---------- 2) GECE - GÜNDÜZ ---------- */
+function cizGeceGunduz(){
+  const{c,ctx,W,H}=yeniCanvas(330,190);
+  ctx.fillStyle='#0D1B3E'; ctx.fillRect(0,0,W,H);
+  const gx=44, gy=H/2;
+  const gr=ctx.createRadialGradient(gx,gy,3,gx,gy,26);
+  gr.addColorStop(0,'#FFF59D'); gr.addColorStop(1,'#F9A825');
+  ctx.fillStyle=gr; ctx.beginPath(); ctx.arc(gx,gy,22,0,7); ctx.fill();
+  kalinYaz(ctx,'Güneş',gx,gy+36,11.5,'#FFD54F');
+  // Işınlar
+  ctx.strokeStyle='rgba(255,213,79,.55)'; ctx.lineWidth=2;
+  for(let i=-2;i<=2;i++){ ctx.beginPath();
+    ctx.moveTo(gx+26,gy+i*15); ctx.lineTo(W*0.56,gy+i*15); ctx.stroke(); }
+  // Dünya
+  const dx=W*0.70, dy=gy, r=50;
+  ctx.fillStyle='#1565C0'; ctx.beginPath(); ctx.arc(dx,dy,r,0,7); ctx.fill();
+  // Aydınlık yarı (Güneş'e bakan sol taraf)
+  ctx.save(); ctx.beginPath(); ctx.arc(dx,dy,r,Math.PI/2,Math.PI*1.5); ctx.clip();
+  ctx.fillStyle='#64B5F6'; ctx.beginPath(); ctx.arc(dx,dy,r,0,7); ctx.fill();
+  ctx.restore();
+  // Terminatör
+  ctx.strokeStyle='#FFD54F'; ctx.lineWidth=2.5; ctx.setLineDash([5,4]);
+  ctx.beginPath(); ctx.moveTo(dx,dy-r); ctx.lineTo(dx,dy+r); ctx.stroke(); ctx.setLineDash([]);
+  kalinYaz(ctx,'GÜNDÜZ',dx-24,dy,12,'#0D47A1');
+  kalinYaz(ctx,'GECE',dx+24,dy,12,'#E3F2FD');
+  ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(dx,dy,r,0,7); ctx.stroke();
+  return c;
+}
+
+/* ---------- 3) GÖLGE BOYU ---------- */
+function cizGolge(){
+  const{c,ctx,W,H}=yeniCanvas(340,190);
+  ctx.fillStyle='#E3F2FD'; ctx.fillRect(0,0,W,H*0.70);
+  ctx.fillStyle='#8D6E63'; ctx.fillRect(0,H*0.70,W,H*0.30);
+  const durumlar=[
+    {ad:'SABAH',gx:0.14,gy:0.22,golge:46,yon:1},
+    {ad:'ÖĞLE', gx:0.50,gy:0.10,golge:14,yon:1},
+    {ad:'AKŞAM',gx:0.86,gy:0.22,golge:46,yon:-1}
+  ];
+  durumlar.forEach((d,i)=>{
+    const bx=W*(0.18+i*0.32), by=H*0.70;
+    // Güneş
+    ctx.fillStyle='#FDD835';
+    ctx.beginPath(); ctx.arc(W*d.gx,H*d.gy,13,0,7); ctx.fill();
+    // Ağaç / direk
+    ctx.fillStyle='#5D4037'; ctx.fillRect(bx-3,by-42,6,42);
+    ctx.fillStyle='#2E7D32';
+    ctx.beginPath(); ctx.arc(bx,by-48,13,0,7); ctx.fill();
+    // Gölge
+    ctx.fillStyle='rgba(60,40,25,.45)';
+    ctx.beginPath();
+    ctx.ellipse(bx+d.yon*d.golge/2,by+4,d.golge/2,6,0,0,7); ctx.fill();
+    kalinYaz(ctx,d.ad,bx,H*0.86,12.5,'#FFF');
+    yaz(ctx,d.golge>30?'uzun gölge':'kısa gölge',bx,H*0.955,11,'#D7CCC8');
+  });
+  return c;
+}
+
+/* ---------- 4) KAYAÇ - MİNERAL - MADEN ---------- */
+function cizKayacSema(){
+  const{c,ctx,W,H}=yeniCanvas(340,200);
+  const kutu=(x,y,g,h,renk,kenar,baslik,alt)=>{
+    ctx.fillStyle=renk; ctx.strokeStyle=kenar; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.roundRect(x,y,g,h,12); ctx.fill(); ctx.stroke();
+    kalinYaz(ctx,baslik,x+g/2,y+20,14,kenar);
+    const kel=alt.split(' '); let s='', sat=[];
+    ctx.font='11.5px Fredoka,Arial';
+    kel.forEach(k=>{ const d=s?s+' '+k:k;
+      if(ctx.measureText(d).width>g-16){sat.push(s);s=k;} else s=d; });
+    if(s) sat.push(s);
+    sat.forEach((t,i)=>yaz(ctx,t,x+g/2,y+40+i*15,11.5,'#546E7A'));
+  };
+  kutu(10,14,100,86,'#E8F5E9','#2E7D32','MİNERAL','doğada katı hâlde bulunur, kayaca renk ve sertlik verir');
+  kutu(120,14,100,86,'#E3F2FD','#1565C0','KAYAÇ','bir ya da birden fazla mineralden oluşur');
+  kutu(230,14,100,86,'#FFF3E0','#E65100','MADEN','ekonomik değeri olan kayaç ve mineraller');
+  // Oklar
+  ctx.strokeStyle='#90A4AE'; ctx.lineWidth=2.5;
+  [[112,57,118,57],[222,57,228,57]].forEach(([x1,y1,x2,y2])=>{
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+    ctx.fillStyle='#90A4AE';
+    ctx.beginPath(); ctx.moveTo(x2+4,y2); ctx.lineTo(x2-3,y2-4); ctx.lineTo(x2-3,y2+4); ctx.fill();
+  });
+  // Örnekler
+  yaz(ctx,'Örnekler',W/2,124,13,'#455A64');
+  const ornekler=[['🪨','granit, mermer'],['💎','kuvars, kalsit'],['🥇','altın, bakır, bor']];
+  ornekler.forEach((o,i)=>{
+    const x=60+i*110;
+    ctx.save(); ctx.font='24px serif'; ctx.textAlign='center'; ctx.fillText(o[0],x,156); ctx.restore();
+    yaz(ctx,o[1],x,178,11.5,'#546E7A');
+  });
+  return c;
+}
+
+/* ---------- 5) FOSİLLEŞME AŞAMALARI ---------- */
+function cizFosil(){
+  const{c,ctx,W,H}=yeniCanvas(340,200);
+  const adimlar=[
+    {n:'1',b:'Canlı ölür',a:'Toprağa ya da su dibine düşer'},
+    {n:'2',b:'Üstü örtülür',a:'Çamur ve kum kaplar, HAVA TEMASI KESİLİR'},
+    {n:'3',b:'Yumuşaklar çürür',a:'Kemik, diş, boynuz kalır'},
+    {n:'4',b:'Taşlaşır',a:'Milyonlarca yılda sertleşir, FOSİL olur'}
+  ];
+  const kw=(W-28)/4;
+  // Metni kutu genişliğine göre satırlara böl
+  const satirla=(metin,maxG,font)=>{
+    ctx.font=font;
+    const kel=metin.split(' '); const sat=[]; let s='';
+    kel.forEach(k=>{ const d=s?s+' '+k:k;
+      if(ctx.measureText(d).width>maxG){ if(s)sat.push(s); s=k; } else s=d; });
+    if(s) sat.push(s);
+    return sat;
+  };
+  adimlar.forEach((d,i)=>{
+    const x=10+i*(kw+2.6);
+    ctx.fillStyle=['#FFF3E0','#FFE0B2','#FFCC80','#FFB74D'][i];
+    ctx.strokeStyle='#E65100'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.roundRect(x,12,kw,176,11); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#E65100';
+    ctx.beginPath(); ctx.arc(x+kw/2,32,12,0,7); ctx.fill();
+    kalinYaz(ctx,d.n,x+kw/2,32,13,'#fff');
+    // Başlık — sığmazsa iki satır
+    const bSat=satirla(d.b,kw-10,'700 10.5px Fredoka,Arial');
+    bSat.forEach((t,j)=>kalinYaz(ctx,t,x+kw/2,54+j*13,10.5,'#BF360C'));
+    // Açıklama
+    const aSat=satirla(d.a,kw-10,'9.5px Fredoka,Arial');
+    aSat.forEach((t,j)=>yaz(ctx,t,x+kw/2,54+bSat.length*13+8+j*12,9.5,'#6D4C41'));
+    if(i<3){
+      ctx.fillStyle='#E65100';
+      ctx.beginPath(); ctx.moveTo(x+kw+1,100); ctx.lineTo(x+kw-4,96); ctx.lineTo(x+kw-4,104); ctx.fill();
+    }
+  });
+  return c;
+}
+
+/* ---------- 6) DÜNYA'NIN KATMANLARI ---------- */
+function cizKatman(){
+  const{c,ctx,W,H}=yeniCanvas(300,190);
+  const cx=W*0.36, cy=H/2, r=78;
+  const kat=[
+    {r:1.00,renk:'#8D6E63',ad:'Yer kabuğu',aciklama:'En dıştaki ince katman'},
+    {r:0.74,renk:'#FF7043',ad:'Manto',aciklama:'Sıcak ve akışkan'},
+    {r:0.40,renk:'#FFCA28',ad:'Çekirdek',aciklama:'En sıcak iç kısım'}
+  ];
+  kat.forEach(k=>{
+    ctx.fillStyle=k.renk;
+    ctx.beginPath(); ctx.arc(cx,cy,r*k.r,0,7); ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,.2)'; ctx.lineWidth=1.5; ctx.stroke();
+  });
+  // Etiketler
+  kat.forEach((k,i)=>{
+    const y=cy-48+i*44;
+    ctx.strokeStyle='#78909C'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(cx+r*(k.r-0.14),y); ctx.lineTo(W*0.70,y); ctx.stroke();
+    kalinYaz(ctx,k.ad,W*0.72,y-7,12.5,'#37474F','left');
+    yaz(ctx,k.aciklama,W*0.72,y+8,11,'#78909C','left');
+  });
+  return c;
+}
+
+/* ============================================================
+   BÖLÜMLER
+   ============================================================ */
+const BOLUMLER=[
+ {id:'hareket', ad:'🌍 Dünya’nın Hareketleri', icerik:()=>`
+   <h2>🌍 Dünya’nın Hareketleri</h2>
+   <p>Dünya’mız hiç durmadan iki hareket yapar. Bu hareketler günün ve yılın
+   oluşmasını sağlar.</p>
+   <div class="gorsel" id="g-hareket"></div>
+
+   <h3>1. Dönme Hareketi (Kendi Ekseni Etrafında)</h3>
+   <p>Dünya, kendi ekseni etrafında <b>batıdan doğuya</b> doğru döner.
+   Bir tam dönüşünü <b>24 saatte</b> tamamlar. Bu süreye <b>1 gün</b> denir.</p>
+   <div class="tanim">
+     <b>Dönme hareketinin sonuçları:</b>
+     <ul>
+       <li>Gece ve gündüz oluşur</li>
+       <li>Güneş doğar ve batar gibi görünür</li>
+       <li>Gün içinde gölge boyu değişir</li>
+     </ul>
+   </div>
+
+   <h3>2. Dolanma Hareketi (Güneş Etrafında)</h3>
+   <p>Dünya aynı zamanda Güneş’in etrafında da dolanır. Bir tam turunu
+   <b>365 gün 6 saatte</b> tamamlar. Bu süreye <b>1 yıl</b> denir.</p>
+   <div class="tanim">
+     <b>Dolanma hareketinin sonucu:</b>
+     <ul><li>Mevsimler oluşur</li></ul>
+   </div>
+
+   <div class="dikkat">
+     <b>⚠️ Sık yapılan hata:</b> Mevsimleri oluşturan hareket DÖNME değil,
+     <b>DOLANMA</b> hareketidir. Dönme hareketi gece ile gündüzü oluşturur.
+   </div>
+
+   <div class="ornek">
+     <b>🧮 Örnek soru:</b> Dünya, Güneş’in etrafında 1 defa dolandığında kendi
+     etrafında kaç tam dönüş yapar?<br><br>
+     <b>Çözüm:</b> 1 dolanma = 365 gün. 1 dönme = 1 gün.
+     Demek ki Dünya <b>365 tam dönüş</b> yapar.
+   </div>`},
+
+ {id:'gece', ad:'🌓 Gece ve Gündüz', icerik:()=>`
+   <h2>🌓 Gece ve Gündüz Nasıl Oluşur?</h2>
+   <p>Dünya küre biçimindedir. Güneş ışınları Dünya’nın ancak bir yarısını
+   aydınlatabilir. Dünya döndükçe aydınlık ve karanlık taraflar sürekli
+   yer değiştirir.</p>
+   <div class="gorsel" id="g-gece"></div>
+   <ul>
+     <li>Güneş’e <b>bakan</b> taraf: <b>gündüz</b></li>
+     <li>Güneş’e <b>bakmayan</b> taraf: <b>gece</b></li>
+   </ul>
+
+   <h3>Güneş neden doğup batıyor gibi görünür?</h3>
+   <p>Aslında Güneş bir yere gitmez. Dünya kendi ekseni etrafında döndüğü için
+   Güneş hareket ediyormuş <b>gibi görünür</b>. Dünya batıdan doğuya döndüğünden
+   Güneş bize doğudan doğup batıdan batıyormuş gibi gelir.</p>
+
+   <div class="dikkat">
+     <b>⚠️ Önemli:</b> Dünya batıdan doğuya döndüğü için, <b>doğuda</b> bulunan
+     şehirlerde Güneş <b>daha önce</b> doğar.
+   </div>
+
+   <div class="ornek">
+     <b>🗺️ Örnek:</b> İstanbul, Ankara, Hatay ve Hakkâri şehirlerinden
+     Güneş en önce <b>Hakkâri</b>’de doğar. Çünkü Hakkâri en doğudadır.<br><br>
+     Aynı şekilde Van’da Güneş, Sakarya’dan daha önce doğar.
+   </div>
+
+   <h3>Gölge Boyu Gün İçinde Nasıl Değişir?</h3>
+   <div class="gorsel" id="g-golge"></div>
+   <table>
+     <tr><th>Zaman</th><th>Güneş’in konumu</th><th>Gölge boyu</th></tr>
+     <tr><td>Sabah</td><td>Alçak (ufka yakın)</td><td><b>Uzun</b></td></tr>
+     <tr><td>Öğle</td><td>En yüksek (tepede)</td><td><b>En kısa</b></td></tr>
+     <tr><td>Akşam</td><td>Alçak (ufka yakın)</td><td><b>Uzun</b></td></tr>
+   </table>
+   <div class="dikkat">
+     <b>⚠️ Sık yapılan hata:</b> “En uzun gölge öğle saatlerinde olur” ifadesi
+     <b>YANLIŞTIR</b>. Öğlen Güneş tam tepededir, bu yüzden gölge <b>en kısadır</b>.
+   </div>`},
+
+ {id:'kabuk', ad:'🪨 Yer Kabuğu', icerik:()=>`
+   <h2>🪨 Yer Kabuğu, Kayaçlar ve Mineraller</h2>
+   <p>Dünya’mızın üzerinde yaşadığımız en dış katmanına <b>yer kabuğu</b> denir.
+   Yer kabuğu kayaçlardan oluşur.</p>
+   <div class="gorsel" id="g-katman"></div>
+
+   <h3>Kayaç, Mineral ve Maden</h3>
+   <div class="gorsel" id="g-kayac"></div>
+   <div class="tanim">
+     <b>Mineral:</b> Doğada katı hâlde bulunan, çeşitli renk, biçim ve boyutta
+     olan maddelerdir. Kayaçlara <b>rengini</b> ve <b>sertliğini</b> mineraller verir.
+   </div>
+   <div class="tanim">
+     <b>Kayaç:</b> Bir ya da birden fazla mineralin bir araya gelmesiyle oluşan
+     taş ve kaya parçalarıdır.
+   </div>
+   <div class="tanim">
+     <b>Maden:</b> Ekonomik değeri olan kayaç ve minerallerdir. Bir kayacın maden
+     sayılması için en temel özellik <b>ekonomik değerinin olmasıdır</b>.
+   </div>
+
+   <div class="ornek">
+     <b>🔍 Neden her taşın rengi farklıdır?</b><br>
+     Çünkü her kayacın içinde farklı mineraller, farklı miktarlarda bulunur.
+     Kayacın rengini ve sertliğini bu mineraller belirler.
+   </div>
+
+   <h3>Kayaçların Kullanım Alanları</h3>
+   <table>
+     <tr><th>Kayaç / Maden</th><th>Kullanım alanı</th></tr>
+     <tr><td>Kum, taş</td><td>Bina ve yol yapımı</td></tr>
+     <tr><td>Mermer</td><td>Heykel, yer döşemesi</td></tr>
+     <tr><td>Altın, gümüş</td><td>Kuyumculuk, mücevher</td></tr>
+     <tr><td>Bakır</td><td>Elektrik teli, elektrikli aletler, süs eşyası</td></tr>
+     <tr><td>Demir, krom</td><td>İnşaat, otomobil, çivi, ray</td></tr>
+     <tr><td>Nikel</td><td>Paslanmaz mutfak eşyaları</td></tr>
+   </table>
+
+   <h3>Bor Madeni</h3>
+   <p>Bor, <b>ülkemizde dünyadaki en büyük rezervi bulunan</b> madenlerden biridir.</p>
+   <ul>
+     <li>Isıya dayanıklı cam üretiminde</li>
+     <li>Araç hava yastıklarında</li>
+     <li>Temizlik ürünleri ve seramikte</li>
+     <li>Uzay ve havacılık teknolojisinde</li>
+   </ul>
+   <div class="dikkat">
+     <b>⚠️ Dikkat:</b> Bor, termik santrallerde ve evlerde <b>ısınma amaçlı
+     kullanılmaz</b>. Isınmada kullanılan kömürdür.
+   </div>
+
+   <h3>Kayaçlar Nasıl Parçalanır?</h3>
+   <ul>
+     <li><b>Rüzgâr</b> — aşındırır</li>
+     <li><b>Su</b> — akarsular ve donan su kayacı çatlatır</li>
+     <li><b>Sıcaklık farkı</b> — gündüz genleşen, gece büzülen kayaç çatlar</li>
+     <li><b>Bitki kökleri</b> — çatlakları büyütür</li>
+   </ul>`},
+
+ {id:'fosil', ad:'🦕 Fosiller', icerik:()=>`
+   <h2>🦕 Fosiller</h2>
+   <div class="tanim">
+     <b>Fosil:</b> Geçmişte yaşamış bitki ve hayvanların günümüze ulaşan
+     <b>taşlaşmış (sertleşmiş) kalıntıları</b> ve izleridir.
+   </div>
+   <div class="tanim">
+     <b>Paleontoloji:</b> Fosilleri inceleyen bilim dalıdır.<br>
+     <b>Paleontolog:</b> Bu bilim dalıyla uğraşan bilim insanıdır.
+   </div>
+   <div class="dikkat">
+     <b>⚠️ Karıştırma:</b> Fosillerle ilgilenen bilim insanı <b>arkeolog değil,
+     paleontologtur</b>. Arkeologlar insanlara ait tarihî kalıntıları inceler.
+   </div>
+
+   <h3>Fosilleşme Nasıl Gerçekleşir?</h3>
+   <div class="gorsel" id="g-fosil"></div>
+   <p>Fosilleşmenin gerçekleşebilmesi için kalıntının <b>hava ile temasının
+   hemen kesilmesi</b> gerekir. Hava alan bir kalıntı çürür, fosilleşemez.</p>
+
+   <div class="ornek">
+     <b>🧊 Fosilleşme hangi ortamlarda olur?</b>
+     <ul>
+       <li>✅ Buzul ortamı</li>
+       <li>✅ Bitki reçinesi (amber)</li>
+       <li>✅ Kireç taşı, çamur, kum</li>
+       <li>❌ <b>Toprak yüzeyi</b> — hava ile temas kesilmediği için fosilleşme olmaz</li>
+     </ul>
+   </div>
+
+   <h3>Hangi Kısımlar Fosilleşir?</h3>
+   <p>Canlıların <b>sert kısımları</b> fosilleşir:</p>
+   <ul>
+     <li>Kemik</li>
+     <li>Diş</li>
+     <li>Boynuz</li>
+     <li>Kabuk</li>
+   </ul>
+   <p>Yumuşak kısımlar (kas, deri gibi) genellikle çürür ve fosilleşmez.</p>
+
+   <h3>Fosiller Bize Ne Anlatır?</h3>
+   <ul>
+     <li>Canlının <b>kaç yaşında</b> olduğunu</li>
+     <li>Canlıların geçirdiği <b>gelişim dönemlerini</b></li>
+     <li>O dönemin <b>iklim özelliklerini</b></li>
+     <li>Geçmişte hangi canlıların yaşadığını</li>
+   </ul>
+   <div class="dikkat">
+     <b>⚠️ Dikkat:</b> Fosiller bize <b>o dönemde yaşamış TÜM canlıları</b>
+     göstermez. Çünkü her canlı fosilleşmez; fosilleşme özel şartlar ister.
+   </div>
+
+   <div class="ornek">
+     <b>🇹🇷 Ülkemizde fosiller:</b> Türkiye’de birçok bölgede fosil bulunmuştur.
+     Bu fosiller, ülkemizin geçmişte nasıl bir iklime sahip olduğunu anlamamızı sağlar.
+   </div>`},
+
+ {id:'ozet', ad:'📌 Özet', icerik:()=>`
+   <h2>📌 Ünite Özeti</h2>
+   <div class="ozet">
+     <h3>🌍 Dünya’nın Hareketleri</h3>
+     <ul>
+       <li><b>Dönme:</b> kendi ekseni etrafında, 24 saat = 1 gün → gece-gündüz</li>
+       <li><b>Dolanma:</b> Güneş etrafında, 365 gün 6 saat = 1 yıl → mevsimler</li>
+       <li>Dünya <b>batıdan doğuya</b> döner, doğuda Güneş önce doğar</li>
+       <li>Gölge sabah ve akşam <b>uzun</b>, öğle <b>en kısadır</b></li>
+     </ul>
+   </div>
+   <div class="ozet">
+     <h3>🪨 Yer Kabuğu</h3>
+     <ul>
+       <li><b>Mineral:</b> kayaca renk ve sertlik verir</li>
+       <li><b>Kayaç:</b> bir ya da daha çok mineralden oluşur</li>
+       <li><b>Maden:</b> ekonomik değeri olan kayaç ve mineral</li>
+       <li><b>Bor:</b> ülkemizde bol bulunur; ısıya dayanıklı cam, hava yastığı</li>
+       <li>Kayaçları rüzgâr, su, sıcaklık farkı ve bitki kökleri parçalar</li>
+     </ul>
+   </div>
+   <div class="ozet">
+     <h3>🦕 Fosiller</h3>
+     <ul>
+       <li>Geçmiş canlıların <b>taşlaşmış kalıntıları</b></li>
+       <li>İnceleyen bilim dalı: <b>paleontoloji</b>, bilim insanı: <b>paleontolog</b></li>
+       <li>Fosilleşme için <b>hava teması kesilmelidir</b></li>
+       <li><b>Sert kısımlar</b> fosilleşir: kemik, diş, boynuz</li>
+       <li>Fosiller iklim, yaş ve gelişim hakkında bilgi verir</li>
+     </ul>
+   </div>
+
+   <h3>🎯 En Çok Karıştırılanlar</h3>
+   <table>
+     <tr><th>Yanlış</th><th>Doğru</th></tr>
+     <tr><td>Mevsimler dönme ile oluşur</td><td>Mevsimler <b>dolanma</b> ile oluşur</td></tr>
+     <tr><td>En uzun gölge öğledir</td><td>Öğle <b>en kısa</b> gölgedir</td></tr>
+     <tr><td>Fosilleri arkeologlar inceler</td><td><b>Paleontologlar</b> inceler</td></tr>
+     <tr><td>Bor ısınmada kullanılır</td><td>Bor <b>ısınmada kullanılmaz</b></td></tr>
+     <tr><td>Batıda Güneş önce doğar</td><td><b>Doğuda</b> önce doğar</td></tr>
+   </table>`}
+];
+
+/* ---------- SESLENDİRME ---------- */
+function bolumuOku(){
+  if(!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const el=document.getElementById('icerik');
+  const metin=el.innerText.replace(/[🌍🌓🪨🦕📌⚠️🧮🗺️🔍🧊🇹🇷🎯✅❌▸]/g,'').replace(/\s+/g,' ').trim();
+  const u=new SpeechSynthesisUtterance(metin);
+  u.lang='tr-TR'; u.rate=.92; u.pitch=1;
+  speechSynthesis.speak(u);
+}
+
+/* ---------- ARAYÜZ ---------- */
+let aktif=BOLUMLER[0].id;
+function sekmeleriCiz(){
+  const k=document.getElementById('sekmeler'); k.innerHTML='';
+  BOLUMLER.forEach(b=>{
+    const d=document.createElement('button');
+    d.className='sekme'+(b.id===aktif?' aktif':'');
+    d.textContent=b.ad;
+    d.onclick=()=>{ aktif=b.id;
+      if('speechSynthesis' in window) speechSynthesis.cancel();
+      sekmeleriCiz(); icerikCiz();
+      if(window.IO) IO.olay('fen-konu-anlatim',{bolum:b.id}); };
+    k.appendChild(d);
+  });
+}
+function icerikCiz(){
+  const b=BOLUMLER.find(x=>x.id===aktif);
+  document.getElementById('icerik').innerHTML=b.icerik();
+  // Görselleri yerleştir
+  const yerlesim={
+    'g-hareket':cizDonmeDolanma,'g-gece':cizGeceGunduz,'g-golge':cizGolge,
+    'g-kayac':cizKayacSema,'g-fosil':cizFosil,'g-katman':cizKatman
+  };
+  Object.entries(yerlesim).forEach(([id,fn])=>{
+    const el=document.getElementById(id);
+    if(el) el.appendChild(fn());
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+sekmeleriCiz(); icerikCiz();
+</script>
+</body>
+</html>
