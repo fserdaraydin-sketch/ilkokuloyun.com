@@ -113,21 +113,28 @@ function kalinYaz(ctx,t,x,y,b,renk,hiza){
 
 /* ---------- 1) BASAMAK VE BÖLÜK TABLOSU ---------- */
 function cizBasamakTablo(){
-  const{c,ctx,W,H}=yeniCanvas(340,168);
+  const{c,ctx,W,H}=yeniCanvas(340,186);
   const sayi='548392';
   const basliklar=['Yüz\nBinler','On\nBinler','Binler','Yüzler','Onlar','Birler'];
-  const kw=54, x0=(W-kw*6)/2, y0=44;
+  const kw=54, x0=(W-kw*6)/2, y0=62;
   // Bölük fonları
   ctx.fillStyle='#EDE7F6'; ctx.fillRect(x0,y0,kw*3,58);         // binler bölüğü
   ctx.fillStyle='#F3E5F5'; ctx.fillRect(x0+kw*3,y0,kw*3,58);    // birler bölüğü
+  // Yüzbinler kutusunu özel olarak vurgula (en büyük basamak)
+  ctx.fillStyle='#FFF3E0'; ctx.fillRect(x0,y0,kw,58);
   for(let i=0;i<6;i++){
     const x=x0+i*kw;
-    ctx.strokeStyle='#CE93D8'; ctx.lineWidth=1.6;
+    const vurgu=(i===0);
+    ctx.strokeStyle=vurgu?'#FB8C00':'#CE93D8'; ctx.lineWidth=vurgu?2.6:1.6;
     ctx.strokeRect(x,y0,kw,58);
     const sat=basliklar[i].split('\n');
-    sat.forEach((s,j)=>yaz(ctx,s,x+kw/2,y0-24+j*12,10.5,'#6A1B9A'));
-    kalinYaz(ctx,sayi[i],x+kw/2,y0+29,24,'#4A148C');
+    sat.forEach((s,j)=>yaz(ctx,s,x+kw/2,y0-24+j*12,10.5,vurgu?'#E65100':'#6A1B9A'));
+    kalinYaz(ctx,sayi[i],x+kw/2,y0+29,24,vurgu?'#E65100':'#4A148C');
   }
+  // Yüzbinler'i işaret eden yıldız ve not (sola taşmasın diye sola hizalı)
+  kalinYaz(ctx,'★ en büyük basamak',x0,y0-40,10.5,'#E65100','left');
+  ctx.strokeStyle='#FB8C00'; ctx.lineWidth=1.6;
+  ctx.beginPath(); ctx.moveTo(x0+kw/2,y0-32); ctx.lineTo(x0+kw/2,y0-4); ctx.stroke();
   // Bölük etiketleri altta
   kalinYaz(ctx,'BİNLER BÖLÜĞÜ',x0+kw*1.5,y0+80,12,'#8E24AA');
   kalinYaz(ctx,'BİRLER BÖLÜĞÜ',x0+kw*4.5,y0+80,12,'#AB47BC');
@@ -295,9 +302,26 @@ const BOLUMLER=[
      <li>Binler, On binler, Yüz binler → <b>BİNLER BÖLÜĞÜ</b></li>
    </ul>
 
-   <h3>Bir Sayı Nasıl Okunur?</h3>
-   <p>Her bölüğü kendi içinde okuruz, binler bölüğünden sonra <b>"bin"</b>
-   kelimesini söyleriz.</p>
+   <h3>⭐ Yüzbinler Basamağı</h3>
+   <p><b>Yüzbinler</b>, 6 basamaklı bir sayının <b>en solundaki, en büyük</b>
+   basamağıdır. Bir sayı gerçekten 6 basamaklıysa yüzbinler basamağı
+   <b>asla 0 olamaz</b> — 0 olsaydı sayı 5 basamaklı olurdu.</p>
+   <div class="ornek">
+     <b>🧮 Örnek:</b> 548 392 sayısında yüzbinler basamağındaki rakam
+     <b>5</b>’tir. Bu rakamın basamak değeri: 5 × 100 000 = <b>500 000</b>
+   </div>
+
+   <h3>Bir Sayı Nasıl Okunur? (4 Adım)</h3>
+   <ul>
+     <li><b>1.</b> Sayıyı sağdan başlayarak 3’erli bölüklere ayır.</li>
+     <li><b>2.</b> Her bölüğü kendi içinde, sıradan 3 basamaklı bir sayı
+     gibi oku (yüzler → onlar → birler).</li>
+     <li><b>3.</b> Binler bölüğünü okuduktan sonra <b>"bin"</b> de.
+     (Binler bölüğü 000 ise hiç "bin" söylenmez.)</li>
+     <li><b>4.</b> Bir bölükte bir basamağın rakamı <b>0</b> ise, o basamak
+     hiç söylenmez — atlanır.</li>
+   </ul>
+
    <div class="ornek">
      <b>🧮 Örnek:</b> 548 392<br>
      Binler bölüğü: 548 → "beş yüz kırk sekiz <b>bin</b>"<br>
@@ -306,9 +330,42 @@ const BOLUMLER=[
    </div>
 
    <div class="dikkat">
-     <b>⚠️ Sık yapılan hata:</b> Binler bölüğü <b>100</b> olsa bile
-     "yüz bin" değil, tam olarak <b>bölükteki sayı + bin</b> okunur.
-     Örnek: 100 245 → "yüz bin iki yüz kırk beş" (100 → "yüz", sonra "bin").
+     <b>⚠️ Sık yapılan hata 1 — "bir" tuzağı:</b> YÜZLER ve BİNLER
+     basamağındaki rakam <b>1</b> ise <b>"bir" hiç söylenmez</b>, sadece
+     "yüz" ya da "bin" denir. Yüzbinler de "yüz" ile başladığı için aynı
+     kural onun için de geçerlidir.<br><br>
+     100 → "yüz" <span style="color:#B71C1C">(❌ "bir yüz" değil)</span><br>
+     1000 → "bin" <span style="color:#B71C1C">(❌ "bir bin" değil)</span><br>
+     100 000 → "yüz bin" <span style="color:#B71C1C">(❌ "bir yüz bin" değil)</span><br>
+     Ama 100 245 → "yüz bin iki yüz kırk beş" (100 → "yüz", sonra "bin";
+     bölükteki sayı 100 olsa bile tam olarak <b>o sayı + bin</b> okunur.)
+   </div>
+
+   <div class="dikkat">
+     <b>⚠️ Sık yapılan hata 2 — bölük içinde sıfır tuzağı:</b> Bir bölükte
+     <b>onlar basamağı 0</b> ise, o sıfır hiç söylenmez ve birler basamağı
+     hemen yüzler basamağının ardından gelir. Bu, sınavlarda en çok
+     şaşırtan durumdur.<br><br>
+     <b>708 093</b> sayısını okuyalım:<br>
+     Binler bölüğü <b>708</b> → yüzler=7 ("yedi yüz"), onlar=<b>0</b>
+     (atlanır), birler=8 ("sekiz") → <b>"yedi yüz sekiz bin"</b><br>
+     <span style="color:#B71C1C">❌ "Yedi yüz seksen bin" YANLIŞTIR —
+     çünkü onlar basamağında 8 değil 0 vardır; 8 aslında BİRLER
+     basamağındadır.</span><br>
+     Birler bölüğü <b>093</b> → yüzler=<b>0</b> (atlanır), onlar=9
+     ("doksan"), birler=3 ("üç") → <b>"doksan üç"</b><br>
+     Tam okunuşu: <b>yedi yüz sekiz bin doksan üç</b>
+   </div>
+
+   <div class="ornek">
+     <b>🧮 Bir örnek daha:</b> 570 049<br>
+     Binler bölüğü 570 → "beş yüz yetmiş" (birler basamağı 0, atlanır) →
+     <b>"beş yüz yetmiş bin"</b><br>
+     Birler bölüğü 049 → yüzler=0 (atlanır), onlar=4 ("kırk"), birler=9
+     ("dokuz") → <b>"kırk dokuz"</b>
+     <span style="color:#B71C1C">(❌ "sıfır kırk dokuz" değil — sıfır
+     hiçbir zaman söylenmez)</span><br>
+     Tam okunuşu: <b>beş yüz yetmiş bin kırk dokuz</b>
    </div>`},
 
  {id:'deger', ad:'💠 Basamak Değeri', icerik:()=>`
